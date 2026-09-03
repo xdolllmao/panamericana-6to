@@ -538,6 +538,22 @@
     color: var(--ink-mute); letter-spacing: 0.08em; text-transform: uppercase;
   }
   .empresa-foot .rating { color: var(--lemon); letter-spacing: 0; font-size: 14px; }
+  .owners { display: inline-flex; align-items: center; gap: 8px; }
+  .owner-stack { display: inline-flex; }
+  .owner-mini {
+    width: 24px; height: 24px; border-radius: 50%;
+    display: grid; place-items: center;
+    color: #fff; font-family: var(--f-display); font-weight: 800;
+    font-size: 11px;
+    box-shadow: inset 0 0 0 2px var(--paper), 0 0 0 1.5px var(--line);
+    margin-left: -8px;
+  }
+  .owner-stack .owner-mini:first-child { margin-left: 0; }
+  .owner-names {
+    font-family: var(--f-body); font-weight: 700; font-size: 13px;
+    letter-spacing: -0.01em; text-transform: none;
+    color: var(--ink);
+  }
 
   /* ============ PARTIDOS ============ */
   .partidos {
@@ -1470,10 +1486,10 @@
 <section id="empresas" class="wrap block">
   <div class="section-head reveal">
     <div>
-      <div class="section-tag">03 · <em>salidas del salón</em></div>
-      <h2>Empresas y lugares que visitamos.</h2>
+      <div class="section-tag">03 · <em>los negocios del salón</em></div>
+      <h2>Empresas del salón.</h2>
     </div>
-    <p>La ruta escolar de este ciclo. Cada visita cerró con un mini reporte del salón.</p>
+    <p>Los negocios que corren desde el salón. Todos con los mismos dueños — el imperio de Gerardo y Magaña.</p>
   </div>
 
   <div class="empresas reveal" id="empresasGrid"></div>
@@ -1846,12 +1862,9 @@
   ];
 
   const EMPRESAS = [
-    { badge: 'Marzo', title: 'Museo Tin Marín', desc: 'Recorrido guiado por las salas de ciencias y el simulador de terremotos.', rating: 5 },
-    { badge: 'Abril', title: 'Aeropuerto de Comalapa', desc: 'Visita al centro de control y a la terminal de carga.', rating: 4 },
-    { badge: 'Mayo',  title: 'Fábrica de galletas', desc: 'Vimos la línea de producción entera. Nos regalaron muestras.', rating: 5 },
-    { badge: 'Junio', title: 'Estación de bomberos', desc: 'Práctica con manguera y charla sobre primeros auxilios.', rating: 4 },
-    { badge: 'Julio', title: 'Jardín Botánico La Laguna', desc: 'Herbario, orquídeas y una caminata por los senderos altos.', rating: 4 },
-    { badge: 'Agosto',title: 'Planta de reciclaje', desc: 'Cómo se separa el PET del vidrio y del cartón, a escala industrial.', rating: 3 },
+    { badge: 'Bebidas',   title: 'Lipton Industries', desc: 'La empresa insignia del salón. Producción y distribución de té helado, jugos y bebidas del recreo.', owners: ['Gerardo', 'Magaña'] },
+    { badge: 'Papelería', title: 'Lapis Hoyo',        desc: 'Tienda de útiles y accesorios de escritorio. Especialistas en lapiceros que aparecen y desaparecen misteriosamente.', owners: ['Gerardo', 'Magaña'] },
+    { badge: 'Deportes',  title: 'Liga Lipton',       desc: 'Organiza los partidos entre Equipo 1 y Equipo 2 los miércoles. Patrocinador oficial del torneo interno.', owners: ['Gerardo', 'Magaña'] },
   ];
 
   const PARTIDOS = [
@@ -1925,8 +1938,13 @@
       <h3>${e.title}</h3>
       <p>${e.desc}</p>
       <div class="empresa-foot">
-        <span>Nota del salón</span>
-        <span class="rating">${'★'.repeat(e.rating)}${'☆'.repeat(5 - e.rating)}</span>
+        <span>Dueños</span>
+        <div class="owners">
+          <span class="owner-stack">
+            ${e.owners.map(name => `<span class="owner-mini" style="background:${colorFor(name)}" title="${name}">${name[0]}</span>`).join('')}
+          </span>
+          <span class="owner-names">${e.owners.join(' & ')}</span>
+        </div>
       </div>
     </article>
   `).join('');
