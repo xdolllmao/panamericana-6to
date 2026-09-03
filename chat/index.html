@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1E3AAB" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#070D24" media="(prefers-color-scheme: dark)">
+<title>Chat · Clase de 6to</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%231E3AAB'/%3E%3Cpath d='M10 14h20v12H22l-4 4v-4h-8z' fill='white'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+
+<style>
+  :root {
+    --ground:      #EEF1FA;
+    --ground-2:    #E4EAF7;
+    --paper:       #FFFFFF;
+    --paper-soft:  #F7F9FE;
+    --ink:         #0C1846;
+    --ink-soft:    #3A4675;
+    --ink-mute:    #6E79A6;
+    --line:        #DBE1F2;
+    --line-strong: #B9C3E1;
+    --school:      #1E3AAB;
+    --school-2:    #3B5EF0;
+    --school-tint: #DDE4FF;
+    --coral:       #D91F26;
+    --mint:        #35C89A;
+    --lemon:       #F5DE3A;
+    --shadow-sm:   0 1px 2px rgba(12,24,70,.06), 0 4px 14px rgba(12,24,70,.06);
+    --shadow-lg:   0 4px 12px rgba(12,24,70,.08), 0 22px 44px rgba(12,24,70,.10);
+    --radius:      14px;
+    --radius-lg:   22px;
+    --f-display: 'Bricolage Grotesque', system-ui, sans-serif;
+    --f-body:    'Manrope', system-ui, sans-serif;
+    --f-mono:    'JetBrains Mono', ui-monospace, monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #070D24;
+      --ground-2:    #0D163B;
+      --paper:       #121E4A;
+      --paper-soft:  #0F1940;
+      --ink:         #EAEEFC;
+      --ink-soft:    #B0BADE;
+      --ink-mute:    #7A87B6;
+      --line:        #223163;
+      --line-strong: #364785;
+      --school:      #7091FF;
+      --school-2:    #9DB3FF;
+      --school-tint: #1A2A6B;
+      --coral:       #FF6B72;
+      --mint:        #52D9AE;
+      --lemon:       #FFE85B;
+      --shadow-sm:   0 1px 2px rgba(0,0,0,.5), 0 4px 14px rgba(0,0,0,.35);
+      --shadow-lg:   0 4px 12px rgba(0,0,0,.55), 0 22px 44px rgba(0,0,0,.45);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:      #070D24;
+    --ground-2:    #0D163B;
+    --paper:       #121E4A;
+    --paper-soft:  #0F1940;
+    --ink:         #EAEEFC;
+    --ink-soft:    #B0BADE;
+    --ink-mute:    #7A87B6;
+    --line:        #223163;
+    --line-strong: #364785;
+    --school:      #7091FF;
+    --school-2:    #9DB3FF;
+    --school-tint: #1A2A6B;
+    --coral:       #FF6B72;
+    --mint:        #52D9AE;
+    --lemon:       #FFE85B;
+    --shadow-sm:   0 1px 2px rgba(0,0,0,.5), 0 4px 14px rgba(0,0,0,.35);
+    --shadow-lg:   0 4px 12px rgba(0,0,0,.55), 0 22px 44px rgba(0,0,0,.45);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: var(--f-body);
+    color: var(--ink);
+    background: var(--ground);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--school-2); outline-offset: 3px; border-radius: 6px; }
+
+  /* ============ NAV ============ */
+  .nav {
+    flex-shrink: 0;
+    display: flex; align-items: center;
+    gap: 12px; padding: 10px 20px;
+    background: var(--paper); border-bottom: 1px solid var(--line);
+    z-index: 20;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; }
+  .brand svg { color: var(--ink-soft); }
+  .brand-mark {
+    width: 32px; height: 32px; border-radius: 9px;
+    background: var(--school); color: #fff;
+    display: grid; place-items: center;
+    font-family: var(--f-display); font-weight: 800; font-size: 14px;
+  }
+  .brand-name { font-family: var(--f-display); font-size: 16px; color: var(--ink); }
+  .brand-name em { font-style: normal; color: var(--school); }
+  .nav-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+  .notif-btn {
+    position: relative;
+    width: 38px; height: 38px; border-radius: 999px;
+    background: var(--paper-soft); border: 1px solid var(--line);
+    display: grid; place-items: center;
+    color: var(--ink-soft);
+    transition: background .15s;
+  }
+  .notif-btn:hover { background: var(--school-tint); }
+  .notif-badge {
+    position: absolute; top: -4px; right: -4px;
+    min-width: 18px; height: 18px;
+    padding: 0 5px; border-radius: 999px;
+    background: var(--coral); color: #fff;
+    font-family: var(--f-mono); font-size: 10px; font-weight: 700;
+    display: grid; place-items: center;
+    box-shadow: 0 0 0 2px var(--paper);
+  }
+  .notif-badge[hidden] { display: none; }
+  .notif-panel {
+    position: absolute; top: 52px; right: 12px;
+    width: min(360px, calc(100vw - 24px));
+    max-height: 60vh; overflow: hidden;
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    z-index: 40;
+    display: flex; flex-direction: column;
+  }
+  .notif-panel[hidden] { display: none; }
+  .notif-panel-head {
+    padding: 14px 18px; border-bottom: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .notif-panel-head h3 { font-family: var(--f-display); margin: 0; font-size: 18px; letter-spacing: -0.01em; }
+  .notif-panel-body { overflow-y: auto; padding: 6px; }
+  .notif-item {
+    display: flex; gap: 10px; align-items: center;
+    padding: 12px; border-radius: 10px;
+    transition: background .15s;
+    width: 100%; text-align: left;
+  }
+  .notif-item:hover { background: var(--paper-soft); }
+  .notif-item .avatar-mini {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: grid; place-items: center;
+    color: #fff; font-family: var(--f-display); font-weight: 800; font-size: 13px;
+    flex-shrink: 0;
+  }
+  .notif-item-body { flex: 1; min-width: 0; }
+  .notif-item-name { font-weight: 700; font-size: 13px; }
+  .notif-item-preview {
+    font-size: 12px; color: var(--ink-mute);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .notif-item-count {
+    background: var(--coral); color: #fff;
+    font-family: var(--f-mono); font-size: 10px; font-weight: 700;
+    padding: 2px 7px; border-radius: 999px;
+  }
+  .notif-empty {
+    padding: 30px 20px; text-align: center;
+    color: var(--ink-mute); font-family: var(--f-mono);
+    font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+  }
+
+  .theme-toggle, .account-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 12px; border-radius: 999px;
+    background: var(--paper-soft); border: 1px solid var(--line);
+    font-weight: 700; font-size: 13px; color: var(--ink);
+  }
+  .theme-toggle {
+    width: 38px; height: 38px; padding: 0;
+    justify-content: center; color: var(--ink-soft);
+  }
+  .account-chip.is-guest { background: var(--ink); color: var(--paper); border-color: transparent; }
+  .account-chip .who-avatar {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--school); color: #fff;
+    display: grid; place-items: center;
+    font-size: 10px; font-family: var(--f-display); font-weight: 800;
+  }
+  @media (max-width: 600px) {
+    .account-chip .who-name { display: none; }
+    .account-chip.is-guest .who-name { display: inline; }
+  }
+
+  /* ============ CHAT APP LAYOUT ============ */
+  .chat-app {
+    flex: 1; display: grid;
+    grid-template-columns: 340px 1fr;
+    min-height: 0;
+    overflow: hidden;
+  }
+  @media (max-width: 780px) {
+    .chat-app { grid-template-columns: 1fr; }
+    .chat-app .chat-main { display: none; }
+    body.chat-open .chat-app .chat-sidebar { display: none; }
+    body.chat-open .chat-app .chat-main { display: flex; }
+  }
+
+  /* ============ SIDEBAR ============ */
+  .chat-sidebar {
+    display: flex; flex-direction: column;
+    border-right: 1px solid var(--line);
+    background: var(--paper);
+    min-height: 0;
+  }
+  .sidebar-head {
+    padding: 16px 18px 12px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px;
+  }
+  .sidebar-head h2 {
+    font-family: var(--f-display); font-weight: 800;
+    font-size: 24px; margin: 0; letter-spacing: -0.02em;
+  }
+  .btn-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: var(--school); color: #fff;
+    display: grid; place-items: center;
+    font-family: var(--f-display); font-size: 20px; font-weight: 800;
+    line-height: 1;
+    transition: transform .15s, background .15s;
+  }
+  .btn-icon:hover { transform: scale(1.05); background: var(--school-2); }
+
+  .sidebar-search {
+    padding: 0 18px 12px;
+  }
+  .sidebar-search input {
+    width: 100%; padding: 10px 14px;
+    background: var(--paper-soft); border: 1px solid var(--line);
+    border-radius: 999px; font: inherit; color: var(--ink);
+    outline: none; transition: border-color .15s;
+    font-size: 14px;
+  }
+  .sidebar-search input:focus { border-color: var(--school-2); }
+
+  .chat-tabs {
+    display: flex; gap: 4px;
+    padding: 0 18px 8px;
+  }
+  .chat-tab {
+    padding: 6px 12px; border-radius: 999px;
+    font-weight: 700; font-size: 12px; color: var(--ink-mute);
+    transition: all .15s;
+  }
+  .chat-tab.is-active { background: var(--ink); color: var(--paper); }
+
+  .chat-list {
+    flex: 1; overflow-y: auto;
+    padding: 4px 8px 12px;
+  }
+  .chat-item {
+    display: flex; gap: 12px; align-items: center;
+    width: 100%; text-align: left;
+    padding: 10px 12px; border-radius: 12px;
+    transition: background .15s;
+    margin: 2px 0;
+  }
+  .chat-item:hover { background: var(--paper-soft); }
+  .chat-item.is-active { background: var(--school-tint); }
+  .chat-item .chat-avatar {
+    width: 42px; height: 42px; border-radius: 50%;
+    display: grid; place-items: center;
+    color: #fff; font-family: var(--f-display); font-weight: 800; font-size: 15px;
+    flex-shrink: 0;
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,.3);
+  }
+  .chat-item .chat-avatar.group { border-radius: 12px; background: var(--school); }
+  .chat-item-body { flex: 1; min-width: 0; }
+  .chat-item-name {
+    font-weight: 700; font-size: 14px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    letter-spacing: -0.01em;
+  }
+  .chat-item-preview {
+    font-size: 12px; color: var(--ink-mute);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    margin-top: 2px;
+  }
+  .chat-item-meta {
+    display: flex; flex-direction: column; align-items: end; gap: 4px;
+    flex-shrink: 0;
+  }
+  .chat-item-time {
+    font-family: var(--f-mono); font-size: 10px;
+    color: var(--ink-mute); letter-spacing: 0.04em;
+  }
+  .chat-item-badge {
+    min-width: 18px; height: 18px; padding: 0 6px;
+    background: var(--coral); color: #fff;
+    font-family: var(--f-mono); font-size: 10px; font-weight: 700;
+    border-radius: 999px;
+    display: grid; place-items: center;
+  }
+  .chat-item .chat-item-name.has-role::after {
+    content: "★";
+    color: var(--lemon);
+    margin-left: 4px;
+    font-size: 11px;
+  }
+
+  .list-empty {
+    padding: 40px 20px; text-align: center;
+    color: var(--ink-mute); font-family: var(--f-mono);
+    font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase;
+  }
+
+  /* ============ CHAT MAIN ============ */
+  .chat-main {
+    display: flex; flex-direction: column;
+    background: var(--ground);
+    min-width: 0;
+    background-image:
+      radial-gradient(600px 400px at 90% 10%, rgba(59,94,240,.06), transparent 60%),
+      radial-gradient(500px 300px at 0% 100%, rgba(217,31,38,.03), transparent 60%);
+  }
+  .chat-empty {
+    flex: 1;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 40px 24px; text-align: center;
+    color: var(--ink-soft);
+  }
+  .chat-empty svg { color: var(--ink-mute); margin-bottom: 16px; opacity: .5; }
+  .chat-empty h3 {
+    font-family: var(--f-display); font-weight: 800;
+    font-size: 22px; margin: 0 0 6px; color: var(--ink);
+    letter-spacing: -0.02em;
+  }
+  .chat-empty p { margin: 0 0 18px; font-size: 14px; max-width: 34ch; }
+  .chat-empty .btn-primary {
+    background: var(--ink); color: var(--paper);
+    padding: 10px 18px; border-radius: 999px;
+    font-weight: 700; font-size: 14px;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+
+  .chat-header {
+    flex-shrink: 0;
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 20px;
+    background: var(--paper); border-bottom: 1px solid var(--line);
+  }
+  .chat-back {
+    display: none;
+    width: 34px; height: 34px; border-radius: 8px;
+    background: var(--paper-soft); border: 1px solid var(--line);
+    place-items: center; color: var(--ink-soft);
+  }
+  @media (max-width: 780px) { .chat-back { display: grid; } }
+  .chat-header-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: grid; place-items: center;
+    color: #fff; font-family: var(--f-display); font-weight: 800; font-size: 15px;
+    flex-shrink: 0;
+  }
+  .chat-header-avatar.group { border-radius: 10px; background: var(--school); }
+  .chat-header-info { flex: 1; min-width: 0; }
+  .chat-header-name {
+    font-family: var(--f-display); font-weight: 700;
+    font-size: 17px; letter-spacing: -0.02em;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .chat-header-meta {
+    font-family: var(--f-mono); font-size: 10px;
+    color: var(--ink-mute); letter-spacing: 0.1em; text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .chat-messages {
+    flex: 1; overflow-y: auto;
+    padding: 20px 20px 8px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .msg { display: flex; gap: 8px; align-items: end; max-width: 82%; }
+  .msg.me { align-self: flex-end; flex-direction: row-reverse; }
+  .msg-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: grid; place-items: center;
+    color: #fff; font-family: var(--f-display); font-weight: 800; font-size: 11px;
+    flex-shrink: 0;
+    margin-bottom: 4px;
+  }
+  .msg-bubble {
+    background: var(--paper); border: 1px solid var(--line);
+    padding: 10px 14px; border-radius: 16px;
+    box-shadow: var(--shadow-sm);
+    max-width: 100%;
+  }
+  .msg.me .msg-bubble {
+    background: var(--school); color: #fff;
+    border-color: var(--school);
+  }
+  .msg.other .msg-bubble { border-bottom-left-radius: 4px; }
+  .msg.me .msg-bubble { border-bottom-right-radius: 4px; }
+  .msg-from {
+    font-size: 11px; font-weight: 800;
+    color: var(--school); margin-bottom: 2px;
+    letter-spacing: -0.01em;
+  }
+  .msg-text {
+    font-size: 14px; line-height: 1.4;
+    white-space: pre-wrap; word-wrap: break-word;
+  }
+  .msg-photo {
+    display: block; max-width: 260px; max-height: 340px;
+    border-radius: 10px;
+    margin: -4px -4px 6px; width: auto;
+  }
+  .msg.me .msg-photo { border: 1px solid rgba(255,255,255,.2); }
+  .msg-time {
+    font-family: var(--f-mono); font-size: 10px;
+    color: var(--ink-mute); margin-top: 4px;
+    letter-spacing: 0.04em;
+    text-align: right;
+  }
+  .msg.me .msg-time { color: rgba(255,255,255,.7); }
+
+  .msg-day {
+    align-self: center;
+    font-family: var(--f-mono); font-size: 10px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ink-mute); font-weight: 600;
+    padding: 6px 12px; border-radius: 999px;
+    background: var(--paper); border: 1px solid var(--line);
+    margin: 10px 0 4px;
+  }
+
+  .chat-composer {
+    flex-shrink: 0;
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 16px 14px;
+    background: var(--paper); border-top: 1px solid var(--line);
+  }
+  .composer-btn {
+    width: 40px; height: 40px; border-radius: 12px;
+    background: var(--paper-soft); border: 1px solid var(--line);
+    display: grid; place-items: center;
+    color: var(--ink-soft);
+    flex-shrink: 0;
+    transition: all .15s;
+  }
+  .composer-btn:hover { background: var(--school-tint); color: var(--school); }
+  .composer-btn.primary { background: var(--school); color: #fff; border-color: var(--school); }
+  .composer-btn.primary:hover { background: var(--school-2); }
+  .composer-input {
+    flex: 1; padding: 11px 16px;
+    background: var(--paper-soft); border: 1px solid var(--line);
+    border-radius: 999px; font: inherit; color: var(--ink);
+    outline: none;
+    font-size: 14px;
+    transition: border-color .15s;
+  }
+  .composer-input:focus { border-color: var(--school-2); }
+  .composer-preview {
+    padding: 8px 16px;
+    background: var(--paper-soft);
+    border-top: 1px solid var(--line);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .composer-preview img { height: 60px; border-radius: 8px; }
+  .composer-preview button { color: var(--coral); font-weight: 700; font-size: 12px; }
+
+  /* ============ LOCKED / login ============ */
+  .locked {
+    flex: 1;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 40px; text-align: center;
+    background: var(--ground);
+  }
+  .locked-icon {
+    width: 64px; height: 64px; border-radius: 18px;
+    background: var(--school-tint); color: var(--school);
+    display: grid; place-items: center; margin-bottom: 16px;
+  }
+  .locked h2 {
+    font-family: var(--f-display); font-weight: 800;
+    font-size: 28px; margin: 0 0 8px; letter-spacing: -0.02em;
+  }
+  .locked p { margin: 0 0 20px; color: var(--ink-soft); max-width: 42ch; }
+  .locked .btn-primary {
+    background: var(--ink); color: var(--paper);
+    padding: 12px 20px; border-radius: 999px;
+    font-weight: 700; font-size: 15px;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+
+  /* ============ MODAL ============ */
+  .modal-backdrop {
+    position: fixed; inset: 0; z-index: 100;
+    background: rgba(12,24,70,.6);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    display: none; align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: var(--paper); border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    max-width: 560px; width: 100%;
+    max-height: 92vh; overflow: hidden;
+    display: flex; flex-direction: column;
+    animation: slide .22s ease;
+  }
+  @keyframes slide { from { transform: translateY(12px); opacity: 0 } to { transform: none; opacity: 1 } }
+  .modal-head {
+    display: flex; justify-content: space-between; align-items: start;
+    padding: 22px 24px 8px; gap: 12px;
+  }
+  .modal-head h3 {
+    font-family: var(--f-display); font-weight: 800;
+    font-size: 24px; margin: 0; letter-spacing: -0.02em;
+  }
+  .modal-head p { color: var(--ink-soft); font-size: 14px; margin: 6px 0 0; }
+  .modal-close {
+    width: 32px; height: 32px; border-radius: 999px;
+    background: var(--paper-soft); border: 1px solid var(--line);
+    display: grid; place-items: center; flex-shrink: 0;
+    color: var(--ink-soft);
+  }
+  .modal-body { padding: 12px 24px 20px; overflow-y: auto; }
+  .modal-foot {
+    padding: 14px 24px; border-top: 1px solid var(--line);
+    background: var(--paper-soft);
+    display: flex; justify-content: space-between; gap: 10px; align-items: center;
+  }
+  .modal-foot .fill { flex: 1; font-family: var(--f-mono); font-size: 11px; color: var(--ink-mute); letter-spacing: 0.08em; text-transform: uppercase; }
+  .modal-foot button {
+    padding: 10px 18px; border-radius: 999px;
+    font-weight: 700; font-size: 14px;
+  }
+  .modal-foot .primary { background: var(--ink); color: var(--paper); }
+  .modal-foot .primary:disabled { opacity: .4; cursor: not-allowed; }
+  .modal-foot .ghost { color: var(--ink-mute); }
+
+  .picker-choice {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  }
+  .picker-choice-btn {
+    padding: 20px; border-radius: var(--radius);
+    background: var(--paper-soft); border: 1.5px solid var(--line);
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    text-align: center;
+    transition: all .15s;
+  }
+  .picker-choice-btn:hover {
+    border-color: var(--school-2); background: var(--school-tint);
+    transform: translateY(-2px);
+  }
+  .picker-choice-btn svg { color: var(--school); }
+  .picker-choice-btn strong { font-family: var(--f-display); font-size: 16px; letter-spacing: -0.01em; }
+  .picker-choice-btn span { font-size: 12px; color: var(--ink-mute); }
+
+  .person-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 8px; margin-top: 12px;
+  }
+  .person-chip {
+    display: flex; gap: 8px; align-items: center;
+    padding: 10px 12px;
+    background: var(--paper-soft); border: 1.5px solid var(--line);
+    border-radius: 10px;
+    font-weight: 600; font-size: 13px;
+    color: var(--ink);
+    transition: all .15s;
+    text-align: left;
+  }
+  .person-chip:hover:not(.selected) { border-color: var(--school-2); background: var(--school-tint); }
+  .person-chip.selected {
+    border-color: var(--school); background: var(--school-tint);
+  }
+  .person-chip .avatar-mini {
+    width: 26px; height: 26px; border-radius: 50%;
+    display: grid; place-items: center; flex-shrink: 0;
+    color: #fff; font-family: var(--f-display); font-weight: 800; font-size: 10px;
+  }
+  .person-chip-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .person-chip-check {
+    color: var(--school); font-weight: 800;
+    opacity: 0;
+  }
+  .person-chip.selected .person-chip-check { opacity: 1; }
+  .picker-search {
+    width: 100%; padding: 10px 14px;
+    background: var(--paper-soft); border: 1px solid var(--line);
+    border-radius: 999px; font: inherit; color: var(--ink);
+    outline: none; font-size: 14px;
+  }
+  .picker-search:focus { border-color: var(--school-2); }
+  .group-name-input {
+    width: 100%; padding: 12px 16px;
+    background: var(--paper-soft); border: 1.5px solid var(--line);
+    border-radius: 12px; font: inherit; color: var(--ink);
+    outline: none; font-size: 15px; font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .group-name-input:focus { border-color: var(--school-2); }
+  .section-title {
+    font-family: var(--f-mono); font-size: 10px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--ink-mute); margin: 14px 0 8px; font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/" class="brand" title="Volver al inicio">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg>
+    <span class="brand-mark">6</span>
+    <span class="brand-name">Chat <em>· 6to</em></span>
+  </a>
+  <div class="nav-right">
+    <button class="notif-btn" id="notifBtn" aria-label="Notificaciones">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="notif-badge" id="notifBadge" hidden>0</span>
+    </button>
+    <button class="account-chip is-guest" id="accountChip" type="button">
+      <span class="who-name">Iniciar sesión</span>
+    </button>
+    <button class="theme-toggle" id="themeBtn" aria-label="Tema">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+  </div>
+</nav>
+
+<div class="notif-panel" id="notifPanel" hidden>
+  <div class="notif-panel-head">
+    <h3>Notificaciones</h3>
+    <button class="modal-close" id="notifClose" aria-label="Cerrar">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <div class="notif-panel-body" id="notifBody"></div>
+</div>
+
+<main class="chat-app" id="chatApp"></main>
+
+<!-- ================ MODAL: login ================ -->
+<div class="modal-backdrop" id="loginModal" role="dialog" aria-modal="true" hidden>
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h3>Elegí tu nombre</h3>
+        <p>Reclamá uno de los nombres del salón para poder chatear.</p>
+      </div>
+      <button class="modal-close" id="loginClose" aria-label="Cerrar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input class="picker-search" id="loginSearch" placeholder="Buscá tu nombre…">
+      <div class="section-title">Sección A</div>
+      <div class="person-grid" id="loginNamesA"></div>
+      <div class="section-title">Sección B</div>
+      <div class="person-grid" id="loginNamesB"></div>
+    </div>
+    <div class="modal-foot">
+      <span class="fill" id="loginStatus"></span>
+      <button class="ghost" id="loginLogout" hidden>Cerrar sesión</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================ MODAL: new chat choice ================ -->
+<div class="modal-backdrop" id="newModal" role="dialog" aria-modal="true" hidden>
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h3>Nuevo chat</h3>
+        <p>Empezá una conversación directa o creá un grupo.</p>
+      </div>
+      <button class="modal-close" id="newClose" aria-label="Cerrar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="picker-choice">
+        <button class="picker-choice-btn" id="chooseDm" type="button">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <strong>Mensaje directo</strong>
+          <span>Chateá 1 a 1 con alguien del salón</span>
+        </button>
+        <button class="picker-choice-btn" id="chooseGroup" type="button">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <strong>Grupo nuevo</strong>
+          <span>Elegí nombre y miembros</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================ MODAL: DM picker ================ -->
+<div class="modal-backdrop" id="dmModal" role="dialog" aria-modal="true" hidden>
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h3>Chatear con…</h3>
+        <p>Buscá o elegí a alguien del salón.</p>
+      </div>
+      <button class="modal-close" id="dmClose" aria-label="Cerrar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input class="picker-search" id="dmSearch" placeholder="Buscar…">
+      <div class="section-title">Sección A</div>
+      <div class="person-grid" id="dmNamesA"></div>
+      <div class="section-title">Sección B</div>
+      <div class="person-grid" id="dmNamesB"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================ MODAL: create group ================ -->
+<div class="modal-backdrop" id="groupModal" role="dialog" aria-modal="true" hidden>
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h3>Grupo nuevo</h3>
+        <p>Ponle nombre y elegí quién va a estar.</p>
+      </div>
+      <button class="modal-close" id="groupClose" aria-label="Cerrar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input class="group-name-input" id="groupName" placeholder="Nombre del grupo (ej. Salón B, Fútbol lunch…)" maxlength="40">
+      <input class="picker-search" id="groupSearch" placeholder="Buscar miembros…">
+      <div class="section-title">Sección A</div>
+      <div class="person-grid" id="groupNamesA"></div>
+      <div class="section-title">Sección B</div>
+      <div class="person-grid" id="groupNamesB"></div>
+    </div>
+    <div class="modal-foot">
+      <span class="fill" id="groupSelectedCount">0 seleccionados</span>
+      <button class="primary" id="groupCreate" disabled>Crear grupo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ================ DATA ================
+  const STUDENTS = [
+    { n: 'Amaya',     s: 'A' }, { n: 'Deleón',    s: 'A' },
+    { n: 'Magaña',    s: 'A' }, { n: 'Gerardo',   s: 'A', r: 'Presidente' },
+    { n: 'Osegueda',  s: 'A' }, { n: 'Fabricio',  s: 'A' },
+    { n: 'Jaime',     s: 'A' }, { n: 'Eduardo',   s: 'A' },
+    { n: 'Alejandro', s: 'A' }, { n: 'Valentina', s: 'A' },
+    { n: 'Hana',      s: 'A' }, { n: 'Abril',     s: 'A' },
+    { n: 'Sofía',     s: 'A' },
+    { n: 'Iglesias',  s: 'B', r: 'Presidente' },
+    { n: 'Mateo',     s: 'B' }, { n: 'Alejandro', s: 'B' },
+    { n: 'Javier',    s: 'B' }, { n: 'Sofía',     s: 'B' },
+    { n: 'Marcela',   s: 'B' }, { n: 'Julieta',   s: 'B' },
+    { n: 'Andrea',    s: 'B' }, { n: 'Rachel',    s: 'B' },
+    { n: 'Suil',      s: 'B' }, { n: 'Roberto',   s: 'B' },
+    { n: 'Carlos',    s: 'B' }, { n: 'Josué',     s: 'B' },
+    { n: 'Lucas',     s: 'B' }, { n: 'Lucía',     s: 'B' },
+  ];
+
+  const PALETTE = ['#1E3AAB', '#3B5EF0', '#6B3EE8', '#D91F26', '#35C89A', '#0C1846', '#C68416', '#7A4A00'];
+  function colorFor(name) {
+    let h = 0;
+    for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+    return PALETTE[h % PALETTE.length];
+  }
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function timeShort(ts) {
+    const d = new Date(ts);
+    const now = new Date();
+    const sameDay = d.toDateString() === now.toDateString();
+    if (sameDay) return d.toTimeString().slice(0, 5);
+    const diff = (now - d) / 86400000;
+    if (diff < 7) return ['dom','lun','mar','mié','jue','vie','sáb'][d.getDay()];
+    return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+  }
+  function dayLabel(ts) {
+    const d = new Date(ts); const now = new Date();
+    const day = d.toDateString();
+    if (day === now.toDateString()) return 'Hoy';
+    const y = new Date(now); y.setDate(y.getDate() - 1);
+    if (day === y.toDateString()) return 'Ayer';
+    return d.toLocaleDateString('es-SV', { day: 'numeric', month: 'long' });
+  }
+  function keyOf(name, section) { return `${section}-${name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'')}`; }
+
+  // ================ STATE ================
+  let account = null;
+  let chats = [];
+  let activeChatId = null;
+  let claimedKeys = new Set();
+
+  function loadState() {
+    try {
+      const a = localStorage.getItem('sixth-account'); if (a) account = JSON.parse(a);
+      const c = localStorage.getItem('sixth-chats');   if (c) chats = JSON.parse(c);
+      const k = JSON.parse(localStorage.getItem('sixth-claims') || '[]');
+      claimedKeys = new Set(k);
+      if (account) claimedKeys.add(account.key);
+    } catch (e) {}
+  }
+  function saveChats() { try { localStorage.setItem('sixth-chats', JSON.stringify(chats)); } catch (e) {} }
+  function saveAccount() {
+    try {
+      if (account) localStorage.setItem('sixth-account', JSON.stringify(account));
+      else localStorage.removeItem('sixth-account');
+      localStorage.setItem('sixth-claims', JSON.stringify([...claimedKeys]));
+    } catch (e) {}
+  }
+
+  function seedIfEmpty() {
+    if (!account || chats.length > 0) return;
+    const now = Date.now();
+    chats = [
+      {
+        id: 'seed-dm-iglesias',
+        type: 'dm',
+        peer: { name: 'Iglesias', section: 'B', role: 'Presidente' },
+        messages: [
+          { id: 's1', from: { name: 'Iglesias', section: 'B' }, ts: now - 5400000, text: '¡Bienvenido al chat del salón! 👋' },
+          { id: 's2', from: { name: 'Iglesias', section: 'B' }, ts: now - 5300000, text: 'Cualquier cosa del salón mándamelo por acá. Soy uno de los presidentes.' },
+        ],
+        lastReadTs: 0,
+      },
+      {
+        id: 'seed-dm-gerardo',
+        type: 'dm',
+        peer: { name: 'Gerardo', section: 'A', role: 'Presidente' },
+        messages: [
+          { id: 's3', from: { name: 'Gerardo', section: 'A' }, ts: now - 3600000, text: 'Recordá que hoy hay partido en el lunch 🏀' },
+        ],
+        lastReadTs: 0,
+      },
+      {
+        id: 'seed-group-salon',
+        type: 'group',
+        name: 'Salón 6to (todos)',
+        members: STUDENTS.map(s => ({ name: s.n, section: s.s })),
+        createdBy: { name: 'Iglesias', section: 'B' },
+        messages: [
+          { id: 's4', from: { name: 'Magaña', section: 'A' }, ts: now - 10800000, text: 'Alguien tiene la tarea de mate? 😅' },
+          { id: 's5', from: { name: 'Sofía', section: 'B' }, ts: now - 10000000, text: 'Yo la tengo, te paso foto ahorita' },
+          { id: 's6', from: { name: 'Josué', section: 'B' }, ts: now - 9000000, text: 'Recuerden que el 14 no venimos 🙌' },
+          { id: 's7', from: { name: 'Deleón', section: 'A' }, ts: now - 7200000, text: 'Concierto conmigo y Magaña el viernes 🎤' },
+        ],
+        lastReadTs: 0,
+      },
+    ];
+    saveChats();
+  }
+
+  // ================ THEME ================
+  const themeBtn = document.getElementById('themeBtn');
+  const rootEl = document.documentElement;
+  try {
+    const t = localStorage.getItem('sixth-theme');
+    if (t === 'dark' || t === 'light') rootEl.setAttribute('data-theme', t);
+  } catch (e) {}
+  themeBtn.addEventListener('click', () => {
+    const cur = rootEl.getAttribute('data-theme');
+    const sysDark = matchMedia('(prefers-color-scheme: dark)').matches;
+    const isDark = cur ? cur === 'dark' : sysDark;
+    const next = isDark ? 'light' : 'dark';
+    rootEl.setAttribute('data-theme', next);
+    try { localStorage.setItem('sixth-theme', next); } catch (e) {}
+  });
+
+  // ================ ACCOUNT / LOGIN ================
+  const accountChip = document.getElementById('accountChip');
+  const loginModal  = document.getElementById('loginModal');
+  const loginClose  = document.getElementById('loginClose');
+  const loginSearch = document.getElementById('loginSearch');
+  const loginNamesA = document.getElementById('loginNamesA');
+  const loginNamesB = document.getElementById('loginNamesB');
+  const loginStatus = document.getElementById('loginStatus');
+  const loginLogout = document.getElementById('loginLogout');
+
+  function openLogin() { renderLoginNames(); openBackdrop(loginModal); }
+  accountChip.addEventListener('click', openLogin);
+  loginClose.addEventListener('click', () => closeBackdrop(loginModal));
+
+  function updateAccountChip() {
+    if (account) {
+      accountChip.classList.remove('is-guest');
+      accountChip.innerHTML = `<span class="who-avatar" style="background:${colorFor(account.name)}">${account.name[0].toUpperCase()}</span><span class="who-name">${escapeHtml(account.name)} · ${escapeHtml(account.section)}</span>`;
+    } else {
+      accountChip.classList.add('is-guest');
+      accountChip.innerHTML = `<span class="who-name">Iniciar sesión</span>`;
+    }
+  }
+
+  function renderLoginNames() {
+    const q = loginSearch.value.trim().toLowerCase();
+    const bySec = { A: [], B: [] };
+    STUDENTS.forEach(st => {
+      if (q && !st.n.toLowerCase().includes(q)) return;
+      bySec[st.s].push(st);
+    });
+    const build = (list, container) => {
+      container.innerHTML = list.map(st => {
+        const k = keyOf(st.n, st.s);
+        const isMe = account && account.key === k;
+        const isTaken = claimedKeys.has(k) && !isMe;
+        return `<button class="person-chip" ${isTaken ? 'disabled style="opacity:.5;text-decoration:line-through"' : ''} data-name="${escapeHtml(st.n)}" data-section="${st.s}" data-key="${k}" type="button">
+          <span class="avatar-mini" style="background:${colorFor(st.n)}">${st.n[0].toUpperCase()}</span>
+          <span class="person-chip-name">${escapeHtml(st.n)}</span>
+          ${isMe ? '<span class="person-chip-check">Yo</span>' : ''}
+        </button>`;
+      }).join('');
+      container.querySelectorAll('.person-chip:not([disabled])').forEach(btn => {
+        btn.addEventListener('click', () => claimName(btn.dataset.name, btn.dataset.section, btn.dataset.key));
+      });
+    };
+    build(bySec.A, loginNamesA);
+    build(bySec.B, loginNamesB);
+    const total = STUDENTS.length, avail = total - claimedKeys.size;
+    loginStatus.textContent = `${avail} disponibles · ${claimedKeys.size} tomados`;
+    loginLogout.hidden = !account;
+  }
+  loginSearch.addEventListener('input', renderLoginNames);
+
+  function claimName(name, section, key) {
+    if (account && account.key === key) { closeBackdrop(loginModal); return; }
+    if (account) { claimedKeys.delete(account.key); }
+    claimedKeys.add(key);
+    account = { key, name, section };
+    saveAccount();
+    seedIfEmpty();
+    updateAccountChip();
+    renderApp();
+    closeBackdrop(loginModal);
+  }
+  loginLogout.addEventListener('click', () => {
+    if (!account) return;
+    claimedKeys.delete(account.key);
+    account = null;
+    saveAccount();
+    updateAccountChip();
+    renderApp();
+    closeBackdrop(loginModal);
+  });
+
+  // ================ MODAL helpers ================
+  function openBackdrop(el) { el.hidden = false; el.classList.add('open'); }
+  function closeBackdrop(el) { el.classList.remove('open'); el.hidden = true; }
+  document.querySelectorAll('.modal-backdrop').forEach(m => {
+    m.addEventListener('click', (e) => { if (e.target === m) closeBackdrop(m); });
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-backdrop.open').forEach(m => closeBackdrop(m));
+      hideNotifPanel();
+    }
+  });
+
+  // ================ NEW CHAT flow ================
+  const newModal = document.getElementById('newModal');
+  const newClose = document.getElementById('newClose');
+  const chooseDm = document.getElementById('chooseDm');
+  const chooseGroup = document.getElementById('chooseGroup');
+  const dmModal = document.getElementById('dmModal');
+  const dmClose = document.getElementById('dmClose');
+  const dmSearch = document.getElementById('dmSearch');
+  const dmNamesA = document.getElementById('dmNamesA');
+  const dmNamesB = document.getElementById('dmNamesB');
+  const groupModal = document.getElementById('groupModal');
+  const groupClose = document.getElementById('groupClose');
+  const groupName = document.getElementById('groupName');
+  const groupSearch = document.getElementById('groupSearch');
+  const groupNamesA = document.getElementById('groupNamesA');
+  const groupNamesB = document.getElementById('groupNamesB');
+  const groupSelectedCount = document.getElementById('groupSelectedCount');
+  const groupCreate = document.getElementById('groupCreate');
+
+  newClose.addEventListener('click', () => closeBackdrop(newModal));
+  dmClose.addEventListener('click', () => closeBackdrop(dmModal));
+  groupClose.addEventListener('click', () => closeBackdrop(groupModal));
+
+  chooseDm.addEventListener('click', () => {
+    closeBackdrop(newModal);
+    renderDmPicker();
+    openBackdrop(dmModal);
+  });
+  chooseGroup.addEventListener('click', () => {
+    closeBackdrop(newModal);
+    groupSelected.clear();
+    groupName.value = '';
+    renderGroupPicker();
+    openBackdrop(groupModal);
+  });
+
+  function renderDmPicker() {
+    const q = dmSearch.value.trim().toLowerCase();
+    const meKey = account && account.key;
+    const bySec = { A: [], B: [] };
+    STUDENTS.forEach(st => {
+      const k = keyOf(st.n, st.s);
+      if (k === meKey) return;
+      if (q && !st.n.toLowerCase().includes(q)) return;
+      bySec[st.s].push(st);
+    });
+    const build = (list, container) => {
+      container.innerHTML = list.map(st => `
+        <button class="person-chip" type="button" data-name="${escapeHtml(st.n)}" data-section="${st.s}">
+          <span class="avatar-mini" style="background:${colorFor(st.n)}">${st.n[0].toUpperCase()}</span>
+          <span class="person-chip-name">${escapeHtml(st.n)}</span>
+        </button>
+      `).join('');
+      container.querySelectorAll('.person-chip').forEach(btn => {
+        btn.addEventListener('click', () => startDm(btn.dataset.name, btn.dataset.section));
+      });
+    };
+    build(bySec.A, dmNamesA);
+    build(bySec.B, dmNamesB);
+  }
+  dmSearch.addEventListener('input', renderDmPicker);
+
+  function startDm(name, section) {
+    const id = `dm-${keyOf(name, section)}`;
+    let chat = chats.find(c => c.id === id);
+    if (!chat) {
+      const st = STUDENTS.find(s => s.n === name && s.s === section);
+      chat = { id, type: 'dm', peer: { name, section, role: st && st.r }, messages: [], lastReadTs: Date.now() };
+      chats.push(chat);
+      saveChats();
+    }
+    closeBackdrop(dmModal);
+    openChat(id);
+  }
+
+  const groupSelected = new Set();
+  function renderGroupPicker() {
+    const q = groupSearch.value.trim().toLowerCase();
+    const meKey = account && account.key;
+    const bySec = { A: [], B: [] };
+    STUDENTS.forEach(st => {
+      if (q && !st.n.toLowerCase().includes(q)) return;
+      bySec[st.s].push(st);
+    });
+    const build = (list, container) => {
+      container.innerHTML = list.map(st => {
+        const k = keyOf(st.n, st.s);
+        const isSel = groupSelected.has(k);
+        const isMe = k === meKey;
+        return `<button class="person-chip ${isSel || isMe ? 'selected' : ''}" type="button" data-key="${k}" data-name="${escapeHtml(st.n)}" data-section="${st.s}" ${isMe ? 'disabled title="Vos ya estás en el grupo"' : ''}>
+          <span class="avatar-mini" style="background:${colorFor(st.n)}">${st.n[0].toUpperCase()}</span>
+          <span class="person-chip-name">${escapeHtml(st.n)}${isMe ? ' (yo)' : ''}</span>
+          <span class="person-chip-check">✓</span>
+        </button>`;
+      }).join('');
+      container.querySelectorAll('.person-chip:not([disabled])').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const k = btn.dataset.key;
+          if (groupSelected.has(k)) groupSelected.delete(k);
+          else groupSelected.add(k);
+          renderGroupPicker();
+          updateGroupCreate();
+        });
+      });
+    };
+    build(bySec.A, groupNamesA);
+    build(bySec.B, groupNamesB);
+    updateGroupCreate();
+  }
+  function updateGroupCreate() {
+    const n = groupSelected.size;
+    groupSelectedCount.textContent = `${n + 1} miembros (incluido vos)`;
+    const ok = groupName.value.trim().length >= 2 && n >= 1;
+    groupCreate.disabled = !ok;
+  }
+  groupSearch.addEventListener('input', renderGroupPicker);
+  groupName.addEventListener('input', updateGroupCreate);
+  groupCreate.addEventListener('click', () => {
+    const name = groupName.value.trim();
+    if (!name || groupSelected.size < 1) return;
+    const members = [{ name: account.name, section: account.section }];
+    STUDENTS.forEach(st => {
+      const k = keyOf(st.n, st.s);
+      if (groupSelected.has(k)) members.push({ name: st.n, section: st.s });
+    });
+    const chat = {
+      id: `group-${Date.now().toString(36)}`,
+      type: 'group',
+      name,
+      members,
+      createdBy: { name: account.name, section: account.section },
+      messages: [],
+      lastReadTs: Date.now(),
+    };
+    chats.push(chat);
+    saveChats();
+    groupSelected.clear();
+    closeBackdrop(groupModal);
+    openChat(chat.id);
+  });
+
+  // ================ SIDEBAR / CHAT LIST ================
+  let currentTab = 'all';
+  let searchQuery = '';
+
+  function renderApp() {
+    const app = document.getElementById('chatApp');
+    if (!account) {
+      app.innerHTML = `
+        <div class="locked">
+          <div class="locked-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          </div>
+          <h2>Necesitás una cuenta para chatear</h2>
+          <p>El chat usa el mismo sistema de cuentas del salón — elegí uno de los nombres para empezar.</p>
+          <button class="btn-primary" id="lockedLogin" type="button">Elegir mi nombre</button>
+        </div>
+      `;
+      document.getElementById('lockedLogin').addEventListener('click', openLogin);
+      updateNotifBadge();
+      return;
+    }
+    app.innerHTML = `
+      <aside class="chat-sidebar">
+        <div class="sidebar-head">
+          <h2>Chats</h2>
+          <button class="btn-icon" id="newChatBtn" title="Nuevo chat" type="button">+</button>
+        </div>
+        <div class="sidebar-search">
+          <input id="sidebarSearch" placeholder="Buscar chats…" value="${escapeHtml(searchQuery)}">
+        </div>
+        <div class="chat-tabs">
+          <button class="chat-tab ${currentTab==='all'?'is-active':''}" data-tab="all">Todos</button>
+          <button class="chat-tab ${currentTab==='dm'?'is-active':''}" data-tab="dm">Personas</button>
+          <button class="chat-tab ${currentTab==='group'?'is-active':''}" data-tab="group">Grupos</button>
+        </div>
+        <div class="chat-list" id="chatList"></div>
+      </aside>
+      <section class="chat-main" id="chatMain"></section>
+    `;
+    document.getElementById('newChatBtn').addEventListener('click', () => openBackdrop(newModal));
+    document.getElementById('sidebarSearch').addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      renderChatList();
+    });
+    document.querySelectorAll('.chat-tab').forEach(t => {
+      t.addEventListener('click', () => {
+        currentTab = t.dataset.tab;
+        renderApp();
+        openChat(activeChatId);
+      });
+    });
+    renderChatList();
+    if (activeChatId && chats.find(c => c.id === activeChatId)) {
+      renderChatMain(chats.find(c => c.id === activeChatId));
+    } else {
+      renderEmpty();
+    }
+    updateNotifBadge();
+  }
+
+  function chatDisplayName(chat) { return chat.type === 'dm' ? chat.peer.name : chat.name; }
+  function chatDisplaySection(chat) { return chat.type === 'dm' ? `Sección ${chat.peer.section}` : `${chat.members.length} miembros`; }
+  function chatLastTs(chat) { return chat.messages.length ? chat.messages[chat.messages.length-1].ts : 0; }
+
+  function unreadOf(chat) {
+    const meKey = account && account.key;
+    return chat.messages.filter(m => m.ts > (chat.lastReadTs || 0) && keyOf(m.from.name, m.from.section) !== meKey).length;
+  }
+  function totalUnread() { return chats.reduce((n,c) => n + unreadOf(c), 0); }
+
+  function updateNotifBadge() {
+    const badge = document.getElementById('notifBadge');
+    const total = account ? totalUnread() : 0;
+    if (total > 0) { badge.hidden = false; badge.textContent = total > 99 ? '99+' : String(total); }
+    else { badge.hidden = true; }
+  }
+
+  function renderChatList() {
+    const list = document.getElementById('chatList');
+    if (!list) return;
+    const q = searchQuery.trim().toLowerCase();
+    let filtered = chats.slice()
+      .filter(c => currentTab === 'all' || c.type === currentTab)
+      .filter(c => !q || chatDisplayName(c).toLowerCase().includes(q))
+      .sort((a,b) => chatLastTs(b) - chatLastTs(a));
+    if (!filtered.length) {
+      list.innerHTML = '<div class="list-empty">Sin chats. Tocá + para empezar uno.</div>';
+      return;
+    }
+    list.innerHTML = filtered.map(c => {
+      const last = c.messages[c.messages.length-1];
+      const unread = unreadOf(c);
+      const name = chatDisplayName(c);
+      const isGroup = c.type === 'group';
+      const roleStar = c.type === 'dm' && c.peer.role ? ' has-role' : '';
+      const avatarClass = isGroup ? 'chat-avatar group' : 'chat-avatar';
+      const bg = isGroup ? '' : `background:${colorFor(name)}`;
+      const preview = last
+        ? (last.photo ? '📷 Foto' : escapeHtml((last.text || '').slice(0, 44)))
+        : 'Sin mensajes';
+      const fromLabel = last && account && keyOf(last.from.name, last.from.section) === account.key ? 'Vos: ' : (isGroup && last ? `${escapeHtml(last.from.name)}: ` : '');
+      return `<button class="chat-item ${c.id===activeChatId?'is-active':''}" data-id="${c.id}">
+        <div class="${avatarClass}" style="${bg}">${isGroup ? '👥' : name[0].toUpperCase()}</div>
+        <div class="chat-item-body">
+          <div class="chat-item-name${roleStar}">${escapeHtml(name)}</div>
+          <div class="chat-item-preview">${fromLabel}${preview}</div>
+        </div>
+        <div class="chat-item-meta">
+          <div class="chat-item-time">${last ? timeShort(last.ts) : ''}</div>
+          ${unread ? `<div class="chat-item-badge">${unread}</div>` : ''}
+        </div>
+      </button>`;
+    }).join('');
+    list.querySelectorAll('.chat-item').forEach(btn => {
+      btn.addEventListener('click', () => openChat(btn.dataset.id));
+    });
+  }
+
+  function openChat(id) {
+    if (!id) { activeChatId = null; renderEmpty(); return; }
+    const chat = chats.find(c => c.id === id);
+    if (!chat) { activeChatId = null; renderEmpty(); return; }
+    activeChatId = id;
+    chat.lastReadTs = Date.now();
+    saveChats();
+    document.body.classList.add('chat-open');
+    renderChatList();
+    renderChatMain(chat);
+    updateNotifBadge();
+    hideNotifPanel();
+  }
+
+  function renderEmpty() {
+    const main = document.getElementById('chatMain');
+    if (!main) return;
+    main.innerHTML = `
+      <div class="chat-empty">
+        <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <h3>Elegí un chat</h3>
+        <p>Tocá un chat de la izquierda, o creá uno nuevo con el botón +.</p>
+        <button class="btn-primary" type="button" id="emptyNew">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Nuevo chat
+        </button>
+      </div>
+    `;
+    document.getElementById('emptyNew').addEventListener('click', () => openBackdrop(newModal));
+  }
+
+  function renderChatMain(chat) {
+    const main = document.getElementById('chatMain');
+    if (!main) return;
+    const name = chatDisplayName(chat);
+    const isGroup = chat.type === 'group';
+    const meta = isGroup
+      ? `${chat.members.length} miembros${chat.createdBy ? ' · creado por ' + escapeHtml(chat.createdBy.name) : ''}`
+      : `Sección ${chat.peer.section}${chat.peer.role ? ' · ' + escapeHtml(chat.peer.role) : ''}`;
+
+    let bubblesHtml = '';
+    let lastDay = '';
+    chat.messages.forEach(m => {
+      const day = new Date(m.ts).toDateString();
+      if (day !== lastDay) {
+        bubblesHtml += `<div class="msg-day">${dayLabel(m.ts)}</div>`;
+        lastDay = day;
+      }
+      bubblesHtml += renderBubble(m, isGroup);
+    });
+
+    main.innerHTML = `
+      <header class="chat-header">
+        <button class="chat-back" type="button" id="chatBack" aria-label="Volver">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg>
+        </button>
+        <div class="chat-header-avatar ${isGroup ? 'group' : ''}" style="${isGroup ? '' : `background:${colorFor(name)}`}">${isGroup ? '👥' : name[0].toUpperCase()}</div>
+        <div class="chat-header-info">
+          <div class="chat-header-name">${escapeHtml(name)}${chat.type === 'dm' && chat.peer.role ? ' <span style="color:var(--lemon);font-size:14px">★</span>' : ''}</div>
+          <div class="chat-header-meta">${meta}</div>
+        </div>
+      </header>
+      <div class="chat-messages" id="chatMessages">
+        ${bubblesHtml || '<div class="chat-empty" style="padding:20px 0"><p style="margin:0;color:var(--ink-mute);font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase">Sin mensajes aún — mandá el primero</p></div>'}
+      </div>
+      <div class="composer-preview" id="composerPreview" hidden></div>
+      <form class="chat-composer" id="chatComposer">
+        <input type="file" accept="image/*" id="attachInput" hidden>
+        <button type="button" class="composer-btn" id="attachBtn" title="Adjuntar foto" aria-label="Adjuntar foto">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+        </button>
+        <input type="text" class="composer-input" id="composerInput" placeholder="Escribí un mensaje…" autocomplete="off">
+        <button type="submit" class="composer-btn primary" title="Enviar" aria-label="Enviar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        </button>
+      </form>
+    `;
+    const messagesEl = document.getElementById('chatMessages');
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+    document.getElementById('chatBack').addEventListener('click', () => {
+      document.body.classList.remove('chat-open');
+    });
+    wireComposer(chat);
+  }
+
+  function renderBubble(m, isGroup) {
+    const meKey = account && account.key;
+    const fromKey = keyOf(m.from.name, m.from.section);
+    const isMe = fromKey === meKey;
+    const showAvatar = !isMe && isGroup;
+    return `
+      <div class="msg ${isMe ? 'me' : 'other'}">
+        ${showAvatar ? `<div class="msg-avatar" style="background:${colorFor(m.from.name)}" title="${escapeHtml(m.from.name)}">${m.from.name[0].toUpperCase()}</div>` : ''}
+        <div class="msg-bubble">
+          ${showAvatar ? `<div class="msg-from">${escapeHtml(m.from.name)}</div>` : ''}
+          ${m.photo ? `<img class="msg-photo" src="${m.photo}" alt="Foto adjunta">` : ''}
+          ${m.text ? `<div class="msg-text">${escapeHtml(m.text)}</div>` : ''}
+          <div class="msg-time">${timeShort(m.ts)}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  let pendingPhoto = null;
+  function wireComposer(chat) {
+    const form = document.getElementById('chatComposer');
+    const input = document.getElementById('composerInput');
+    const attachBtn = document.getElementById('attachBtn');
+    const attachInput = document.getElementById('attachInput');
+    const preview = document.getElementById('composerPreview');
+    pendingPhoto = null;
+    preview.hidden = true;
+    attachBtn.addEventListener('click', () => attachInput.click());
+    attachInput.addEventListener('change', async () => {
+      const file = attachInput.files[0];
+      if (!file) return;
+      if (file.size > 900000) {
+        alert('Foto muy grande (máx ~900 KB porque se guarda en el navegador).');
+        attachInput.value = '';
+        return;
+      }
+      const dataUrl = await new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => resolve(r.result);
+        r.onerror = () => reject(r.error);
+        r.readAsDataURL(file);
+      });
+      pendingPhoto = dataUrl;
+      preview.innerHTML = `
+        <img src="${dataUrl}" alt="preview">
+        <span style="flex:1;font-size:13px;color:var(--ink-soft)">Foto lista para enviar</span>
+        <button type="button" id="removePhoto">Quitar</button>
+      `;
+      preview.hidden = false;
+      document.getElementById('removePhoto').addEventListener('click', () => {
+        pendingPhoto = null;
+        preview.hidden = true;
+        attachInput.value = '';
+      });
+    });
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (!text && !pendingPhoto) return;
+      const msg = {
+        id: `m-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,6)}`,
+        from: { name: account.name, section: account.section },
+        ts: Date.now(),
+        ...(text && { text }),
+        ...(pendingPhoto && { photo: pendingPhoto }),
+      };
+      chat.messages.push(msg);
+      chat.lastReadTs = Date.now();
+      saveChats();
+      pendingPhoto = null;
+      input.value = '';
+      renderChatMain(chat);
+      renderChatList();
+      updateNotifBadge();
+    });
+    input.focus();
+  }
+
+  // ================ NOTIF PANEL ================
+  const notifBtn = document.getElementById('notifBtn');
+  const notifPanel = document.getElementById('notifPanel');
+  const notifBody = document.getElementById('notifBody');
+  const notifClose = document.getElementById('notifClose');
+  function showNotifPanel() {
+    renderNotifPanel();
+    notifPanel.hidden = false;
+  }
+  function hideNotifPanel() { notifPanel.hidden = true; }
+  notifBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!account) { openLogin(); return; }
+    if (notifPanel.hidden) showNotifPanel(); else hideNotifPanel();
+  });
+  notifClose.addEventListener('click', hideNotifPanel);
+  document.addEventListener('click', (e) => {
+    if (!notifPanel.hidden && !notifPanel.contains(e.target) && e.target !== notifBtn) hideNotifPanel();
+  });
+  function renderNotifPanel() {
+    const items = chats
+      .map(c => ({ c, u: unreadOf(c) }))
+      .filter(x => x.u > 0)
+      .sort((a,b) => chatLastTs(b.c) - chatLastTs(a.c));
+    if (!items.length) {
+      notifBody.innerHTML = '<div class="notif-empty">No tenés mensajes sin leer</div>';
+      return;
+    }
+    notifBody.innerHTML = items.map(({ c, u }) => {
+      const name = chatDisplayName(c);
+      const last = c.messages[c.messages.length-1];
+      const preview = last ? (last.photo ? '📷 Foto' : (last.text || '').slice(0, 46)) : '';
+      const isGroup = c.type === 'group';
+      return `<button class="notif-item" data-id="${c.id}">
+        <div class="avatar-mini" style="background:${isGroup ? 'var(--school)' : colorFor(name)}">${isGroup ? '👥' : name[0].toUpperCase()}</div>
+        <div class="notif-item-body">
+          <div class="notif-item-name">${escapeHtml(name)}</div>
+          <div class="notif-item-preview">${escapeHtml(preview)}</div>
+        </div>
+        <div class="notif-item-count">${u}</div>
+      </button>`;
+    }).join('');
+    notifBody.querySelectorAll('.notif-item').forEach(btn => {
+      btn.addEventListener('click', () => {
+        hideNotifPanel();
+        openChat(btn.dataset.id);
+      });
+    });
+  }
+
+  // ================ BOOT ================
+  loadState();
+  seedIfEmpty();
+  updateAccountChip();
+  renderApp();
+</script>
+
+</body>
+</html>
