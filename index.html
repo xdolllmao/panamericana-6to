@@ -803,18 +803,18 @@
     font-size: clamp(28px, 3.6vw, 44px);
     letter-spacing: -0.03em; line-height: 1;
     margin: 10px 0 12px;
-    color: var(--paper);
+    color: #ffffff;
     text-wrap: balance;
   }
   .chat-cta-copy p {
-    color: color-mix(in oklab, var(--paper) 80%, transparent);
+    color: rgba(255,255,255,.85);
     max-width: 44ch; margin: 0 0 22px;
     font-size: 15px; line-height: 1.55;
   }
   .chat-cta-features {
     list-style: none; padding: 0; margin: 0 0 26px;
     display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 22px;
-    color: color-mix(in oklab, var(--paper) 92%, transparent);
+    color: #ffffff;
     font-size: 14px; font-weight: 600;
   }
   .chat-cta-features li { display: flex; align-items: center; gap: 8px; }
@@ -1810,7 +1810,6 @@
 <section id="chat" class="wrap block">
   <div class="chat-cta reveal">
     <div class="chat-cta-copy">
-      <div class="section-tag" style="color: color-mix(in oklab, var(--paper) 75%, transparent)">06 · <em style="color:var(--lemon)">nuevo</em></div>
       <h2>El chat del salón.</h2>
       <p>Mensajes directos, grupos, fotos y notificaciones — todo el salón conectado. Iniciás con tu nombre y ya podés escribirle a cualquiera.</p>
       <ul class="chat-cta-features">
