@@ -504,12 +504,35 @@
     background: var(--school-tint);
     color: var(--school);
     font-weight: 700;
+    font-size: 12.5px;
+    line-height: 1.25;
   }
-  .schedule td.subj.mat { background: color-mix(in oklab, var(--coral) 20%, var(--paper)); color: var(--coral); }
-  .schedule td.subj.eng { background: color-mix(in oklab, var(--mint) 24%, var(--paper)); color: color-mix(in oklab, var(--mint) 60%, var(--ink)); }
-  .schedule td.subj.art { background: color-mix(in oklab, var(--lemon) 45%, var(--paper)); color: #7a5f00; }
-  .schedule td.subj.efi { background: color-mix(in oklab, var(--plum) 20%, var(--paper)); color: var(--plum); }
-  .schedule td.subj.soc { background: color-mix(in oklab, var(--school-2) 18%, var(--paper)); color: var(--school-2); }
+  .schedule td.subj.mat { background: color-mix(in oklab, #D91F26 22%, var(--paper)); color: #B01820; }
+  .schedule td.subj.sci { background: color-mix(in oklab, #22B573 26%, var(--paper)); color: #16794D; }
+  .schedule td.subj.soc { background: color-mix(in oklab, #3B5EF0 20%, var(--paper)); color: #2C48C8; }
+  .schedule td.subj.gra { background: color-mix(in oklab, #7C3AED 22%, var(--paper)); color: #6D28D9; }
+  .schedule td.subj.com { background: color-mix(in oklab, #0891B2 24%, var(--paper)); color: #0E7490; }
+  .schedule td.subj.esp { background: color-mix(in oklab, #EA580C 22%, var(--paper)); color: #C04B0A; }
+  .schedule td.subj.cyv { background: color-mix(in oklab, #DB2777 20%, var(--paper)); color: #BE185D; }
+  .schedule td.subj.mus { background: color-mix(in oklab, #F59E0B 28%, var(--paper)); color: #A66E00; }
+  .schedule td.subj.art { background: color-mix(in oklab, var(--lemon) 55%, var(--paper)); color: #7a5f00; }
+  .schedule td.subj.efi { background: color-mix(in oklab, #6366F1 22%, var(--paper)); color: #4338CA; }
+  .schedule td.subj.tec { background: color-mix(in oklab, #10B981 22%, var(--paper)); color: #0B7A5A; }
+  .schedule td.subj.dis { background: color-mix(in oklab, #A16207 24%, var(--paper)); color: #78450F; }
+  .schedule td.subj.hr  { background: var(--paper-soft); color: var(--ink-mute); font-weight: 500; }
+  .sched-tabs {
+    display: inline-flex; padding: 4px;
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: 999px; box-shadow: var(--shadow-sm);
+    margin-bottom: 18px; flex-wrap: wrap; gap: 2px;
+  }
+  .sched-tab {
+    padding: 8px 16px; border-radius: 999px;
+    font-weight: 700; font-size: 13px; color: var(--ink-soft);
+    transition: background .18s, color .18s;
+    white-space: nowrap;
+  }
+  .sched-tab.is-active { background: var(--ink); color: var(--paper); }
   .schedule td.recess {
     background: transparent;
     color: var(--ink-mute);
@@ -1536,88 +1559,16 @@
       <div class="section-tag">02 · <em>la semana</em></div>
       <h2>Horario oficial del salón.</h2>
     </div>
-    <p>De 7:30 a 14:15. Recreo grande a las 10:00. El viernes hay taller doble.</p>
+    <p>Entrada 6:45 · break 8:55 · lunch 12:20 · salida 2:35. Los martes hay assembly de 7:15 a 7:30.</p>
+  </div>
+
+  <div class="sched-tabs reveal" role="tablist">
+    <button class="sched-tab is-active" data-sec="B" role="tab">6° B · Prof. Verónica</button>
+    <button class="sched-tab" data-sec="A" role="tab">6° A · Prof. Dolores</button>
   </div>
 
   <div class="schedule-wrap reveal">
-    <table class="schedule">
-      <thead>
-        <tr>
-          <th>Hora</th>
-          <th>Lunes</th>
-          <th>Martes</th>
-          <th>Miércoles</th>
-          <th>Jueves</th>
-          <th>Viernes</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <th>07:30 · 08:15</th>
-          <td class="subj mat">Matemática</td>
-          <td class="subj eng">Inglés</td>
-          <td class="subj">Español</td>
-          <td class="subj mat">Matemática</td>
-          <td class="subj soc">Sociales</td>
-        </tr>
-        <tr>
-          <th>08:15 · 09:00</th>
-          <td class="subj mat">Matemática</td>
-          <td class="subj eng">Inglés</td>
-          <td class="subj">Español</td>
-          <td class="subj">Ciencias</td>
-          <td class="subj soc">Sociales</td>
-        </tr>
-        <tr>
-          <th>09:00 · 09:45</th>
-          <td class="subj">Ciencias</td>
-          <td class="subj soc">Sociales</td>
-          <td class="subj eng">Inglés</td>
-          <td class="subj">Ciencias</td>
-          <td class="subj art">Arte</td>
-        </tr>
-        <tr>
-          <th>09:45 · 10:15</th>
-          <td colspan="5" class="recess">— Recreo · 30 min —</td>
-        </tr>
-        <tr>
-          <th>10:15 · 11:00</th>
-          <td class="subj eng">Inglés</td>
-          <td class="subj mat">Matemática</td>
-          <td class="subj soc">Sociales</td>
-          <td class="subj eng">Inglés</td>
-          <td class="subj art">Arte</td>
-        </tr>
-        <tr>
-          <th>11:00 · 11:45</th>
-          <td class="subj">Español</td>
-          <td class="subj mat">Matemática</td>
-          <td class="subj efi">Educ. Física</td>
-          <td class="subj">Español</td>
-          <td class="subj">Computación</td>
-        </tr>
-        <tr>
-          <th>11:45 · 12:30</th>
-          <td class="subj">Español</td>
-          <td class="subj">Ciencias</td>
-          <td class="subj efi">Educ. Física</td>
-          <td class="subj">Español</td>
-          <td class="subj">Computación</td>
-        </tr>
-        <tr>
-          <th>12:30 · 13:15</th>
-          <td colspan="5" class="recess">— Almuerzo · 45 min —</td>
-        </tr>
-        <tr>
-          <th>13:15 · 14:15</th>
-          <td class="subj soc">Sociales</td>
-          <td class="subj art">Arte</td>
-          <td class="subj">Tutoría</td>
-          <td class="subj efi">Educ. Física</td>
-          <td class="subj">Taller libre</td>
-        </tr>
-      </tbody>
-    </table>
+    <table class="schedule" id="scheduleTable"></table>
   </div>
 </section>
 
@@ -2136,6 +2087,76 @@
       <td><b>${t.pts}</b></td>
     </tr>
   `).join('');
+
+  // ---------- horario (dinámico por sección) ----------
+  const SCHEDULES = {
+    B: {
+      teacher: 'Verónica Castillo',
+      rows: [
+        { time: '6:45 · 7:15',   mon:['hr','HR Time'],           tue:['hr','Entry'],              wed:['hr','HR Time'],            thu:['hr','HR Time'],           fri:['hr','HR Time'] },
+        { time: '7:15 · 7:30',   mon:['hr','HR Time'],           tue:['hr','Assembly'],           wed:['hr','HR Time'],            thu:['hr','HR Time'],           fri:['hr','HR Time'] },
+        { time: '7:30 · 8:15',   mon:['gra','Grammar'],          tue:['sci','Science'],           wed:['soc','Social Studies'],    thu:['sci','CCNN'],             fri:['esp','Lectura/Escritura'] },
+        { time: '8:15 · 8:55',   mon:['cyv','Ciudadanía y Valores'], tue:['gra','Grammar'],       wed:['efi','Educación Física'],  thu:['gra','Grammar'],          fri:['gra','Grammar'] },
+        { time: '8:55 · 9:20',   recess: 'Break · 25 min' },
+        { time: '9:20 · 10:05',  mon:['mat','Math'],             tue:['com','Comunicación'],      wed:['com','Comunicación'],      thu:['cyv','Ciudadanía y Valores'], fri:['mus','Música'] },
+        { time: '10:05 · 10:50', mon:['com','Comunicación'],     tue:['mat','Math'],              wed:['soc','Social Studies'],    thu:['dis','Discovering'],      fri:['sci','Science'] },
+        { time: '10:50 · 11:35', mon:['soc','Social Studies'],   tue:['esp','Reading'],           wed:['art','Arte'],              thu:['com','Comunicación'],     fri:['com','Comunicación'] },
+        { time: '11:35 · 12:20', mon:['sci','Science'],          tue:['cyv','Ciudadanía y Valores'], wed:['mat','Math'],           thu:['mat','Math'],             fri:['mat','Math'] },
+        { time: '12:20 · 1:05',  recess: 'Lunch · 45 min' },
+        { time: '1:05 · 1:50',   mon:['art','Arte'],             tue:['mus','Música'],            wed:['cyv','Ciudadanía y Valores'], thu:['esp','Reading'],       fri:['esp','Reading'] },
+        { time: '1:50 · 2:35',   mon:['esp','Reading'],          tue:['cyv','Valores'],           wed:['esp','Reading'],           thu:['tec','Technology'],       fri:['efi','Educación Física'] },
+        { time: '2:35',          recess: 'Salida' },
+      ]
+    },
+    A: {
+      teacher: 'Dolores Hernández',
+      rows: [
+        { time: '6:45 · 7:15',   mon:['hr','HR Time'],           tue:['hr','Entry'],              wed:['hr','HR Time'],            thu:['hr','HR Time'],           fri:['hr','HR Time'] },
+        { time: '7:15 · 7:30',   mon:['hr','HR Time'],           tue:['hr','Assembly'],           wed:['hr','HR Time'],            thu:['hr','HR Time'],           fri:['hr','HR Time'] },
+        { time: '7:30 · 8:15',   mon:['cyv','Ciudadanía y Valores'], tue:['esp','Reading'],       wed:['efi','Educación Física'],  thu:['com','Comunicación'],     fri:['efi','Educación Física'] },
+        { time: '8:15 · 8:55',   mon:['sci','Science'],          tue:['com','Comunicación'],      wed:['soc','Social Studies'],    thu:['dis','Discovering'],      fri:['com','Comunicación'] },
+        { time: '8:55 · 9:20',   recess: 'Break · 25 min' },
+        { time: '9:20 · 10:05',  mon:['mus','Música'],           tue:['mat','Math'],              wed:['soc','Social Studies'],    thu:['mus','Música'],           fri:['esp','Reading'] },
+        { time: '10:05 · 10:50', mon:['esp','Reading'],          tue:['gra','Grammar'],           wed:['gra','Grammar'],           thu:['gra','Grammar'],          fri:['gra','Grammar'] },
+        { time: '10:50 · 11:35', mon:['mat','Math'],             tue:['esp','Lectura/Escritura'], wed:['com','Comunicación'],      thu:['sci','Science'],          fri:['sci','Science'] },
+        { time: '11:35 · 12:20', mon:['esp','Reading'],          tue:['soc','Social Studies'],    wed:['sci','CCNN'],              thu:['tec','Technology'],       fri:['cyv','Ciudadanía y Valores'] },
+        { time: '12:20 · 1:05',  recess: 'Lunch · 45 min' },
+        { time: '1:05 · 1:50',   mon:['com','Comunicación'],     tue:['art','Arte'],              wed:['esp','Reading'],           thu:['cyv','Ciudadanía y Valores'], fri:null },
+        { time: '1:50 · 2:35',   mon:['cyv','Ciudadanía y Valores'], tue:['mat','Math'],          wed:['cyv','Valores'],           thu:['mat','Math'],             fri:null },
+        { time: '2:35',          recess: 'Salida' },
+      ]
+    },
+  };
+
+  function renderSchedule(sec) {
+    const s = SCHEDULES[sec];
+    if (!s) return;
+    const days = ['mon','tue','wed','thu','fri'];
+    let html = `<thead><tr><th>Hora</th><th>Lunes</th><th>Martes</th><th>Miércoles</th><th>Jueves</th><th>Viernes</th></tr></thead><tbody>`;
+    s.rows.forEach(row => {
+      if (row.recess) {
+        html += `<tr><th>${row.time}</th><td colspan="5" class="recess">— ${row.recess} —</td></tr>`;
+      } else {
+        html += `<tr><th>${row.time}</th>`;
+        days.forEach(d => {
+          const c = row[d];
+          if (!c) html += `<td></td>`;
+          else html += `<td class="subj ${c[0]}">${c[1]}</td>`;
+        });
+        html += `</tr>`;
+      }
+    });
+    html += `</tbody>`;
+    document.getElementById('scheduleTable').innerHTML = html;
+  }
+  document.querySelectorAll('.sched-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.sched-tab').forEach(x => x.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      renderSchedule(btn.dataset.sec);
+    });
+  });
+  renderSchedule('B');
 
   // ---------- countdown ----------
   const target = new Date(new Date().getFullYear(), 5, 15, 12, 0, 0); // 15 de junio a mediodía
