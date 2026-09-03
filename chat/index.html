@@ -1454,7 +1454,41 @@
     `;
   }
 
-  let pendingPhoto = null; // { file, dataUrl }
+  let pendingPhoto = null; // { blob, ext, type, dataUrl, sizeKB }
+
+  // Decodifica la imagen, la reescala a un máximo razonable y la exporta como
+  // JPEG. Devuelve { blob, ext, type, dataUrl, sizeKB }. Lanza si el navegador
+  // no puede decodificar el archivo (p. ej. HEIC en un navegador sin soporte).
+  async function compressImage(file) {
+    const srcUrl = URL.createObjectURL(file);
+    try {
+      const img = await new Promise((resolve, reject) => {
+        const i = new Image();
+        i.onload = () => resolve(i);
+        i.onerror = () => reject(new Error('decode'));
+        i.src = srcUrl;
+      });
+      const maxDim = 1600;
+      let { width, height } = img;
+      if (!width || !height) throw new Error('empty');
+      if (Math.max(width, height) > maxDim) {
+        const s = maxDim / Math.max(width, height);
+        width = Math.round(width * s);
+        height = Math.round(height * s);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.82));
+      if (!blob) throw new Error('toBlob');
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+      return { blob, ext: 'jpg', type: 'image/jpeg', dataUrl, sizeKB: blob.size / 1024 };
+    } finally {
+      URL.revokeObjectURL(srcUrl);
+    }
+  }
+
   function wireComposer(chat) {
     const form = document.getElementById('chatComposer');
     const input = document.getElementById('composerInput');
@@ -1467,21 +1501,41 @@
     attachInput.addEventListener('change', async () => {
       const file = attachInput.files[0];
       if (!file) return;
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Foto muy grande (máx 5 MB).');
+      // Guarda contra archivos gigantes ANTES de intentar decodificar.
+      if (file.size > 25 * 1024 * 1024) {
+        alert('Esa foto es demasiado grande (máx 25 MB).');
         attachInput.value = '';
         return;
       }
-      const dataUrl = await new Promise((resolve, reject) => {
-        const r = new FileReader();
-        r.onload = () => resolve(r.result);
-        r.onerror = () => reject(r.error);
-        r.readAsDataURL(file);
-      });
-      pendingPhoto = { file, dataUrl };
+      preview.hidden = false;
+      preview.innerHTML = `<span style="flex:1;font-size:13px;color:var(--ink-soft)">Procesando foto…</span>`;
+      let photo;
+      try {
+        // Se comprime/convierte a JPEG en el cliente: así las fotos pesadas de
+        // celular caben, y formatos que el navegador no muestra (HEIC, etc.)
+        // se normalizan a algo que sí se ve.
+        photo = await compressImage(file);
+      } catch (err) {
+        // No se pudo decodificar (formato raro) → intentar con el original.
+        if (file.size > 8 * 1024 * 1024) {
+          alert('No pudimos procesar esa foto. Probá con otra o una más liviana.');
+          pendingPhoto = null; preview.hidden = true; attachInput.value = '';
+          return;
+        }
+        const rawExt = (file.name && file.name.includes('.'))
+          ? file.name.split('.').pop().toLowerCase().slice(0, 5) : 'jpg';
+        const dataUrl = await new Promise((resolve, reject) => {
+          const r = new FileReader();
+          r.onload = () => resolve(r.result);
+          r.onerror = () => reject(r.error);
+          r.readAsDataURL(file);
+        });
+        photo = { blob: file, ext: rawExt || 'jpg', type: file.type || 'application/octet-stream', dataUrl, sizeKB: file.size / 1024 };
+      }
+      pendingPhoto = photo;
       preview.innerHTML = `
-        <img src="${dataUrl}" alt="preview">
-        <span style="flex:1;font-size:13px;color:var(--ink-soft)">Foto lista (${(file.size/1024).toFixed(0)} KB)</span>
+        <img src="${photo.dataUrl}" alt="preview">
+        <span style="flex:1;font-size:13px;color:var(--ink-soft)">Foto lista (${photo.sizeKB.toFixed(0)} KB)</span>
         <button type="button" id="removePhoto">Quitar</button>
       `;
       preview.hidden = false;
@@ -1499,10 +1553,10 @@
       sendBtn.disabled = true;
       let photoUrl = null;
       if (pendingPhoto) {
-        const ext = pendingPhoto.file.name.split('.').pop().toLowerCase().slice(0, 5) || 'jpg';
+        const ext = pendingPhoto.ext || 'jpg';
         const path = `${currentUser.id}/${Date.now()}-${Math.random().toString(36).slice(2,6)}.${ext}`;
-        const { error: upErr } = await sb.storage.from('photos').upload(path, pendingPhoto.file, {
-          contentType: pendingPhoto.file.type, cacheControl: '3600', upsert: false
+        const { error: upErr } = await sb.storage.from('photos').upload(path, pendingPhoto.blob, {
+          contentType: pendingPhoto.type || 'image/jpeg', cacheControl: '3600', upsert: false
         });
         if (upErr) { alert('Error subiendo foto: ' + upErr.message); sendBtn.disabled = false; return; }
         photoUrl = sb.storage.from('photos').getPublicUrl(path).data.publicUrl;
