@@ -1947,6 +1947,15 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  const SUPABASE_URL = 'https://qmxugyqwgptgafitbquw.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFteHVneXF3Z3B0Z2FmaXRicXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzOTQ0NDcsImV4cCI6MjEwMzk3MDQ0N30.AtfxRuD_zSojiVCW170wmQjZudRQJyUl_mdm_L5ii_I';
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true }
+  });
+</script>
+
 <script>
   // ---------- theme toggle ----------
   const root = document.documentElement;
@@ -1962,28 +1971,13 @@
     try { localStorage.setItem('sixth-theme', next); } catch (e) {}
   });
 
-  // ---------- notification badge (unread from chat/) ----------
-  function refreshNotifBadge() {
+  // Notif badge — se actualiza tras conectar a Supabase (más abajo)
+  function setNotifBadge(n) {
     const badge = document.getElementById('notifBadge');
     if (!badge) return;
-    let total = 0;
-    try {
-      const acc = JSON.parse(localStorage.getItem('sixth-account') || 'null');
-      const chats = JSON.parse(localStorage.getItem('sixth-chats') || '[]');
-      if (acc) {
-        const meKey = acc.key;
-        total = chats.reduce((n, c) => n + (c.messages || []).filter(m => {
-          const fromKey = `${m.from.section}-${m.from.name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'')}`;
-          return m.ts > (c.lastReadTs || 0) && fromKey !== meKey;
-        }).length, 0);
-      }
-    } catch (e) {}
-    if (total > 0) { badge.hidden = false; badge.textContent = total > 99 ? '99+' : String(total); }
+    if (n > 0) { badge.hidden = false; badge.textContent = n > 99 ? '99+' : String(n); }
     else { badge.hidden = true; }
   }
-  refreshNotifBadge();
-  window.addEventListener('storage', refreshNotifBadge);
-  window.addEventListener('focus', refreshNotifBadge);
 
   // ---------- data ----------
   const STUDENTS = [
@@ -2167,7 +2161,7 @@
   // Ensure hero reveals immediately at rest
   document.querySelectorAll('.hero .reveal, .stats').forEach(el => el.classList.add('in'));
 
-  // ---------- accounts & chismes ----------
+  // ---------- accounts & chismes (Supabase) ----------
   const accountChip  = document.getElementById('accountChip');
   const loginModal   = document.getElementById('loginModal');
   const loginClose   = document.getElementById('loginClose');
@@ -2182,39 +2176,23 @@
   const slug = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]/g, '');
   const keyOf = (name, section) => `${section}-${slug(name)}`;
 
-  let db = null;
-  let currentAccount = null;
-  let claimedKeys = new Set();
+  let currentUser = null;
+  let account = null;
+  let profilesByKey = new Map();
   let posts = [];
 
-  try {
-    const stored = localStorage.getItem('sixth-account');
-    if (stored) currentAccount = JSON.parse(stored);
-    posts = JSON.parse(localStorage.getItem('sixth-posts') || '[]');
-    const localClaims = JSON.parse(localStorage.getItem('sixth-claims') || '[]');
-    claimedKeys = new Set(localClaims);
-    if (currentAccount) claimedKeys.add(currentAccount.key);
-  } catch (e) {}
-
-  function openModal() {
-    renderNames();
-    loginModal.hidden = false;
-    loginModal.classList.add('open');
-  }
-  function closeModal() {
-    loginModal.classList.remove('open');
-    loginModal.hidden = true;
-  }
+  function openModal() { renderNames(); loginModal.hidden = false; loginModal.classList.add('open'); }
+  function closeModal() { loginModal.classList.remove('open'); loginModal.hidden = true; }
   accountChip.addEventListener('click', openModal);
   loginClose.addEventListener('click', closeModal);
   loginModal.addEventListener('click', (e) => { if (e.target === loginModal) closeModal(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !loginModal.hidden) closeModal(); });
 
   function updateAccountChip() {
-    if (currentAccount) {
+    if (account) {
       accountChip.classList.remove('is-guest');
-      const init = currentAccount.name[0].toUpperCase();
-      accountChip.innerHTML = `<span class="who-avatar">${init}</span><span class="who-name">${currentAccount.name} · ${currentAccount.section}</span>`;
+      const init = account.name[0].toUpperCase();
+      accountChip.innerHTML = `<span class="who-avatar">${init}</span><span class="who-name">${escapeHtml(account.name)} · ${escapeHtml(account.section)}</span>`;
     } else {
       accountChip.classList.add('is-guest');
       accountChip.innerHTML = `<span class="who-name">Iniciar sesión</span>`;
@@ -2227,10 +2205,11 @@
     const build = (list, container) => {
       container.innerHTML = list.map(st => {
         const k = keyOf(st.n, st.s);
-        const isMe = currentAccount && currentAccount.key === k;
-        const isTaken = claimedKeys.has(k) && !isMe;
-        return `<button class="name-chip" ${isTaken ? 'disabled' : ''} data-key="${k}" data-name="${st.n}" data-section="${st.s}" type="button">
-          <span class="who-name">${st.n}</span>
+        const claimed = profilesByKey.get(k);
+        const isMe = account && account.name === st.n && account.section === st.s;
+        const isTaken = !!claimed && !isMe;
+        return `<button class="name-chip" ${isTaken ? 'disabled' : ''} data-name="${escapeHtml(st.n)}" data-section="${st.s}" type="button">
+          <span class="who-name">${escapeHtml(st.n)}</span>
           ${isMe ? '<span class="taken-tag" style="color:var(--mint)">Yo</span>' : (isTaken ? '<span class="taken-tag">tomado</span>' : '')}
         </button>`;
       }).join('');
@@ -2238,9 +2217,10 @@
     build(bySection.A, namesA);
     build(bySection.B, namesB);
     const total = STUDENTS.length;
-    const avail = total - claimedKeys.size;
-    loginStatus.textContent = `${avail} disponibles · ${claimedKeys.size} tomados de ${total}`;
-    loginLogout.hidden = !currentAccount;
+    const takenCount = profilesByKey.size;
+    const avail = total - takenCount;
+    loginStatus.textContent = `${avail} disponibles · ${takenCount} tomados de ${total}`;
+    loginLogout.hidden = !account;
     document.querySelectorAll('.name-chip').forEach(btn => {
       if (btn.disabled) return;
       btn.addEventListener('click', () => claimName(btn.dataset.name, btn.dataset.section));
@@ -2248,46 +2228,48 @@
   }
 
   async function claimName(name, section) {
+    if (!currentUser) { alert('Conectando, intentá en un segundo…'); return; }
     const k = keyOf(name, section);
-    if (currentAccount && currentAccount.key === k) { closeModal(); return; }
-    if (claimedKeys.has(k)) return;
-    if (currentAccount) await releaseAccount({ silent: true });
-    const account = { key: k, name, section };
-    if (db) {
-      try { await db.doc(`accounts/${k}`).set({ key: k, name, section, claimed_at: Date.now() }); }
-      catch (e) { console.error(e); alert('No se pudo reclamar el nombre. Intentá de nuevo.'); return; }
-    } else {
-      claimedKeys.add(k);
-      try { localStorage.setItem('sixth-claims', JSON.stringify([...claimedKeys])); } catch (e) {}
+    const existing = profilesByKey.get(k);
+    if (existing && existing.user_id !== currentUser.id) { alert('Ese nombre ya está tomado'); return; }
+    if (account && (account.name !== name || account.section !== section)) {
+      await sb.from('profiles').delete().eq('user_id', currentUser.id);
     }
-    currentAccount = account;
-    try { localStorage.setItem('sixth-account', JSON.stringify(account)); } catch (e) {}
+    const { error } = await sb.from('profiles').upsert({
+      user_id: currentUser.id, name, section
+    }, { onConflict: 'user_id' });
+    if (error) { console.error(error); alert('No se pudo reclamar: ' + error.message); return; }
+    account = { name, section, role: null };
+    await refreshProfiles();
     updateAccountChip();
     renderComposer();
     closeModal();
   }
 
-  async function releaseAccount(opts) {
-    if (!currentAccount) return;
-    const k = currentAccount.key;
-    if (db) {
-      try { await db.doc(`accounts/${k}`).delete(); } catch (e) {}
-    } else {
-      claimedKeys.delete(k);
-      try { localStorage.setItem('sixth-claims', JSON.stringify([...claimedKeys])); } catch (e) {}
-    }
-    currentAccount = null;
-    try { localStorage.removeItem('sixth-account'); } catch (e) {}
-    if (!opts || !opts.silent) {
-      updateAccountChip();
-      renderComposer();
-      renderNames();
-    }
+  async function releaseAccount() {
+    if (!account || !currentUser) return;
+    await sb.from('profiles').delete().eq('user_id', currentUser.id);
+    account = null;
+    await refreshProfiles();
+    updateAccountChip();
+    renderComposer();
+    renderNames();
   }
-  loginLogout.addEventListener('click', () => releaseAccount());
+  loginLogout.addEventListener('click', releaseAccount);
+
+  async function refreshProfiles() {
+    const { data, error } = await sb.from('profiles').select('user_id, name, section, role');
+    if (error) return;
+    profilesByKey = new Map((data || []).map(p => [keyOf(p.name, p.section), p]));
+    if (currentUser) {
+      const mine = (data || []).find(p => p.user_id === currentUser.id);
+      account = mine ? { name: mine.name, section: mine.section, role: mine.role } : null;
+    }
+    if (!loginModal.hidden) renderNames();
+  }
 
   function renderComposer() {
-    if (!currentAccount) {
+    if (!account) {
       composerEl.className = 'composer composer-locked';
       composerEl.innerHTML = `
         <div class="lock-icon" aria-hidden="true">
@@ -2308,7 +2290,7 @@
         </div>
         <div class="composer-who">
           <strong>Vas a publicar como Anónimo</strong>
-          <span>Sesión: ${currentAccount.name} · ${currentAccount.section}</span>
+          <span>Sesión: ${escapeHtml(account.name)} · ${escapeHtml(account.section)}</span>
         </div>
       </div>
       <textarea id="chismeText" maxlength="400" placeholder="¿Qué se dice en el salón? Escribí acá — nadie sabrá que fuiste vos."></textarea>
@@ -2330,29 +2312,18 @@
     document.getElementById('postChisme').addEventListener('click', async () => {
       const text = ta.value.trim();
       if (!text) return;
-      await postChisme(text);
+      ta.disabled = true;
+      const { error } = await sb.from('chismes').insert({ text: text.slice(0, 400) });
+      ta.disabled = false;
+      if (error) { alert('No se pudo publicar: ' + error.message); return; }
       ta.value = '';
       counter.textContent = '0 / 400';
       counter.classList.remove('warn');
     });
   }
 
-  async function postChisme(text) {
-    const clean = text.slice(0, 400);
-    const id = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
-    const doc = { text: clean, ts: Date.now(), id };
-    if (db) {
-      try { await db.doc(`chismes/${id}`).set({ text: clean, ts: Date.now() }); }
-      catch (e) { console.error(e); alert('No se pudo publicar. Intentá de nuevo.'); }
-    } else {
-      posts = [doc, ...posts].slice(0, 200);
-      try { localStorage.setItem('sixth-posts', JSON.stringify(posts)); } catch (e) {}
-      renderWall();
-    }
-  }
-
   function timeAgo(ts) {
-    const diff = Math.max(0, Date.now() - ts);
+    const diff = Math.max(0, Date.now() - new Date(ts).getTime());
     if (diff < 60000) return 'hace instantes';
     if (diff < 3600000) return `hace ${Math.floor(diff / 60000)} min`;
     if (diff < 86400000) return `hace ${Math.floor(diff / 3600000)} h`;
@@ -2371,51 +2342,73 @@
       const tint = i % 5;
       return `<article class="chisme tint-${tint}" style="--r:${tilt}deg">
         <p>${escapeHtml(p.text)}</p>
-        <div class="chisme-meta"><span>Anónimo</span><span class="dot"></span><span>${timeAgo(p.ts)}</span></div>
+        <div class="chisme-meta"><span>Anónimo</span><span class="dot"></span><span>${timeAgo(p.created_at)}</span></div>
       </article>`;
     }).join('');
   }
 
-  updateAccountChip();
-  renderComposer();
-  renderWall();
+  async function refreshChismes() {
+    const { data, error } = await sb.from('chismes').select('id, text, created_at').order('created_at', { ascending: false }).limit(120);
+    if (error) return;
+    posts = data || [];
+    renderWall();
+  }
 
-  // Try to connect to shared db; fall back to localStorage silently
-  (async () => {
-    let inst = null;
-    if (window.claude && typeof window.claude.use === 'function') {
-      try { inst = await claude.use('db'); } catch (e) { inst = null; }
-    }
-    if (!inst) {
+  async function refreshNotifBadge() {
+    if (!currentUser) { setNotifBadge(0); return; }
+    const { data: mem } = await sb.from('chat_members').select('chat_id, last_read_at').eq('user_id', currentUser.id);
+    if (!mem || !mem.length) { setNotifBadge(0); return; }
+    const readMap = new Map(mem.map(m => [m.chat_id, m.last_read_at]));
+    const chatIds = mem.map(m => m.chat_id);
+    const { data: msgs } = await sb.from('messages').select('chat_id, author_user_id, created_at').in('chat_id', chatIds).neq('author_user_id', currentUser.id);
+    const count = (msgs || []).filter(m => new Date(m.created_at) > new Date(readMap.get(m.chat_id) || 0)).length;
+    setNotifBadge(count);
+  }
+
+  async function initSupabase() {
+    dbNotice.textContent = 'Conectando…';
+    dbNotice.classList.remove('offline');
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session && session.user) {
+        currentUser = session.user;
+      } else {
+        const { data, error } = await sb.auth.signInAnonymously();
+        if (error) throw error;
+        currentUser = data.user;
+      }
+    } catch (e) {
+      console.error('auth error', e);
       dbNotice.classList.add('offline');
-      dbNotice.textContent = 'Solo en este navegador · cada dispositivo ve su propio muro';
+      dbNotice.textContent = 'Sin conexión · reintentá';
       return;
     }
-    db = inst;
-    dbNotice.classList.remove('offline');
-    dbNotice.textContent = 'Sincronizado en vivo · todos ven el mismo muro';
+    await refreshProfiles();
+    await refreshChismes();
+    await refreshNotifBadge();
+    updateAccountChip();
+    renderComposer();
+    dbNotice.textContent = 'Sincronizado en vivo · Supabase';
 
-    // If we already have a local account, register it in shared db
-    if (currentAccount) {
-      try { await db.doc(`accounts/${currentAccount.key}`).set({ ...currentAccount, claimed_at: Date.now() }); } catch (e) {}
-    }
-
-    db.collection('accounts').onSnapshot(snap => {
-      claimedKeys = new Set(snap.docs.map(d => d.data().key));
-      if (currentAccount && !claimedKeys.has(currentAccount.key)) {
-        db.doc(`accounts/${currentAccount.key}`).set({ ...currentAccount, claimed_at: Date.now() }).catch(() => {});
-        claimedKeys.add(currentAccount.key);
-      }
-      if (!loginModal.hidden) renderNames();
-    }, () => {});
-
-    db.collection('chismes').orderBy('ts', 'desc').limit(120).onSnapshot(snap => {
-      posts = snap.docs.map(d => ({ ...d.data(), id: d.id }));
+    sb.channel('chismes-live').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chismes' }, (payload) => {
+      posts = [payload.new, ...posts].slice(0, 120);
       renderWall();
-    }, () => {});
-  })();
+    }).subscribe();
 
-  setInterval(() => { if (posts.length) renderWall(); }, 60000);
+    sb.channel('profiles-live').on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
+      refreshProfiles();
+    }).subscribe();
+
+    sb.channel('messages-badge').on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, () => {
+      refreshNotifBadge();
+    }).subscribe();
+
+    window.addEventListener('focus', refreshNotifBadge);
+  }
+
+  updateAccountChip();
+  renderComposer();
+  initSupabase();
 
   // ---------- perfil de estudiante ----------
   const profileModal = document.getElementById('profileModal');

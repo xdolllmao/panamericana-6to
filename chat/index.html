@@ -761,8 +761,17 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-  // ================ DATA ================
+  const SUPABASE_URL = 'https://qmxugyqwgptgafitbquw.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFteHVneXF3Z3B0Z2FmaXRicXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzOTQ0NDcsImV4cCI6MjEwMzk3MDQ0N30.AtfxRuD_zSojiVCW170wmQjZudRQJyUl_mdm_L5ii_I';
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true }
+  });
+</script>
+
+<script>
+  // ================ ROSTER (nombres del salón) ================
   const STUDENTS = [
     { n: 'Amaya',     s: 'A' }, { n: 'Deleón',    s: 'A' },
     { n: 'Magaña',    s: 'A' }, { n: 'Gerardo',   s: 'A', r: 'Presidente' },
@@ -807,72 +816,20 @@
     if (day === y.toDateString()) return 'Ayer';
     return d.toLocaleDateString('es-SV', { day: 'numeric', month: 'long' });
   }
-  function keyOf(name, section) { return `${section}-${name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'')}`; }
+  function slug(s) { return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,''); }
+  function keyOf(name, section) { return `${section}-${slug(name)}`; }
+  function dmKeyOf(uidA, uidB) { return [uidA, uidB].sort().join(':'); }
 
   // ================ STATE ================
-  let account = null;
-  let chats = [];
+  let currentUser = null;               // auth user
+  let account = null;                   // { user_id, name, section, role }
+  let profilesById = new Map();         // uid -> profile
+  let profilesByKey = new Map();        // section-slug(name) -> profile
+  let chats = [];                       // [{ id, type, name, created_by, dm_key, members:[uid], messages:[] , last_read_at }]
+  let messagesByChat = new Map();       // chat_id -> [msg]
   let activeChatId = null;
-  let claimedKeys = new Set();
-
-  function loadState() {
-    try {
-      const a = localStorage.getItem('sixth-account'); if (a) account = JSON.parse(a);
-      const c = localStorage.getItem('sixth-chats');   if (c) chats = JSON.parse(c);
-      const k = JSON.parse(localStorage.getItem('sixth-claims') || '[]');
-      claimedKeys = new Set(k);
-      if (account) claimedKeys.add(account.key);
-    } catch (e) {}
-  }
-  function saveChats() { try { localStorage.setItem('sixth-chats', JSON.stringify(chats)); } catch (e) {} }
-  function saveAccount() {
-    try {
-      if (account) localStorage.setItem('sixth-account', JSON.stringify(account));
-      else localStorage.removeItem('sixth-account');
-      localStorage.setItem('sixth-claims', JSON.stringify([...claimedKeys]));
-    } catch (e) {}
-  }
-
-  function seedIfEmpty() {
-    if (!account || chats.length > 0) return;
-    const now = Date.now();
-    chats = [
-      {
-        id: 'seed-dm-iglesias',
-        type: 'dm',
-        peer: { name: 'Iglesias', section: 'B', role: 'Presidente' },
-        messages: [
-          { id: 's1', from: { name: 'Iglesias', section: 'B' }, ts: now - 5400000, text: '¡Bienvenido al chat del salón! 👋' },
-          { id: 's2', from: { name: 'Iglesias', section: 'B' }, ts: now - 5300000, text: 'Cualquier cosa del salón mándamelo por acá. Soy uno de los presidentes.' },
-        ],
-        lastReadTs: 0,
-      },
-      {
-        id: 'seed-dm-gerardo',
-        type: 'dm',
-        peer: { name: 'Gerardo', section: 'A', role: 'Presidente' },
-        messages: [
-          { id: 's3', from: { name: 'Gerardo', section: 'A' }, ts: now - 3600000, text: 'Recordá que hoy hay partido en el lunch 🏀' },
-        ],
-        lastReadTs: 0,
-      },
-      {
-        id: 'seed-group-salon',
-        type: 'group',
-        name: 'Salón 6to (todos)',
-        members: STUDENTS.map(s => ({ name: s.n, section: s.s })),
-        createdBy: { name: 'Iglesias', section: 'B' },
-        messages: [
-          { id: 's4', from: { name: 'Magaña', section: 'A' }, ts: now - 10800000, text: 'Alguien tiene la tarea de mate? 😅' },
-          { id: 's5', from: { name: 'Sofía', section: 'B' }, ts: now - 10000000, text: 'Yo la tengo, te paso foto ahorita' },
-          { id: 's6', from: { name: 'Josué', section: 'B' }, ts: now - 9000000, text: 'Recuerden que el 14 no venimos 🙌' },
-          { id: 's7', from: { name: 'Deleón', section: 'A' }, ts: now - 7200000, text: 'Concierto conmigo y Magaña el viernes 🎤' },
-        ],
-        lastReadTs: 0,
-      },
-    ];
-    saveChats();
-  }
+  let realtimeChannel = null;           // per-chat live channel
+  let messagesGlobalChannel = null;
 
   // ================ THEME ================
   const themeBtn = document.getElementById('themeBtn');
@@ -888,6 +845,19 @@
     const next = isDark ? 'light' : 'dark';
     rootEl.setAttribute('data-theme', next);
     try { localStorage.setItem('sixth-theme', next); } catch (e) {}
+  });
+
+  // ================ MODAL helpers ================
+  function openBackdrop(el) { el.hidden = false; el.classList.add('open'); }
+  function closeBackdrop(el) { el.classList.remove('open'); el.hidden = true; }
+  document.querySelectorAll('.modal-backdrop').forEach(m => {
+    m.addEventListener('click', (e) => { if (e.target === m) closeBackdrop(m); });
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-backdrop.open').forEach(m => closeBackdrop(m));
+      hideNotifPanel();
+    }
   });
 
   // ================ ACCOUNT / LOGIN ================
@@ -924,59 +894,62 @@
     const build = (list, container) => {
       container.innerHTML = list.map(st => {
         const k = keyOf(st.n, st.s);
-        const isMe = account && account.key === k;
-        const isTaken = claimedKeys.has(k) && !isMe;
-        return `<button class="person-chip" ${isTaken ? 'disabled style="opacity:.5;text-decoration:line-through"' : ''} data-name="${escapeHtml(st.n)}" data-section="${st.s}" data-key="${k}" type="button">
+        const claimed = profilesByKey.get(k);
+        const isMe = account && account.name === st.n && account.section === st.s;
+        const isTaken = !!claimed && !isMe;
+        return `<button class="person-chip" ${isTaken ? 'disabled style="opacity:.5;text-decoration:line-through"' : ''} data-name="${escapeHtml(st.n)}" data-section="${st.s}" type="button">
           <span class="avatar-mini" style="background:${colorFor(st.n)}">${st.n[0].toUpperCase()}</span>
           <span class="person-chip-name">${escapeHtml(st.n)}</span>
           ${isMe ? '<span class="person-chip-check">Yo</span>' : ''}
         </button>`;
       }).join('');
       container.querySelectorAll('.person-chip:not([disabled])').forEach(btn => {
-        btn.addEventListener('click', () => claimName(btn.dataset.name, btn.dataset.section, btn.dataset.key));
+        btn.addEventListener('click', () => claimName(btn.dataset.name, btn.dataset.section));
       });
     };
     build(bySec.A, loginNamesA);
     build(bySec.B, loginNamesB);
-    const total = STUDENTS.length, avail = total - claimedKeys.size;
-    loginStatus.textContent = `${avail} disponibles · ${claimedKeys.size} tomados`;
+    const total = STUDENTS.length, avail = total - profilesByKey.size;
+    loginStatus.textContent = `${avail} disponibles · ${profilesByKey.size} tomados`;
     loginLogout.hidden = !account;
   }
   loginSearch.addEventListener('input', renderLoginNames);
 
-  function claimName(name, section, key) {
-    if (account && account.key === key) { closeBackdrop(loginModal); return; }
-    if (account) { claimedKeys.delete(account.key); }
-    claimedKeys.add(key);
-    account = { key, name, section };
-    saveAccount();
-    seedIfEmpty();
+  async function claimName(name, section) {
+    if (!currentUser) { alert('Conectando…'); return; }
+    if (account && account.name === name && account.section === section) { closeBackdrop(loginModal); return; }
+    if (account) await sb.from('profiles').delete().eq('user_id', currentUser.id);
+    const { error } = await sb.from('profiles').upsert({
+      user_id: currentUser.id, name, section
+    }, { onConflict: 'user_id' });
+    if (error) { alert('No se pudo reclamar: ' + error.message); return; }
+    await refreshProfiles();
     updateAccountChip();
     renderApp();
     closeBackdrop(loginModal);
   }
-  loginLogout.addEventListener('click', () => {
-    if (!account) return;
-    claimedKeys.delete(account.key);
+
+  loginLogout.addEventListener('click', async () => {
+    if (!account || !currentUser) return;
+    await sb.from('profiles').delete().eq('user_id', currentUser.id);
     account = null;
-    saveAccount();
+    await refreshProfiles();
     updateAccountChip();
     renderApp();
     closeBackdrop(loginModal);
   });
 
-  // ================ MODAL helpers ================
-  function openBackdrop(el) { el.hidden = false; el.classList.add('open'); }
-  function closeBackdrop(el) { el.classList.remove('open'); el.hidden = true; }
-  document.querySelectorAll('.modal-backdrop').forEach(m => {
-    m.addEventListener('click', (e) => { if (e.target === m) closeBackdrop(m); });
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      document.querySelectorAll('.modal-backdrop.open').forEach(m => closeBackdrop(m));
-      hideNotifPanel();
+  async function refreshProfiles() {
+    const { data, error } = await sb.from('profiles').select('user_id, name, section, role');
+    if (error) return;
+    profilesById = new Map((data || []).map(p => [p.user_id, p]));
+    profilesByKey = new Map((data || []).map(p => [keyOf(p.name, p.section), p]));
+    if (currentUser) {
+      const mine = profilesById.get(currentUser.id);
+      account = mine || null;
     }
-  });
+    if (!loginModal.hidden) renderLoginNames();
+  }
 
   // ================ NEW CHAT flow ================
   const newModal = document.getElementById('newModal');
@@ -1016,23 +989,26 @@
 
   function renderDmPicker() {
     const q = dmSearch.value.trim().toLowerCase();
-    const meKey = account && account.key;
+    const meKey = account && keyOf(account.name, account.section);
     const bySec = { A: [], B: [] };
     STUDENTS.forEach(st => {
       const k = keyOf(st.n, st.s);
       if (k === meKey) return;
+      const claimed = profilesByKey.get(k);
+      if (!claimed) return; // solo con perfil claimado (así tienen user_id)
       if (q && !st.n.toLowerCase().includes(q)) return;
-      bySec[st.s].push(st);
+      bySec[st.s].push({ ...st, uid: claimed.user_id });
     });
     const build = (list, container) => {
-      container.innerHTML = list.map(st => `
-        <button class="person-chip" type="button" data-name="${escapeHtml(st.n)}" data-section="${st.s}">
+      const html = list.length ? list.map(st => `
+        <button class="person-chip" type="button" data-uid="${st.uid}" data-name="${escapeHtml(st.n)}" data-section="${st.s}">
           <span class="avatar-mini" style="background:${colorFor(st.n)}">${st.n[0].toUpperCase()}</span>
           <span class="person-chip-name">${escapeHtml(st.n)}</span>
         </button>
-      `).join('');
+      `).join('') : '<div style="grid-column:1/-1;padding:16px;text-align:center;color:var(--ink-mute);font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase">Nadie con cuenta acá</div>';
+      container.innerHTML = html;
       container.querySelectorAll('.person-chip').forEach(btn => {
-        btn.addEventListener('click', () => startDm(btn.dataset.name, btn.dataset.section));
+        btn.addEventListener('click', () => startDm(btn.dataset.uid, btn.dataset.name, btn.dataset.section));
       });
     };
     build(bySec.A, dmNamesA);
@@ -1040,34 +1016,45 @@
   }
   dmSearch.addEventListener('input', renderDmPicker);
 
-  function startDm(name, section) {
-    const id = `dm-${keyOf(name, section)}`;
-    let chat = chats.find(c => c.id === id);
-    if (!chat) {
-      const st = STUDENTS.find(s => s.n === name && s.s === section);
-      chat = { id, type: 'dm', peer: { name, section, role: st && st.r }, messages: [], lastReadTs: Date.now() };
-      chats.push(chat);
-      saveChats();
+  async function startDm(targetUid, name, section) {
+    if (!currentUser) return;
+    const dm_key = dmKeyOf(currentUser.id, targetUid);
+    // Try find existing
+    let { data: existing } = await sb.from('chats').select('id').eq('dm_key', dm_key).maybeSingle();
+    let chatId = existing && existing.id;
+    if (!chatId) {
+      const { data: created, error } = await sb.from('chats').insert({
+        type: 'dm', created_by: currentUser.id, dm_key
+      }).select('id').single();
+      if (error) { alert('No se pudo crear el chat: ' + error.message); return; }
+      chatId = created.id;
+      await sb.from('chat_members').insert([
+        { chat_id: chatId, user_id: currentUser.id },
+        { chat_id: chatId, user_id: targetUid }
+      ]);
     }
+    await refreshChats();
     closeBackdrop(dmModal);
-    openChat(id);
+    openChat(chatId);
   }
 
-  const groupSelected = new Set();
+  const groupSelected = new Set(); // set of user_ids
   function renderGroupPicker() {
     const q = groupSearch.value.trim().toLowerCase();
-    const meKey = account && account.key;
+    const meKey = account && keyOf(account.name, account.section);
     const bySec = { A: [], B: [] };
     STUDENTS.forEach(st => {
+      const k = keyOf(st.n, st.s);
+      const claimed = profilesByKey.get(k);
+      if (!claimed) return; // solo con cuenta
       if (q && !st.n.toLowerCase().includes(q)) return;
-      bySec[st.s].push(st);
+      bySec[st.s].push({ ...st, uid: claimed.user_id });
     });
     const build = (list, container) => {
       container.innerHTML = list.map(st => {
-        const k = keyOf(st.n, st.s);
-        const isSel = groupSelected.has(k);
-        const isMe = k === meKey;
-        return `<button class="person-chip ${isSel || isMe ? 'selected' : ''}" type="button" data-key="${k}" data-name="${escapeHtml(st.n)}" data-section="${st.s}" ${isMe ? 'disabled title="Vos ya estás en el grupo"' : ''}>
+        const isSel = groupSelected.has(st.uid);
+        const isMe = keyOf(st.n, st.s) === meKey;
+        return `<button class="person-chip ${isSel || isMe ? 'selected' : ''}" type="button" data-uid="${st.uid}" ${isMe ? 'disabled title="Vos ya estás en el grupo"' : ''}>
           <span class="avatar-mini" style="background:${colorFor(st.n)}">${st.n[0].toUpperCase()}</span>
           <span class="person-chip-name">${escapeHtml(st.n)}${isMe ? ' (yo)' : ''}</span>
           <span class="person-chip-check">✓</span>
@@ -1075,9 +1062,9 @@
       }).join('');
       container.querySelectorAll('.person-chip:not([disabled])').forEach(btn => {
         btn.addEventListener('click', () => {
-          const k = btn.dataset.key;
-          if (groupSelected.has(k)) groupSelected.delete(k);
-          else groupSelected.add(k);
+          const uid = btn.dataset.uid;
+          if (groupSelected.has(uid)) groupSelected.delete(uid);
+          else groupSelected.add(uid);
           renderGroupPicker();
           updateGroupCreate();
         });
@@ -1095,26 +1082,20 @@
   }
   groupSearch.addEventListener('input', renderGroupPicker);
   groupName.addEventListener('input', updateGroupCreate);
-  groupCreate.addEventListener('click', () => {
+  groupCreate.addEventListener('click', async () => {
     const name = groupName.value.trim();
-    if (!name || groupSelected.size < 1) return;
-    const members = [{ name: account.name, section: account.section }];
-    STUDENTS.forEach(st => {
-      const k = keyOf(st.n, st.s);
-      if (groupSelected.has(k)) members.push({ name: st.n, section: st.s });
-    });
-    const chat = {
-      id: `group-${Date.now().toString(36)}`,
-      type: 'group',
-      name,
-      members,
-      createdBy: { name: account.name, section: account.section },
-      messages: [],
-      lastReadTs: Date.now(),
-    };
-    chats.push(chat);
-    saveChats();
+    if (!name || groupSelected.size < 1 || !currentUser) return;
+    groupCreate.disabled = true;
+    const { data: chat, error } = await sb.from('chats').insert({
+      type: 'group', name, created_by: currentUser.id
+    }).select('id').single();
+    if (error) { alert('Error: ' + error.message); groupCreate.disabled = false; return; }
+    const members = [{ chat_id: chat.id, user_id: currentUser.id }];
+    groupSelected.forEach(uid => members.push({ chat_id: chat.id, user_id: uid }));
+    const { error: memErr } = await sb.from('chat_members').insert(members);
+    if (memErr) { alert('Error miembros: ' + memErr.message); return; }
     groupSelected.clear();
+    await refreshChats();
     closeBackdrop(groupModal);
     openChat(chat.id);
   });
@@ -1125,6 +1106,17 @@
 
   function renderApp() {
     const app = document.getElementById('chatApp');
+    if (!currentUser) {
+      app.innerHTML = `
+        <div class="locked">
+          <div class="locked-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+          <h2>Conectando…</h2>
+          <p>Un segundito.</p>
+        </div>
+      `;
+      updateNotifBadge();
+      return;
+    }
     if (!account) {
       app.innerHTML = `
         <div class="locked">
@@ -1132,7 +1124,7 @@
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
           </div>
           <h2>Necesitás una cuenta para chatear</h2>
-          <p>El chat usa el mismo sistema de cuentas del salón — elegí uno de los nombres para empezar.</p>
+          <p>Elegí uno de los nombres del salón para empezar. Es el mismo sistema de cuentas del muro.</p>
           <button class="btn-primary" id="lockedLogin" type="button">Elegir mi nombre</button>
         </div>
       `;
@@ -1167,25 +1159,42 @@
       t.addEventListener('click', () => {
         currentTab = t.dataset.tab;
         renderApp();
-        openChat(activeChatId);
+        if (activeChatId) openChat(activeChatId);
       });
     });
     renderChatList();
     if (activeChatId && chats.find(c => c.id === activeChatId)) {
-      renderChatMain(chats.find(c => c.id === activeChatId));
+      const chat = chats.find(c => c.id === activeChatId);
+      renderChatMain(chat);
     } else {
       renderEmpty();
     }
     updateNotifBadge();
   }
 
-  function chatDisplayName(chat) { return chat.type === 'dm' ? chat.peer.name : chat.name; }
-  function chatDisplaySection(chat) { return chat.type === 'dm' ? `Sección ${chat.peer.section}` : `${chat.members.length} miembros`; }
-  function chatLastTs(chat) { return chat.messages.length ? chat.messages[chat.messages.length-1].ts : 0; }
+  function chatDisplayName(chat) {
+    if (chat.type === 'group') return chat.name;
+    // dm — display the other person
+    const otherUid = chat.members.find(uid => uid !== currentUser.id);
+    const other = profilesById.get(otherUid);
+    return other ? other.name : 'Anónimo';
+  }
+  function chatDisplayMeta(chat) {
+    if (chat.type === 'group') return `${chat.members.length} miembros`;
+    const otherUid = chat.members.find(uid => uid !== currentUser.id);
+    const other = profilesById.get(otherUid);
+    if (!other) return 'Usuario';
+    return `Sección ${other.section}${other.role ? ' · ' + other.role : ''}`;
+  }
+  function chatLastTs(chat) {
+    const msgs = messagesByChat.get(chat.id) || [];
+    return msgs.length ? new Date(msgs[msgs.length-1].created_at).getTime() : new Date(chat.created_at).getTime();
+  }
 
   function unreadOf(chat) {
-    const meKey = account && account.key;
-    return chat.messages.filter(m => m.ts > (chat.lastReadTs || 0) && keyOf(m.from.name, m.from.section) !== meKey).length;
+    const msgs = messagesByChat.get(chat.id) || [];
+    const lr = chat.last_read_at ? new Date(chat.last_read_at).getTime() : 0;
+    return msgs.filter(m => new Date(m.created_at).getTime() > lr && m.author_user_id !== currentUser.id).length;
   }
   function totalUnread() { return chats.reduce((n,c) => n + unreadOf(c), 0); }
 
@@ -1209,17 +1218,28 @@
       return;
     }
     list.innerHTML = filtered.map(c => {
-      const last = c.messages[c.messages.length-1];
+      const msgs = messagesByChat.get(c.id) || [];
+      const last = msgs[msgs.length-1];
       const unread = unreadOf(c);
       const name = chatDisplayName(c);
       const isGroup = c.type === 'group';
-      const roleStar = c.type === 'dm' && c.peer.role ? ' has-role' : '';
+      const otherRole = c.type === 'dm' ? (() => {
+        const other = profilesById.get(c.members.find(uid => uid !== currentUser.id));
+        return other && other.role;
+      })() : null;
+      const roleStar = otherRole ? ' has-role' : '';
       const avatarClass = isGroup ? 'chat-avatar group' : 'chat-avatar';
       const bg = isGroup ? '' : `background:${colorFor(name)}`;
-      const preview = last
-        ? (last.photo ? '📷 Foto' : escapeHtml((last.text || '').slice(0, 44)))
-        : 'Sin mensajes';
-      const fromLabel = last && account && keyOf(last.from.name, last.from.section) === account.key ? 'Vos: ' : (isGroup && last ? `${escapeHtml(last.from.name)}: ` : '');
+      let preview = 'Sin mensajes';
+      let fromLabel = '';
+      if (last) {
+        preview = last.photo_url ? '📷 Foto' : escapeHtml((last.text || '').slice(0, 44));
+        if (last.author_user_id === currentUser.id) fromLabel = 'Vos: ';
+        else if (isGroup) {
+          const from = profilesById.get(last.author_user_id);
+          if (from) fromLabel = `${escapeHtml(from.name)}: `;
+        }
+      }
       return `<button class="chat-item ${c.id===activeChatId?'is-active':''}" data-id="${c.id}">
         <div class="${avatarClass}" style="${bg}">${isGroup ? '👥' : name[0].toUpperCase()}</div>
         <div class="chat-item-body">
@@ -1227,7 +1247,7 @@
           <div class="chat-item-preview">${fromLabel}${preview}</div>
         </div>
         <div class="chat-item-meta">
-          <div class="chat-item-time">${last ? timeShort(last.ts) : ''}</div>
+          <div class="chat-item-time">${last ? timeShort(last.created_at) : ''}</div>
           ${unread ? `<div class="chat-item-badge">${unread}</div>` : ''}
         </div>
       </button>`;
@@ -1237,18 +1257,52 @@
     });
   }
 
-  function openChat(id) {
+  async function openChat(id) {
     if (!id) { activeChatId = null; renderEmpty(); return; }
     const chat = chats.find(c => c.id === id);
     if (!chat) { activeChatId = null; renderEmpty(); return; }
     activeChatId = id;
-    chat.lastReadTs = Date.now();
-    saveChats();
     document.body.classList.add('chat-open');
+    // Load messages if not loaded yet
+    if (!messagesByChat.has(id)) await loadMessages(id);
+    // Mark as read
+    const now = new Date().toISOString();
+    chat.last_read_at = now;
+    await sb.from('chat_members').update({ last_read_at: now }).eq('chat_id', id).eq('user_id', currentUser.id);
+    // Subscribe to this chat's messages
+    subscribeToChat(id);
     renderChatList();
     renderChatMain(chat);
     updateNotifBadge();
     hideNotifPanel();
+  }
+
+  async function loadMessages(chatId) {
+    const { data, error } = await sb.from('messages')
+      .select('id, chat_id, author_user_id, text, photo_url, created_at')
+      .eq('chat_id', chatId).order('created_at', { ascending: true }).limit(500);
+    if (error) { console.error(error); return; }
+    messagesByChat.set(chatId, data || []);
+  }
+
+  function subscribeToChat(chatId) {
+    if (realtimeChannel) sb.removeChannel(realtimeChannel);
+    realtimeChannel = sb.channel(`chat-${chatId}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `chat_id=eq.${chatId}` }, async (payload) => {
+        const arr = messagesByChat.get(chatId) || [];
+        arr.push(payload.new);
+        messagesByChat.set(chatId, arr);
+        if (activeChatId === chatId) {
+          const chat = chats.find(c => c.id === chatId);
+          const now = new Date().toISOString();
+          chat.last_read_at = now;
+          await sb.from('chat_members').update({ last_read_at: now }).eq('chat_id', chatId).eq('user_id', currentUser.id);
+          appendBubble(payload.new, chat);
+        }
+        renderChatList();
+        updateNotifBadge();
+      })
+      .subscribe();
   }
 
   function renderEmpty() {
@@ -1273,20 +1327,24 @@
     if (!main) return;
     const name = chatDisplayName(chat);
     const isGroup = chat.type === 'group';
-    const meta = isGroup
-      ? `${chat.members.length} miembros${chat.createdBy ? ' · creado por ' + escapeHtml(chat.createdBy.name) : ''}`
-      : `Sección ${chat.peer.section}${chat.peer.role ? ' · ' + escapeHtml(chat.peer.role) : ''}`;
+    const meta = chatDisplayMeta(chat);
+    const msgs = messagesByChat.get(chat.id) || [];
 
     let bubblesHtml = '';
     let lastDay = '';
-    chat.messages.forEach(m => {
-      const day = new Date(m.ts).toDateString();
+    msgs.forEach(m => {
+      const day = new Date(m.created_at).toDateString();
       if (day !== lastDay) {
-        bubblesHtml += `<div class="msg-day">${dayLabel(m.ts)}</div>`;
+        bubblesHtml += `<div class="msg-day">${dayLabel(m.created_at)}</div>`;
         lastDay = day;
       }
       bubblesHtml += renderBubble(m, isGroup);
     });
+
+    const otherRole = chat.type === 'dm' ? (() => {
+      const other = profilesById.get(chat.members.find(uid => uid !== currentUser.id));
+      return other && other.role;
+    })() : null;
 
     main.innerHTML = `
       <header class="chat-header">
@@ -1295,7 +1353,7 @@
         </button>
         <div class="chat-header-avatar ${isGroup ? 'group' : ''}" style="${isGroup ? '' : `background:${colorFor(name)}`}">${isGroup ? '👥' : name[0].toUpperCase()}</div>
         <div class="chat-header-info">
-          <div class="chat-header-name">${escapeHtml(name)}${chat.type === 'dm' && chat.peer.role ? ' <span style="color:var(--lemon);font-size:14px">★</span>' : ''}</div>
+          <div class="chat-header-name">${escapeHtml(name)}${otherRole ? ' <span style="color:var(--lemon);font-size:14px">★</span>' : ''}</div>
           <div class="chat-header-meta">${meta}</div>
         </div>
       </header>
@@ -1322,25 +1380,47 @@
     wireComposer(chat);
   }
 
+  function appendBubble(m, chat) {
+    const messagesEl = document.getElementById('chatMessages');
+    if (!messagesEl) return;
+    const emptyMarker = messagesEl.querySelector('.chat-empty');
+    if (emptyMarker) messagesEl.innerHTML = '';
+    // day separator
+    const msgs = messagesByChat.get(chat.id) || [];
+    const prev = msgs.length >= 2 ? msgs[msgs.length - 2] : null;
+    const prevDay = prev ? new Date(prev.created_at).toDateString() : '';
+    const newDay = new Date(m.created_at).toDateString();
+    if (prevDay !== newDay) {
+      const dayEl = document.createElement('div');
+      dayEl.className = 'msg-day';
+      dayEl.textContent = dayLabel(m.created_at);
+      messagesEl.appendChild(dayEl);
+    }
+    const wrap = document.createElement('div');
+    wrap.innerHTML = renderBubble(m, chat.type === 'group');
+    messagesEl.appendChild(wrap.firstElementChild);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
   function renderBubble(m, isGroup) {
-    const meKey = account && account.key;
-    const fromKey = keyOf(m.from.name, m.from.section);
-    const isMe = fromKey === meKey;
+    const isMe = m.author_user_id === currentUser.id;
     const showAvatar = !isMe && isGroup;
+    const from = profilesById.get(m.author_user_id);
+    const fromName = from ? from.name : 'Anónimo';
     return `
       <div class="msg ${isMe ? 'me' : 'other'}">
-        ${showAvatar ? `<div class="msg-avatar" style="background:${colorFor(m.from.name)}" title="${escapeHtml(m.from.name)}">${m.from.name[0].toUpperCase()}</div>` : ''}
+        ${showAvatar ? `<div class="msg-avatar" style="background:${colorFor(fromName)}" title="${escapeHtml(fromName)}">${fromName[0].toUpperCase()}</div>` : ''}
         <div class="msg-bubble">
-          ${showAvatar ? `<div class="msg-from">${escapeHtml(m.from.name)}</div>` : ''}
-          ${m.photo ? `<img class="msg-photo" src="${m.photo}" alt="Foto adjunta">` : ''}
+          ${showAvatar ? `<div class="msg-from">${escapeHtml(fromName)}</div>` : ''}
+          ${m.photo_url ? `<img class="msg-photo" src="${m.photo_url}" alt="Foto adjunta">` : ''}
           ${m.text ? `<div class="msg-text">${escapeHtml(m.text)}</div>` : ''}
-          <div class="msg-time">${timeShort(m.ts)}</div>
+          <div class="msg-time">${timeShort(m.created_at)}</div>
         </div>
       </div>
     `;
   }
 
-  let pendingPhoto = null;
+  let pendingPhoto = null; // { file, dataUrl }
   function wireComposer(chat) {
     const form = document.getElementById('chatComposer');
     const input = document.getElementById('composerInput');
@@ -1353,8 +1433,8 @@
     attachInput.addEventListener('change', async () => {
       const file = attachInput.files[0];
       if (!file) return;
-      if (file.size > 900000) {
-        alert('Foto muy grande (máx ~900 KB porque se guarda en el navegador).');
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Foto muy grande (máx 5 MB).');
         attachInput.value = '';
         return;
       }
@@ -1364,10 +1444,10 @@
         r.onerror = () => reject(r.error);
         r.readAsDataURL(file);
       });
-      pendingPhoto = dataUrl;
+      pendingPhoto = { file, dataUrl };
       preview.innerHTML = `
         <img src="${dataUrl}" alt="preview">
-        <span style="flex:1;font-size:13px;color:var(--ink-soft)">Foto lista para enviar</span>
+        <span style="flex:1;font-size:13px;color:var(--ink-soft)">Foto lista (${(file.size/1024).toFixed(0)} KB)</span>
         <button type="button" id="removePhoto">Quitar</button>
       `;
       preview.hidden = false;
@@ -1377,25 +1457,34 @@
         attachInput.value = '';
       });
     });
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const text = input.value.trim();
       if (!text && !pendingPhoto) return;
-      const msg = {
-        id: `m-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,6)}`,
-        from: { name: account.name, section: account.section },
-        ts: Date.now(),
+      const sendBtn = form.querySelector('button[type="submit"]');
+      sendBtn.disabled = true;
+      let photoUrl = null;
+      if (pendingPhoto) {
+        const ext = pendingPhoto.file.name.split('.').pop().toLowerCase().slice(0, 5) || 'jpg';
+        const path = `${currentUser.id}/${Date.now()}-${Math.random().toString(36).slice(2,6)}.${ext}`;
+        const { error: upErr } = await sb.storage.from('photos').upload(path, pendingPhoto.file, {
+          contentType: pendingPhoto.file.type, cacheControl: '3600', upsert: false
+        });
+        if (upErr) { alert('Error subiendo foto: ' + upErr.message); sendBtn.disabled = false; return; }
+        photoUrl = sb.storage.from('photos').getPublicUrl(path).data.publicUrl;
+      }
+      const payload = {
+        chat_id: chat.id, author_user_id: currentUser.id,
         ...(text && { text }),
-        ...(pendingPhoto && { photo: pendingPhoto }),
+        ...(photoUrl && { photo_url: photoUrl })
       };
-      chat.messages.push(msg);
-      chat.lastReadTs = Date.now();
-      saveChats();
+      const { error } = await sb.from('messages').insert(payload);
+      sendBtn.disabled = false;
+      if (error) { alert('No se pudo enviar: ' + error.message); return; }
       pendingPhoto = null;
       input.value = '';
-      renderChatMain(chat);
-      renderChatList();
-      updateNotifBadge();
+      preview.hidden = true;
+      // Message will arrive via realtime and re-render
     });
     input.focus();
   }
@@ -1405,10 +1494,7 @@
   const notifPanel = document.getElementById('notifPanel');
   const notifBody = document.getElementById('notifBody');
   const notifClose = document.getElementById('notifClose');
-  function showNotifPanel() {
-    renderNotifPanel();
-    notifPanel.hidden = false;
-  }
+  function showNotifPanel() { renderNotifPanel(); notifPanel.hidden = false; }
   function hideNotifPanel() { notifPanel.hidden = true; }
   notifBtn.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -1430,8 +1516,9 @@
     }
     notifBody.innerHTML = items.map(({ c, u }) => {
       const name = chatDisplayName(c);
-      const last = c.messages[c.messages.length-1];
-      const preview = last ? (last.photo ? '📷 Foto' : (last.text || '').slice(0, 46)) : '';
+      const msgs = messagesByChat.get(c.id) || [];
+      const last = msgs[msgs.length-1];
+      const preview = last ? (last.photo_url ? '📷 Foto' : (last.text || '').slice(0, 46)) : '';
       const isGroup = c.type === 'group';
       return `<button class="notif-item" data-id="${c.id}">
         <div class="avatar-mini" style="background:${isGroup ? 'var(--school)' : colorFor(name)}">${isGroup ? '👥' : name[0].toUpperCase()}</div>
@@ -1450,11 +1537,99 @@
     });
   }
 
+  // ================ CHAT loading & realtime ================
+  async function refreshChats() {
+    if (!currentUser) return;
+    // 1. get my memberships
+    const { data: myMem, error: memErr } = await sb.from('chat_members')
+      .select('chat_id, last_read_at')
+      .eq('user_id', currentUser.id);
+    if (memErr) { console.error(memErr); return; }
+    const chatIds = (myMem || []).map(m => m.chat_id);
+    if (!chatIds.length) { chats = []; renderChatList(); return; }
+    // 2. get chats
+    const { data: chatRows } = await sb.from('chats').select('id, type, name, created_by, dm_key, created_at').in('id', chatIds);
+    // 3. get all members of these chats
+    const { data: allMembers } = await sb.from('chat_members').select('chat_id, user_id').in('chat_id', chatIds);
+    const membersByChat = new Map();
+    (allMembers || []).forEach(m => {
+      const arr = membersByChat.get(m.chat_id) || [];
+      arr.push(m.user_id);
+      membersByChat.set(m.chat_id, arr);
+    });
+    const lastReadMap = new Map((myMem || []).map(m => [m.chat_id, m.last_read_at]));
+    chats = (chatRows || []).map(c => ({
+      ...c,
+      members: membersByChat.get(c.id) || [],
+      last_read_at: lastReadMap.get(c.id),
+    }));
+    // 4. Load last message for each (for preview/sort). Batch: get messages for all chats ordered.
+    const { data: allMsgs } = await sb.from('messages')
+      .select('id, chat_id, author_user_id, text, photo_url, created_at')
+      .in('chat_id', chatIds)
+      .order('created_at', { ascending: true });
+    const groupedMsgs = new Map();
+    (allMsgs || []).forEach(m => {
+      const arr = groupedMsgs.get(m.chat_id) || [];
+      arr.push(m);
+      groupedMsgs.set(m.chat_id, arr);
+    });
+    // merge
+    messagesByChat = groupedMsgs;
+    renderChatList();
+  }
+
+  function subscribeGlobal() {
+    if (messagesGlobalChannel) sb.removeChannel(messagesGlobalChannel);
+    messagesGlobalChannel = sb.channel('global-updates')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
+        // Only care if it's a chat we're in
+        const m = payload.new;
+        if (!messagesByChat.has(m.chat_id)) return;
+        // Skip if this is the active chat (subscribeToChat handles that)
+        if (m.chat_id === activeChatId) return;
+        const arr = messagesByChat.get(m.chat_id);
+        // Avoid duplicate if already added
+        if (arr.find(x => x.id === m.id)) return;
+        arr.push(m);
+        renderChatList();
+        updateNotifBadge();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_members', filter: `user_id=eq.${currentUser ? currentUser.id : '00000000-0000-0000-0000-000000000000'}` }, () => {
+        refreshChats();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
+        refreshProfiles();
+      })
+      .subscribe();
+  }
+
   // ================ BOOT ================
-  loadState();
-  seedIfEmpty();
-  updateAccountChip();
-  renderApp();
+  async function boot() {
+    updateAccountChip();
+    renderApp();
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session && session.user) {
+        currentUser = session.user;
+      } else {
+        const { data, error } = await sb.auth.signInAnonymously();
+        if (error) throw error;
+        currentUser = data.user;
+      }
+    } catch (e) {
+      console.error('auth error', e);
+      const app = document.getElementById('chatApp');
+      app.innerHTML = `<div class="locked"><div class="locked-icon">⚠️</div><h2>Sin conexión</h2><p>No pudimos conectar. Recargá la página.</p></div>`;
+      return;
+    }
+    await refreshProfiles();
+    await refreshChats();
+    subscribeGlobal();
+    updateAccountChip();
+    renderApp();
+  }
+  boot();
 </script>
 
 </body>
