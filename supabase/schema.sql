@@ -115,7 +115,10 @@ alter table public.chats enable row level security;
 
 drop policy if exists "chats_read_member" on public.chats;
 create policy "chats_read_member" on public.chats
-  for select using (public.is_chat_member(id, auth.uid()));
+  for select using (
+    public.is_chat_member(id, auth.uid())
+    or created_by = auth.uid()
+  );
 
 drop policy if exists "chats_insert" on public.chats;
 create policy "chats_insert" on public.chats
