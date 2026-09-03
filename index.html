@@ -1689,6 +1689,25 @@
       </table>
     </div>
   </div>
+
+  <div class="standings reveal" style="margin-top:20px">
+    <div class="standings-head">
+      <h3>Tabla de goleadores</h3>
+      <span class="section-tag">Torneo interno</span>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="standings-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Jugador</th>
+            <th>Goles</th>
+          </tr>
+        </thead>
+        <tbody id="goleadoresBody"></tbody>
+      </table>
+    </div>
+  </div>
 </section>
 
 <!-- =================== COUNTDOWN =================== -->
@@ -1757,8 +1776,8 @@
     <div class="record">
       <span class="rec-icon">⚽</span>
       <div class="rec-tag">Máx. goleador</div>
-      <div class="rec-title">14 goles</div>
-      <div class="rec-holder">Vigente: <b>Diego M.</b> · Sección B</div>
+      <div class="rec-title">11 goles</div>
+      <div class="rec-holder">Vigente: <b>Deleón</b> · Equipo 2</div>
     </div>
     <div class="record">
       <span class="rec-icon">📚</span>
@@ -1971,19 +1990,38 @@
   ];
 
   const PARTIDOS = [
-    { fecha: '05 Mar', tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 3, gb: 2, res: 'won',  note: 'Doblete de <b>Mateo</b> en el primer tiempo.' },
-    { fecha: '12 Mar', tipo: 'Básquet',a: 'Equipo 1', b: 'Equipo 2', ga: 22, gb: 24, res: 'lost', note: 'Triple sobre la chicharra de <b>Roberto</b>.' },
-    { fecha: '19 Mar', tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 4, gb: 4, res: 'tie',  note: 'El partido más loco. Empate en el último minuto.' },
-    { fecha: '02 Abr', tipo: 'Voleibol',a:'Equipo 1', b: 'Equipo 2', ga: 2, gb: 0, res: 'won',  note: 'Barrida en dos sets. Bloque perfecto de <b>Javier</b>.' },
-    { fecha: '09 Abr', tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 1, gb: 3, res: 'lost', note: 'Golazo de tijera de <b>Josué</b>.' },
-    { fecha: '23 Abr', tipo: 'Básquet',a: 'Equipo 1', b: 'Equipo 2', ga: 30, gb: 27, res: 'won', note: 'Regreso de 10 puntos abajo en el último cuarto.' },
+    { fecha: 'Jornada 1',  tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 1, gb: 0, res: 'won',  note: 'Triunfo por la mínima.' },
+    { fecha: 'Jornada 2',  tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 1, gb: 2, res: 'lost', note: 'Remontada del Equipo 2.' },
+    { fecha: 'Jornada 3',  tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 0, gb: 1, res: 'lost', note: 'Lo definió un solo gol.' },
+    { fecha: 'Jornada 4',  tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 3, gb: 0, res: 'won',  note: 'Goleada del Equipo 1.' },
+    { fecha: 'Jornada 5',  tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 1, gb: 0, res: 'won',  note: 'Otra vez por la mínima.' },
+    { fecha: 'Jornada 6',  tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 1, gb: 2, res: 'lost', note: 'El Equipo 2 se lo llevó ajustado.' },
+    { fecha: 'Jornada 7',  tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 0, gb: 0, res: 'tie',  note: 'Empate sin goles.' },
+    { fecha: 'Jornada 8',  tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 3, gb: 7, res: 'lost', note: 'Goleada del Equipo 2.' },
+    { fecha: 'Jornada 9',  tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 0, gb: 0, res: 'tie',  note: 'Otro 0-0.' },
+    { fecha: 'Jornada 10', tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 3, gb: 1, res: 'won',  note: 'Triunfo cómodo del Equipo 1.' },
+    { fecha: 'Jornada 11', tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 1, gb: 1, res: 'tie',  note: 'Repartieron puntos.' },
+    { fecha: 'Jornada 12', tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 5, gb: 5, res: 'tie',  note: 'Partidazo: empataron a cinco.' },
   ];
 
   const STANDINGS = [
-    { name: 'Equipo 1', pj: 12, g: 7, e: 2, p: 3, gf: 34, gc: 24 },
-    { name: 'Equipo 2', pj: 12, g: 5, e: 2, p: 5, gf: 28, gc: 30 },
+    { name: 'Equipo 1', pj: 12, g: 4, e: 4, p: 4, gf: 19, gc: 19 },
+    { name: 'Equipo 2', pj: 12, g: 4, e: 4, p: 4, gf: 19, gc: 19 },
   ].map(t => ({ ...t, pts: t.g * 3 + t.e }))
    .sort((a,b) => b.pts - a.pts || (b.gf - b.gc) - (a.gf - a.gc));
+
+  const GOLEADORES = [
+    { name: 'Deleón',   goles: 11 },
+    { name: 'Mateo',    goles: 6 },
+    { name: 'Gerardo',  goles: 5 },
+    { name: 'Lucas',    goles: 4 },
+    { name: 'Magaña',   goles: 4 },
+    { name: 'Iglesias', goles: 3 },
+    { name: 'Osegueda', goles: 3 },
+    { name: 'Javier',   goles: 3 },
+    { name: 'Josué',    goles: 2 },
+    { name: 'Fabricio', goles: 1 },
+  ].sort((a, b) => b.goles - a.goles);
 
   // ---------- render students ----------
   const roster = document.getElementById('roster');
@@ -2087,6 +2125,17 @@
       <td><b>${t.pts}</b></td>
     </tr>
   `).join('');
+
+  const goleadoresBody = document.getElementById('goleadoresBody');
+  if (goleadoresBody) {
+    goleadoresBody.innerHTML = GOLEADORES.map((p, i) => `
+      <tr>
+        <td><span class="rank ${i===0?'one':''}">${i+1}</span></td>
+        <td>${p.name}</td>
+        <td><b>${p.goles}</b></td>
+      </tr>
+    `).join('');
+  }
 
   // ---------- horario (dinámico por sección) ----------
   const SCHEDULES = {
