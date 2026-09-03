@@ -825,6 +825,14 @@
   let account = null;                   // { user_id, name, section, role }
   let profilesById = new Map();         // uid -> profile
   let profilesByKey = new Map();        // section-slug(name) -> profile
+
+  // Presencia: un nombre está "en línea" si tuvo heartbeat en los últimos 45s.
+  // (Coincide con la ventana del RPC claim_name en el servidor.)
+  const ACTIVE_WINDOW_MS = 45000;
+  function isActive(p) {
+    if (!p || !p.last_seen) return false;
+    return Date.now() - new Date(p.last_seen).getTime() < ACTIVE_WINDOW_MS;
+  }
   let chats = [];                       // [{ id, type, name, created_by, dm_key, members:[uid], messages:[] , last_read_at }]
   let messagesByChat = new Map();       // chat_id -> [msg]
   let activeChatId = null;
@@ -896,21 +904,38 @@
         const k = keyOf(st.n, st.s);
         const claimed = profilesByKey.get(k);
         const isMe = account && account.name === st.n && account.section === st.s;
-        const isTaken = !!claimed && !isMe;
-        return `<button class="person-chip" ${isTaken ? 'disabled style="opacity:.5;text-decoration:line-through"' : ''} data-name="${escapeHtml(st.n)}" data-section="${st.s}" type="button">
+        const active = !!claimed && !isMe && isActive(claimed);  // en línea ahora en otro dispositivo
+        const idle   = !!claimed && !isMe && !isActive(claimed); // claimado pero sin actividad → reclamable
+        // Solo los ACTIVOS se bloquean. Los inactivos se pueden reclamar.
+        const tag = isMe
+          ? '<span class="person-chip-check">Yo</span>'
+          : active
+            ? '<span class="person-chip-check" style="color:#10b981">● En línea</span>'
+            : idle
+              ? '<span class="person-chip-check" style="opacity:.55">Abierto</span>'
+              : '';
+        return `<button class="person-chip" ${active ? 'disabled style="opacity:.5;text-decoration:line-through"' : ''} data-name="${escapeHtml(st.n)}" data-section="${st.s}" data-idle="${idle ? 1 : 0}" type="button">
           <span class="avatar-mini" style="background:${colorFor(st.n)}">${st.n[0].toUpperCase()}</span>
           <span class="person-chip-name">${escapeHtml(st.n)}</span>
-          ${isMe ? '<span class="person-chip-check">Yo</span>' : ''}
+          ${tag}
         </button>`;
       }).join('');
       container.querySelectorAll('.person-chip:not([disabled])').forEach(btn => {
-        btn.addEventListener('click', () => claimName(btn.dataset.name, btn.dataset.section));
+        btn.addEventListener('click', () => {
+          if (btn.dataset.idle === '1') {
+            const ok = confirm(`"${btn.dataset.name}" quedó abierto en otro dispositivo, pero nadie está en línea con ese nombre ahora mismo. ¿Reclamarlo?`);
+            if (!ok) return;
+          }
+          claimName(btn.dataset.name, btn.dataset.section);
+        });
       });
     };
     build(bySec.A, loginNamesA);
     build(bySec.B, loginNamesB);
-    const total = STUDENTS.length, avail = total - profilesByKey.size;
-    loginStatus.textContent = `${avail} disponibles · ${profilesByKey.size} tomados`;
+    const total = STUDENTS.length;
+    const claimedCount = profilesByKey.size;
+    const activeCount = [...profilesByKey.values()].filter(isActive).length;
+    loginStatus.textContent = `${total - claimedCount} libres · ${activeCount} en línea`;
     loginLogout.hidden = !account;
   }
   loginSearch.addEventListener('input', renderLoginNames);
@@ -918,12 +943,21 @@
   async function claimName(name, section) {
     if (!currentUser) { alert('Conectando…'); return; }
     if (account && account.name === name && account.section === section) { closeBackdrop(loginModal); return; }
-    if (account) await sb.from('profiles').delete().eq('user_id', currentUser.id);
-    const { error } = await sb.from('profiles').upsert({
-      user_id: currentUser.id, name, section
-    }, { onConflict: 'user_id' });
-    if (error) { alert('No se pudo reclamar: ' + error.message); return; }
+    // El RPC decide: si es tuyo lo refresca; si otro lo tiene ACTIVO ahora
+    // mismo lo bloquea; si está inactivo hace takeover y migra tu historial.
+    const { error } = await sb.rpc('claim_name', { p_name: name, p_section: section });
+    if (error) {
+      const msg = error.message || '';
+      if (msg.includes('ACTIVE')) {
+        alert('Ese nombre está en uso en otro dispositivo ahora mismo. Esperá un momento o elegí otro.');
+      } else {
+        alert('No se pudo reclamar: ' + msg);
+      }
+      await refreshProfiles();
+      return;
+    }
     await refreshProfiles();
+    heartbeat();            // marca presencia de inmediato
     updateAccountChip();
     renderApp();
     closeBackdrop(loginModal);
@@ -940,7 +974,7 @@
   });
 
   async function refreshProfiles() {
-    const { data, error } = await sb.from('profiles').select('user_id, name, section, role');
+    const { data, error } = await sb.from('profiles').select('user_id, name, section, role, last_seen');
     if (error) return;
     profilesById = new Map((data || []).map(p => [p.user_id, p]));
     profilesByKey = new Map((data || []).map(p => [keyOf(p.name, p.section), p]));
@@ -1604,6 +1638,26 @@
       .subscribe();
   }
 
+  // ================ PRESENCIA (heartbeat) ================
+  // Cada dispositivo activo marca su nombre como "vivo" cada 15s. Así el
+  // servidor sabe si un nombre está tomado ahora mismo o quedó abierto.
+  let heartbeatTimer = null;
+  async function heartbeat() {
+    if (!currentUser) return;
+    try { await sb.rpc('touch_presence'); } catch (e) {}
+  }
+  function startHeartbeat() {
+    if (heartbeatTimer) return;
+    heartbeat();
+    heartbeatTimer = setInterval(heartbeat, 15000);
+    // Vuelve a marcar presencia al volver a la pestaña.
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) heartbeat(); });
+    window.addEventListener('focus', heartbeat);
+    // Refresca la lista de login mientras está abierta, para que un nombre
+    // que deja de tener actividad pase de "En línea" a "Abierto" solo.
+    setInterval(() => { if (loginModal && !loginModal.hidden) renderLoginNames(); }, 5000);
+  }
+
   // ================ BOOT ================
   async function boot() {
     updateAccountChip();
@@ -1626,6 +1680,7 @@
     await refreshProfiles();
     await refreshChats();
     subscribeGlobal();
+    startHeartbeat();
     updateAccountChip();
     renderApp();
   }
