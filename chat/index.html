@@ -288,7 +288,9 @@
     color: #fff; font-family: var(--f-display); font-weight: 800; font-size: 15px;
     flex-shrink: 0;
     box-shadow: inset 0 0 0 2px rgba(255,255,255,.3);
+    overflow: hidden;
   }
+  .chat-item .chat-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .chat-item .chat-avatar.group { border-radius: 12px; background: var(--school); }
   .chat-item-body { flex: 1; min-width: 0; }
   .chat-item-name {
@@ -390,7 +392,9 @@
     display: grid; place-items: center;
     color: #fff; font-family: var(--f-display); font-weight: 800; font-size: 15px;
     flex-shrink: 0;
+    overflow: hidden;
   }
+  .chat-header-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .chat-header-avatar.group { border-radius: 10px; background: var(--school); }
   .chat-header-info { flex: 1; min-width: 0; }
   .chat-header-name {
@@ -420,7 +424,9 @@
     color: #fff; font-family: var(--f-display); font-weight: 800; font-size: 11px;
     flex-shrink: 0;
     margin-bottom: 4px;
+    overflow: hidden;
   }
+  .msg-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .msg-bubble {
     background: var(--paper); border: 1px solid var(--line);
     padding: 10px 14px; border-radius: 16px;
@@ -1032,7 +1038,7 @@
   });
 
   async function refreshProfiles() {
-    const { data, error } = await sb.from('profiles').select('user_id, name, section, role, last_seen');
+    const { data, error } = await sb.from('profiles').select('user_id, name, section, role, last_seen, avatar_url');
     if (error) return;
     profilesById = new Map((data || []).map(p => [p.user_id, p]));
     profilesByKey = new Map((data || []).map(p => [keyOf(p.name, p.section), p]));
@@ -1398,6 +1404,10 @@
       const roleStar = otherRole ? ' has-role' : '';
       const avatarClass = isGroup ? 'chat-avatar group' : 'chat-avatar';
       const bg = isGroup ? '' : `background:${colorFor(name)}`;
+      const peer = isGroup ? null : profilesById.get(c.members.find(uid => uid !== currentUser.id));
+      const avatarInner = isGroup
+        ? '👥'
+        : (peer && peer.avatar_url ? `<img src="${escapeHtml(peer.avatar_url)}" alt="">` : name[0].toUpperCase());
       let preview = 'Sin mensajes';
       let fromLabel = '';
       if (last) {
@@ -1409,7 +1419,7 @@
         }
       }
       return `<button class="chat-item ${c.id===activeChatId?'is-active':''}" data-id="${c.id}">
-        <div class="${avatarClass}" style="${bg}">${isGroup ? '👥' : name[0].toUpperCase()}</div>
+        <div class="${avatarClass}" style="${bg}">${avatarInner}</div>
         <div class="chat-item-body">
           <div class="chat-item-name${roleStar}">${escapeHtml(name)}</div>
           <div class="chat-item-preview">${fromLabel}${preview}</div>
@@ -1509,19 +1519,19 @@
       bubblesHtml += renderBubble(m, isGroup);
     });
 
-    const otherRole = chat.type === 'dm' ? (() => {
-      const other = profilesById.get(chat.members.find(uid => uid !== currentUser.id));
-      return other && other.role;
-    })() : null;
+    const peer = chat.type === 'dm' ? profilesById.get(chat.members.find(uid => uid !== currentUser.id)) : null;
+    const otherRole = peer ? peer.role : null;
+    const peerKey = peer ? keyOf(peer.name, peer.section) : '';
+    const peerAvatarInner = peer && peer.avatar_url ? `<img src="${escapeHtml(peer.avatar_url)}" alt="">` : name[0].toUpperCase();
 
     main.innerHTML = `
       <header class="chat-header">
         <button class="chat-back" type="button" id="chatBack" aria-label="Volver">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg>
         </button>
-        ${(!isGroup) ? `<a class="chat-header-avatar" style="background:${colorFor(name)}; text-decoration:none; color:#fff" href="/profile/?u=${chat.type === 'dm' ? (function(){const o=chat.members.find(u=>u!==currentUser.id); const p=profilesById.get(o); return p ? keyOf(p.name,p.section) : ''; })() : ''}">${name[0].toUpperCase()}</a>` : `<div class="chat-header-avatar group" style="">👥</div>`}
+        ${(!isGroup) ? `<a class="chat-header-avatar" style="background:${colorFor(name)}; text-decoration:none; color:#fff" href="/profile/?u=${peerKey}">${peerAvatarInner}</a>` : `<div class="chat-header-avatar group" style="">👥</div>`}
         <div class="chat-header-info">
-          <div class="chat-header-name">${(!isGroup && chat.type === 'dm') ? `<a href="/profile/?u=${(function(){const o=chat.members.find(u=>u!==currentUser.id); const p=profilesById.get(o); return p ? keyOf(p.name,p.section) : ''; })()}" style="color:inherit">${escapeHtml(name)}</a>` : escapeHtml(name)}${otherRole ? ' <span style="color:var(--lemon);font-size:14px">★</span>' : ''}</div>
+          <div class="chat-header-name">${(!isGroup && peerKey) ? `<a href="/profile/?u=${peerKey}" style="color:inherit">${escapeHtml(name)}</a>` : escapeHtml(name)}${otherRole ? ' <span style="color:var(--lemon);font-size:14px">★</span>' : ''}</div>
           <div class="chat-header-meta">${meta}</div>
         </div>
         ${isGroup ? `<button class="chat-header-action" id="addMembersBtn" type="button" title="Agregar miembros" aria-label="Agregar miembros">
@@ -1581,8 +1591,9 @@
     const from = profilesById.get(m.author_user_id);
     const fromName = from ? from.name : 'Anónimo';
     const profileHref = from ? `/profile/?u=${keyOf(from.name, from.section)}` : '';
+    const avatarInner = (from && from.avatar_url) ? `<img src="${escapeHtml(from.avatar_url)}" alt="">` : fromName[0].toUpperCase();
     const avatarEl = showAvatar
-      ? (from ? `<a class="msg-avatar" href="${profileHref}" style="background:${colorFor(fromName)}; color:#fff; text-decoration:none" title="Ver perfil de ${escapeHtml(fromName)}">${fromName[0].toUpperCase()}</a>`
+      ? (from ? `<a class="msg-avatar" href="${profileHref}" style="background:${colorFor(fromName)}; color:#fff; text-decoration:none" title="Ver perfil de ${escapeHtml(fromName)}">${avatarInner}</a>`
               : `<div class="msg-avatar" style="background:${colorFor(fromName)}" title="${escapeHtml(fromName)}">${fromName[0].toUpperCase()}</div>`)
       : '';
     const nameEl = showAvatar

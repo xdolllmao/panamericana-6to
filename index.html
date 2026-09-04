@@ -448,7 +448,9 @@
     color: #fff; font-size: 16px;
     flex-shrink: 0;
     box-shadow: inset 0 0 0 2px rgba(255,255,255,.35);
+    overflow: hidden;
   }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .student-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
   .student-name {
     font-weight: 700; font-size: 15px; letter-spacing: -0.01em;
@@ -1408,8 +1410,19 @@
     font-family: var(--f-display); font-weight: 800;
     font-size: 36px; color: #fff;
     box-shadow: inset 0 0 0 3px rgba(255,255,255,.35), 0 8px 24px rgba(12,24,70,.18);
+    overflow: hidden;
     margin-bottom: 6px;
   }
+  .profile-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .profile-goto {
+    margin-top: 14px;
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border-radius: 999px;
+    background: var(--ink); color: var(--paper);
+    font-weight: 700; font-size: 14px;
+    text-decoration: none;
+  }
+  .profile-goto:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
   .profile-name {
     font-family: var(--f-display); font-weight: 800;
     font-size: 32px; letter-spacing: -0.02em; margin: 0;
@@ -2098,15 +2111,22 @@
       if (q && !st.n.toLowerCase().includes(q)) return false;
       return true;
     });
-    roster.innerHTML = list.map(st => `
-      <button class="student" type="button" data-name="${st.n}" data-section="${st.s}" ${st.r ? `data-role="${st.r}"` : ''} aria-label="Ver perfil de ${st.n}">
-        <div class="avatar" style="background:${colorFor(st.n)}">${initials(st.n)}</div>
-        <div class="student-body">
-          <div class="student-name">${st.n}</div>
-          <div class="student-meta">Sección ${st.s}</div>
-        </div>
-      </button>
-    `).join('');
+    roster.innerHTML = list.map(st => {
+      let prof = null;
+      try { prof = profilesByKey.get(`${st.s}-${st.n.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'')}`); } catch(e){}
+      const av = (prof && prof.avatar_url)
+        ? `<div class="avatar" style="background:${colorFor(st.n)}"><img src="${prof.avatar_url}" alt=""></div>`
+        : `<div class="avatar" style="background:${colorFor(st.n)}">${initials(st.n)}</div>`;
+      return `
+        <button class="student" type="button" data-name="${st.n}" data-section="${st.s}" ${st.r ? `data-role="${st.r}"` : ''} aria-label="Ver perfil de ${st.n}">
+          ${av}
+          <div class="student-body">
+            <div class="student-name">${st.n}</div>
+            <div class="student-meta">Sección ${st.s}</div>
+          </div>
+        </button>
+      `;
+    }).join('');
     countEl.textContent = `${list.length} ${list.length === 1 ? 'persona' : 'personas'}`;
     document.querySelectorAll('#roster .student').forEach(btn => {
       btn.addEventListener('click', () => openProfile(btn.dataset.name, btn.dataset.section, btn.dataset.role));
@@ -2381,7 +2401,7 @@
   loginLogout.addEventListener('click', releaseAccount);
 
   async function refreshProfiles() {
-    const { data, error } = await sb.from('profiles').select('user_id, name, section, role');
+    const { data, error } = await sb.from('profiles').select('user_id, name, section, role, avatar_url');
     if (error) return;
     profilesByKey = new Map((data || []).map(p => [keyOf(p.name, p.section), p]));
     if (currentUser) {
@@ -2389,6 +2409,7 @@
       account = mine ? { name: mine.name, section: mine.section, role: mine.role } : null;
     }
     if (!loginModal.hidden) renderNames();
+    if (typeof renderStudents === 'function' && document.getElementById('roster')) renderStudents();
   }
 
   function renderComposer() {
@@ -2774,9 +2795,15 @@
     const roleHtml = role
       ? `<div class="profile-role"><span class="star">★</span> ${escapeHtml(role)}</div>`
       : '';
+    let prof = null;
+    try { prof = profilesByKey.get(keyOf(name, section)); } catch(e){}
+    const key = keyOf(name, section);
+    const avatarInner = (prof && prof.avatar_url)
+      ? `<img src="${escapeHtml(prof.avatar_url)}" alt="">`
+      : init;
     profileCard.style.setProperty('--profile-color', color);
     profileCard.innerHTML = `
-      <div class="profile-avatar" style="background:${color}">${init}</div>
+      <div class="profile-avatar" style="background:${color}">${avatarInner}</div>
       <h3 class="profile-name" id="profileName">${escapeHtml(name)}</h3>
       <div class="profile-section">Sección ${escapeHtml(section)} · 6to grado</div>
       ${roleHtml}
@@ -2790,6 +2817,10 @@
           <div class="profile-fact-value">2026</div>
         </div>
       </div>
+      <a class="profile-goto" href="/profile/?u=${encodeURIComponent(key)}">
+        Ver perfil completo
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </a>
     `;
     profileModal.hidden = false;
     profileModal.classList.add('open');
