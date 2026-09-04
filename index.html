@@ -1419,6 +1419,58 @@
   }
   .db-notice.offline::before { background: var(--coral); animation: none; }
 
+  /* ============ CALENDARIO modal ============ */
+  .modal.cal-modal { max-width: 720px; }
+  .cal-search-row { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+  .cal-search { flex: 1; min-width: 240px; display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 999px; background: var(--paper-soft); border: 1px solid var(--line); }
+  .cal-search input { flex: 1; border: 0; background: transparent; font: inherit; color: var(--ink); outline: none; font-size: 14px; }
+  .cal-search svg { color: var(--ink-mute); flex-shrink: 0; }
+  .cal-today { padding: 8px 14px; border-radius: 999px; background: var(--paper); border: 1px solid var(--line); font-weight: 700; font-size: 13px; color: var(--ink-soft); cursor: pointer; }
+  .cal-today:hover { background: var(--school-tint); color: var(--school); border-color: var(--school-2); }
+
+  .cal-nav { display: flex; align-items: center; justify-content: space-between; margin: 4px 0 12px; }
+  .cal-nav-btn { width: 36px; height: 36px; border-radius: 999px; background: var(--paper); border: 1px solid var(--line); display: grid; place-items: center; color: var(--ink-soft); cursor: pointer; }
+  .cal-nav-btn:hover:not(:disabled) { background: var(--school-tint); color: var(--school); }
+  .cal-nav-btn:disabled { opacity: .35; cursor: not-allowed; }
+  .cal-month-title { font-family: var(--f-display); font-weight: 800; font-size: 22px; letter-spacing: -0.02em; text-transform: capitalize; }
+
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal-dow { font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-mute); text-align: center; padding: 6px 0; font-weight: 700; }
+  .cal-day { aspect-ratio: 1; padding: 4px; border-radius: 8px; background: var(--paper-soft); border: 1px solid transparent; display: flex; flex-direction: column; gap: 2px; font: inherit; color: inherit; cursor: pointer; position: relative; overflow: hidden; }
+  .cal-day.out { opacity: .3; cursor: default; }
+  .cal-day.has-event { background: var(--paper); border-color: var(--line); }
+  .cal-day.is-today .cal-num { background: var(--school); color: #fff; border-radius: 999px; }
+  .cal-day.is-active { border-color: var(--school-2); box-shadow: inset 0 0 0 1px var(--school-2); }
+  .cal-day:hover:not(.out) { border-color: var(--school-2); }
+  .cal-num { font-family: var(--f-display); font-weight: 800; font-size: 13px; padding: 2px 6px; align-self: flex-start; min-width: 22px; text-align: center; }
+  .cal-dots { display: flex; gap: 2px; flex-wrap: wrap; margin-top: auto; padding: 0 3px 3px; }
+  .cal-dot { width: 6px; height: 6px; border-radius: 999px; }
+  .cal-dot.no-class { background: var(--coral); }
+  .cal-dot.academic { background: var(--school-2); }
+  .cal-dot.event    { background: var(--lemon); }
+  .cal-dot.meeting  { background: #9333EA; }
+
+  .cal-events { margin-top: 16px; }
+  .cal-events h4 { font-family: var(--f-display); font-weight: 700; font-size: 15px; margin: 0 0 8px; letter-spacing: -0.01em; }
+  .cal-event { display: flex; gap: 12px; padding: 10px 12px; margin-bottom: 6px; background: var(--paper-soft); border: 1px solid var(--line); border-radius: 10px; border-left: 4px solid var(--line-strong); }
+  .cal-event.no-class { border-left-color: var(--coral); }
+  .cal-event.academic { border-left-color: var(--school-2); }
+  .cal-event.event    { border-left-color: var(--lemon); }
+  .cal-event.meeting  { border-left-color: #9333EA; }
+  .cal-event .cal-event-date { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.08em; color: var(--ink-mute); text-transform: uppercase; white-space: nowrap; min-width: 90px; }
+  .cal-event .cal-event-body { flex: 1; font-size: 14px; }
+  .cal-event .cal-event-body strong { display: block; font-weight: 700; color: var(--ink); margin-bottom: 2px; letter-spacing: -0.01em; }
+  .cal-event .cal-event-body span { font-size: 12px; color: var(--ink-soft); }
+  .cal-empty-day { padding: 16px; text-align: center; color: var(--ink-mute); font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.06em; }
+
+  @media (max-width: 560px) {
+    .cal-num { font-size: 11px; padding: 1px 4px; min-width: 18px; }
+    .cal-day { padding: 2px; }
+    .cal-dow { font-size: 9px; padding: 4px 0; }
+    .cal-event { flex-direction: column; gap: 4px; }
+    .cal-event .cal-event-date { min-width: 0; }
+  }
+
   /* ============ PROFILE modal ============ */
   .profile-card {
     padding: 32px 28px 24px;
@@ -1528,6 +1580,9 @@
       <a class="nav-link" href="/chat/">Chat</a>
       <a class="nav-link" href="/profile/">Perfil</a>
     </div>
+    <button class="notif-btn" id="calBtn" aria-label="Calendario escolar" title="Calendario escolar" style="margin-right:4px">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+    </button>
     <a href="/chat/" class="notif-btn" id="notifBtn" aria-label="Abrir chat">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       <span class="notif-badge" id="notifBadge" hidden>0</span>
@@ -1947,6 +2002,33 @@
     </div>
   </div>
 </footer>
+
+<!-- =================== MODAL · calendario escolar =================== -->
+<div class="modal-backdrop" id="calModal" role="dialog" aria-modal="true" aria-labelledby="calTitle" hidden>
+  <div class="modal cal-modal">
+    <div class="modal-head">
+      <div>
+        <div class="section-tag" style="color: var(--school)">Calendario · 2026-2027</div>
+        <h3 id="calTitle">Fechas del cole</h3>
+        <p>Del manual de convivencia. Tocá un día con evento para ver los detalles.</p>
+      </div>
+      <button class="modal-close" id="calClose" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="cal-search-row">
+        <label class="cal-search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="calSearch" type="search" placeholder="Buscar evento (ej. graduación, pausa, vacaciones…)">
+        </label>
+        <button class="cal-today" id="calToday" type="button">Hoy</button>
+      </div>
+      <div id="calContent"></div>
+    </div>
+    <div class="modal-foot">
+      <span id="calFootInfo" style="font-family:var(--f-mono);font-size:11px;color:var(--ink-mute);letter-spacing:.08em">🔴 Sin clases · 🔵 Académico · 🟡 Evento · 🟣 Reunión</span>
+    </div>
+  </div>
+</div>
 
 <!-- =================== MODAL · votación de récord =================== -->
 <div class="modal-backdrop" id="voteModal" role="dialog" aria-modal="true" aria-labelledby="voteTitle" hidden>
@@ -2853,6 +2935,269 @@
   updateAccountChip();
   renderComposer();
   initSupabase();
+
+  // ---------- calendario escolar ----------
+  const CAL_EVENTS = [
+    // Agosto 2026
+    { d: '2026-08-10', t: 'Se presenta Administración', c: 'academic' },
+    { d: '2026-08-11', t: 'Se presenta Personal Docente', c: 'academic' },
+    { d: '2026-08-14', t: 'Reunión Padres · Parvularia, EC y Primaria', c: 'meeting' },
+    { d: '2026-08-17', t: 'Reunión Padres · 7° a 12° grado', c: 'meeting' },
+    { d: '2026-08-18', t: 'Primer día de clases (K4 a 12°)', c: 'academic', note: 'Inicia Periodo 1' },
+    { d: '2026-08-19', e: '2026-08-25', t: 'Pruebas diagnósticas', c: 'academic' },
+    // Septiembre 2026
+    { d: '2026-09-01', e: '2026-09-04', t: 'Entrega solicitud nuevos miembros NHS', c: 'academic' },
+    { d: '2026-09-07', t: 'Entrega Directivas de grado a Coordinadores', c: 'academic' },
+    { d: '2026-09-08', e: '2026-09-14', t: 'Semana Cívica', c: 'event' },
+    { d: '2026-09-15', t: 'Día de la Independencia', c: 'no-class', note: 'No hay clases' },
+    { d: '2026-09-18', t: '1ª Pausa Pedagógica y capacitación', c: 'no-class', note: 'No clases · se abre plataforma de notas' },
+    { d: '2026-09-21', e: '2026-09-25', t: 'Citas con padres · análisis Pausa Pedagógica', c: 'meeting' },
+    { d: '2026-09-29', t: 'Inducción nuevos miembros NHS', c: 'event' },
+    // Octubre 2026
+    { d: '2026-10-01', t: 'Día del Niño', c: 'event', note: 'Actividades internas' },
+    { d: '2026-10-06', t: 'DEMO Class · Kinder 4', c: 'academic' },
+    { d: '2026-10-07', t: 'DEMO Class · Kinder 5', c: 'academic' },
+    { d: '2026-10-08', t: 'DEMO Class · Kinder 6', c: 'academic' },
+    { d: '2026-10-14', t: 'Elecciones Escolares', c: 'event' },
+    { d: '2026-10-16', t: '1ª Escuela para Padres · Finaliza Periodo 1', c: 'meeting', note: 'Salida estudiantes 11:35 AM' },
+    { d: '2026-10-19', t: 'Inicia Periodo 2', c: 'academic', note: 'Se abre plataforma de notas' },
+    { d: '2026-10-20', t: 'Casa Abierta · Padres visitan escuela', c: 'no-class', note: 'No clases · plataforma abierta' },
+    { d: '2026-10-27', t: 'Se abre plataforma para ver correcciones', c: 'academic' },
+    { d: '2026-10-30', t: 'Honor Roll Digital', c: 'event' },
+    // Noviembre 2026
+    { d: '2026-11-02', t: 'Día de los Muertos', c: 'no-class', note: 'No hay clases' },
+    { d: '2026-11-03', t: 'Honor Roll en formación (7:15 AM)', c: 'event' },
+    { d: '2026-11-13', t: '2ª Pausa Pedagógica y capacitación', c: 'no-class', note: 'No clases · se abre plataforma' },
+    { d: '2026-11-16', e: '2026-11-20', t: 'Citas con padres · análisis Pausa Pedagógica', c: 'meeting' },
+    { d: '2026-11-20', t: 'Thanksgiving celebration', c: 'event', note: 'Actividades internas' },
+    { d: '2026-11-23', e: '2026-11-27', t: 'Vacaciones Thanksgiving', c: 'no-class' },
+    { d: '2026-11-30', t: 'Se reanudan clases', c: 'academic' },
+    // Diciembre 2026
+    { d: '2026-12-10', t: 'Actividad Deportiva Navideña', c: 'event' },
+    { d: '2026-12-11', t: 'Show Navideño', c: 'event' },
+    { d: '2026-12-18', t: 'Último día de clases · Vacaciones de Navidad', c: 'academic', note: 'Salida 11:35 AM' },
+    { d: '2026-12-21', e: '2027-01-10', t: 'Vacaciones de Navidad y Año Nuevo', c: 'no-class' },
+    // Enero 2027
+    { d: '2027-01-04', t: 'Se presenta departamento de Administración', c: 'academic' },
+    { d: '2027-01-11', t: 'Se presentan Administración, docentes y estudiantes', c: 'academic' },
+    { d: '2027-01-22', t: 'Fin Periodo 2 · Escuela para Padres', c: 'meeting' },
+    { d: '2027-01-25', t: 'Inicia Periodo 3', c: 'academic', note: 'Se abre plataforma de notas' },
+    { d: '2027-01-26', t: 'Casa Abierta', c: 'no-class', note: 'No hay clases' },
+    { d: '2027-01-30', t: 'BINGO', c: 'event' },
+    // Febrero 2027
+    { d: '2027-02-02', t: 'Se abre plataforma para ver correcciones', c: 'academic' },
+    { d: '2027-02-08', t: 'Honor Roll Digital', c: 'event' },
+    { d: '2027-02-09', t: 'Honor Roll en formación (7:15 AM)', c: 'event' },
+    { d: '2027-02-12', t: 'Celebración interna de San Valentín', c: 'event' },
+    { d: '2027-02-18', t: 'Intramuros de Secundaria', c: 'event' },
+    { d: '2027-02-19', t: 'Intramuros de EC y Primaria', c: 'event' },
+    { d: '2027-02-22', t: '3ª Pausa Pedagógica y capacitación', c: 'no-class', note: 'No hay clases' },
+    { d: '2027-02-23', e: '2027-02-26', t: 'Citas con padres · análisis Pausa Pedagógica', c: 'meeting' },
+    // Marzo 2027
+    { d: '2027-03-09', t: 'DEMO CLASS · Kinder 4', c: 'academic' },
+    { d: '2027-03-10', t: 'DEMO CLASS · Kinder 5', c: 'academic' },
+    { d: '2027-03-11', t: 'DEMO CLASS · Kinder 6', c: 'academic' },
+    { d: '2027-03-12', t: 'Escuela para Padres #3', c: 'meeting', note: 'Salida 11:35 AM' },
+    { d: '2027-03-18', t: 'Egg Hunt · EC', c: 'event' },
+    { d: '2027-03-19', t: 'Pool Day · Parvularia', c: 'event' },
+    { d: '2027-03-22', e: '2027-03-29', t: 'Vacaciones de Semana Santa', c: 'no-class' },
+    { d: '2027-03-30', t: 'Inician clases (K4 a 12°)', c: 'academic' },
+    // Abril 2027
+    { d: '2027-04-09', t: 'Termina Periodo 3', c: 'academic' },
+    { d: '2027-04-12', t: 'Inicia Periodo 4', c: 'academic', note: 'Se abre plataforma de notas' },
+    { d: '2027-04-13', t: 'Casa Abierta', c: 'no-class', note: 'No hay clases' },
+    { d: '2027-04-20', t: 'Se abre plataforma para correcciones', c: 'academic' },
+    { d: '2027-04-26', t: 'Honor Roll Digital', c: 'event' },
+    { d: '2027-04-27', t: 'Honor Roll en formación (7:15 AM)', c: 'event' },
+    // Mayo 2027
+    { d: '2027-05-07', t: 'Actos del Día de la Madre', c: 'event' },
+    { d: '2027-05-10', t: 'Día de la Madre', c: 'no-class', note: 'No hay clases' },
+    { d: '2027-05-14', t: '4ª Pausa Pedagógica', c: 'no-class', note: 'No clases · plataforma abierta' },
+    { d: '2027-05-17', e: '2027-05-21', t: 'Citas con padres · análisis Pausa Pedagógica', c: 'meeting' },
+    { d: '2027-05-27', t: 'Día de Logros · Primaria', c: 'event' },
+    { d: '2027-05-28', t: 'Día de Logros · Secundaria', c: 'event' },
+    { d: '2027-05-31', t: 'Último día de clases · Seniors', c: 'academic', note: 'Cierre Programa de Valores' },
+    // Junio 2027
+    { d: '2027-06-01', t: 'Se abre plataforma de notas · 12° grado', c: 'academic' },
+    { d: '2027-06-04', t: '1ª fecha de reposición · 12° grado', c: 'academic' },
+    { d: '2027-06-07', t: '2ª fecha de reposición · 12° grado', c: 'academic' },
+    { d: '2027-06-08', t: 'Plataforma abierta · 12° grado (reposición)', c: 'academic' },
+    { d: '2027-06-09', e: '2027-06-11', t: 'Maestros envían temario de reposición (1-11)', c: 'academic', note: 'Máx. 3 materias' },
+    { d: '2027-06-10', t: 'Graduación K6 · Clausura K4 y K5', c: 'event' },
+    { d: '2027-06-11', t: 'Último día de clases (1° a 11°) · Fin Periodo 4', c: 'academic' },
+    { d: '2027-06-14', t: 'Casa Abierta · Plataforma notas K4-11', c: 'meeting' },
+    { d: '2027-06-17', t: 'Día del Padre · Personal docente vacaciona', c: 'no-class' },
+    { d: '2027-06-18', t: 'Último día para maestros', c: 'academic' },
+    { d: '2027-06-21', t: 'Inicia Summer Camp', c: 'event' },
+    { d: '2027-06-28', t: '1ª fecha reposición · 2°-11° grado', c: 'academic', note: 'Hasta 3 materias' },
+    { d: '2027-06-30', t: '2ª fecha reposición · 2°-11° grado', c: 'academic' },
+    // Julio 2027
+    { d: '2027-07-01', t: 'Plataforma abierta · reposición 2°-11°', c: 'academic' },
+    { d: '2027-07-02', t: 'Último día de Administración Académica', c: 'academic' },
+    { d: '2027-07-09', t: 'Termina Curso de Verano', c: 'academic' },
+    // Agosto 2027
+    { d: '2027-08-09', t: 'Regresa Administración General y Académica', c: 'academic' },
+    { d: '2027-08-10', t: 'Primer día de maestros', c: 'academic' },
+    { d: '2027-08-13', t: 'Padres conocen maestros · EC y Primaria', c: 'meeting' },
+    { d: '2027-08-16', t: 'Padres conocen maestros · Secundaria', c: 'meeting' },
+    { d: '2027-08-17', t: 'Primer día de clases (K4 a 12°)', c: 'academic' },
+  ];
+
+  const CAL_MIN = new Date(2026, 7, 1); // agosto 2026
+  const CAL_MAX = new Date(2027, 7, 31); // agosto 2027
+  let calCurrent = new Date(); // current visible month
+  if (calCurrent < CAL_MIN) calCurrent = new Date(CAL_MIN);
+  if (calCurrent > CAL_MAX) calCurrent = new Date(CAL_MAX);
+  calCurrent = new Date(calCurrent.getFullYear(), calCurrent.getMonth(), 1);
+  let calSelectedDay = null;
+
+  const calBtn = document.getElementById('calBtn');
+  const calModal = document.getElementById('calModal');
+  const calContent = document.getElementById('calContent');
+  const calCloseBtn = document.getElementById('calClose');
+  const calSearchInput = document.getElementById('calSearch');
+  const calTodayBtn = document.getElementById('calToday');
+
+  function fmtDate(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+  function parseDate(s) { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); }
+  function eventsOnDay(dateStr) {
+    return CAL_EVENTS.filter(ev => {
+      if (ev.e) return dateStr >= ev.d && dateStr <= ev.e;
+      return ev.d === dateStr;
+    });
+  }
+  function fmtEventRange(ev) {
+    const start = parseDate(ev.d);
+    const opts = { day: 'numeric', month: 'short' };
+    const s = start.toLocaleDateString('es-SV', opts);
+    if (!ev.e) return s;
+    const end = parseDate(ev.e);
+    return `${start.toLocaleDateString('es-SV', { day: 'numeric' })}–${end.toLocaleDateString('es-SV', opts)}`;
+  }
+
+  function renderCalMonth() {
+    const y = calCurrent.getFullYear(), m = calCurrent.getMonth();
+    const first = new Date(y, m, 1);
+    const startDow = (first.getDay() + 6) % 7; // Mon=0
+    const daysInMonth = new Date(y, m+1, 0).getDate();
+    const prevMonthDays = new Date(y, m, 0).getDate();
+    const monthLabel = first.toLocaleDateString('es-SV', { month: 'long', year: 'numeric' });
+    const today = new Date();
+    const todayStr = fmtDate(today);
+
+    // Build 6 rows × 7 cols
+    const cells = [];
+    for (let i = 0; i < 42; i++) {
+      const offset = i - startDow;
+      let cellDate, isOut = false;
+      if (offset < 0) { cellDate = new Date(y, m-1, prevMonthDays + offset + 1); isOut = true; }
+      else if (offset >= daysInMonth) { cellDate = new Date(y, m+1, offset - daysInMonth + 1); isOut = true; }
+      else cellDate = new Date(y, m, offset + 1);
+      cells.push({ date: cellDate, isOut });
+    }
+    // Trim trailing all-out rows
+    while (cells.length > 35 && cells.slice(-7).every(c => c.isOut)) cells.length -= 7;
+
+    const prevDisabled = new Date(y, m, 1) <= CAL_MIN;
+    const nextDisabled = new Date(y, m+1, 1) > CAL_MAX;
+
+    let html = `
+      <div class="cal-nav">
+        <button class="cal-nav-btn" id="calPrev" ${prevDisabled ? 'disabled' : ''} aria-label="Anterior">‹</button>
+        <div class="cal-month-title">${monthLabel}</div>
+        <button class="cal-nav-btn" id="calNext" ${nextDisabled ? 'disabled' : ''} aria-label="Siguiente">›</button>
+      </div>
+      <div class="cal-grid">
+        ${['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].map(d => `<div class="cal-dow">${d}</div>`).join('')}
+        ${cells.map(c => {
+          const ds = fmtDate(c.date);
+          const evs = eventsOnDay(ds);
+          const cats = [...new Set(evs.map(e => e.c))];
+          const isToday = ds === todayStr;
+          const isActive = calSelectedDay === ds;
+          const hasEvent = evs.length > 0;
+          return `<button type="button" class="cal-day${c.isOut ? ' out' : ''}${hasEvent ? ' has-event' : ''}${isToday ? ' is-today' : ''}${isActive ? ' is-active' : ''}" ${c.isOut ? 'tabindex="-1"' : ''} data-date="${ds}">
+            <span class="cal-num">${c.date.getDate()}</span>
+            ${cats.length ? `<div class="cal-dots">${cats.map(cat => `<span class="cal-dot ${cat}"></span>`).join('')}</div>` : ''}
+          </button>`;
+        }).join('')}
+      </div>
+    `;
+
+    // Selected day events
+    const selDate = calSelectedDay || todayStr;
+    const selEvs = eventsOnDay(selDate);
+    const selDateObj = parseDate(selDate);
+    const selLabel = selDateObj.toLocaleDateString('es-SV', { weekday: 'long', day: 'numeric', month: 'long' });
+    html += `<div class="cal-events">
+      <h4>${selLabel[0].toUpperCase()+selLabel.slice(1)}</h4>
+      ${selEvs.length ? selEvs.map(renderEventCard).join('') : '<div class="cal-empty-day">Sin eventos este día</div>'}
+    </div>`;
+
+    calContent.innerHTML = html;
+    calContent.querySelector('#calPrev')?.addEventListener('click', () => {
+      calCurrent = new Date(y, m-1, 1);
+      if (calCurrent < CAL_MIN) calCurrent = new Date(CAL_MIN);
+      renderCalMonth();
+    });
+    calContent.querySelector('#calNext')?.addEventListener('click', () => {
+      calCurrent = new Date(y, m+1, 1);
+      if (calCurrent > CAL_MAX) calCurrent = new Date(CAL_MAX);
+      renderCalMonth();
+    });
+    calContent.querySelectorAll('.cal-day:not(.out)').forEach(btn => {
+      btn.addEventListener('click', () => {
+        calSelectedDay = btn.dataset.date;
+        renderCalMonth();
+      });
+    });
+  }
+
+  function renderEventCard(ev) {
+    return `<div class="cal-event ${ev.c}">
+      <div class="cal-event-date">${fmtEventRange(ev)}</div>
+      <div class="cal-event-body">
+        <strong>${escapeHtml(ev.t)}</strong>
+        ${ev.note ? `<span>${escapeHtml(ev.note)}</span>` : ''}
+      </div>
+    </div>`;
+  }
+
+  function renderCalSearch(q) {
+    const query = q.toLowerCase();
+    const matches = CAL_EVENTS.filter(e => e.t.toLowerCase().includes(query) || (e.note && e.note.toLowerCase().includes(query)));
+    if (!matches.length) {
+      calContent.innerHTML = `<div class="cal-empty-day">Sin resultados para "${escapeHtml(q)}"</div>`;
+      return;
+    }
+    calContent.innerHTML = `<div class="cal-events" style="margin-top:0"><h4>${matches.length} resultado${matches.length===1?'':'s'} para "${escapeHtml(q)}"</h4>${matches.map(renderEventCard).join('')}</div>`;
+  }
+
+  function openCal() {
+    calSelectedDay = null;
+    calSearchInput.value = '';
+    renderCalMonth();
+    calModal.hidden = false;
+    calModal.classList.add('open');
+  }
+  function closeCal() { calModal.classList.remove('open'); calModal.hidden = true; }
+  calBtn.addEventListener('click', openCal);
+  calCloseBtn.addEventListener('click', closeCal);
+  calModal.addEventListener('click', e => { if (e.target === calModal) closeCal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !calModal.hidden) closeCal(); });
+  calSearchInput.addEventListener('input', () => {
+    const q = calSearchInput.value.trim();
+    if (q) renderCalSearch(q); else renderCalMonth();
+  });
+  calTodayBtn.addEventListener('click', () => {
+    const today = new Date();
+    calCurrent = new Date(today.getFullYear(), today.getMonth(), 1);
+    if (calCurrent < CAL_MIN) calCurrent = new Date(CAL_MIN);
+    if (calCurrent > CAL_MAX) calCurrent = new Date(CAL_MAX);
+    calSelectedDay = fmtDate(today);
+    calSearchInput.value = '';
+    renderCalMonth();
+  });
 
   // ---------- perfil de estudiante ----------
   const profileModal = document.getElementById('profileModal');
