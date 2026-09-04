@@ -1268,6 +1268,35 @@
     border-radius: var(--radius);
   }
 
+  /* Pager (paginación tipo Motora) */
+  .pager {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    margin-top: 24px; flex-wrap: wrap;
+  }
+  .pager button {
+    min-width: 36px; height: 36px; padding: 0 12px; border-radius: 999px;
+    background: var(--paper); border: 1px solid var(--line);
+    font-weight: 700; font-size: 13px;
+    color: var(--ink-soft);
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    transition: all .15s;
+  }
+  .pager button:hover:not(:disabled):not(.is-active) {
+    background: var(--school-tint); color: var(--school); border-color: var(--school-2);
+  }
+  .pager button.is-active {
+    background: var(--ink); color: var(--paper); border-color: transparent;
+  }
+  .pager button:disabled { opacity: .38; cursor: not-allowed; }
+  .pager .dots {
+    width: 24px; text-align: center; color: var(--ink-mute); font-family: var(--f-mono); font-size: 12px;
+    user-select: none;
+  }
+  .pager-count {
+    font-family: var(--f-mono); font-size: 11px; color: var(--ink-mute);
+    letter-spacing: 0.08em; text-transform: uppercase; margin-right: 10px;
+  }
+
   /* Account chip in nav */
   .account-chip {
     display: inline-flex; align-items: center; gap: 8px;
@@ -1829,6 +1858,7 @@
   </div>
 
   <div class="wall reveal" id="wall"></div>
+  <nav class="pager reveal" id="wallPager" hidden aria-label="Paginación de chismes"></nav>
 </section>
 
 <!-- =================== RECORDS =================== -->
@@ -2048,6 +2078,7 @@
     { badge: 'Holding',   title: 'Lipton Industries', desc: 'Son los dueños de la mayoría de empresas del salón.', owners: ['Gerardo', 'Magaña'] },
     { badge: 'Papelería', title: 'Lapis Hoyo',        desc: 'Hacen diseños exóticos de lápices.', owners: ['Gerardo', 'Magaña'] },
     { badge: 'Deportes',  title: 'Liga Lipton',       desc: 'Organiza los partidos entre Equipo 1 y Equipo 2 los miércoles. Patrocinador oficial del torneo interno.', owners: ['Gerardo', 'Magaña'] },
+    { badge: 'Inmuebles', title: 'El Bulevar de la Constitución', desc: 'El paseo insignia del salón. Sociedad de cuatro.', owners: ['Andrea', 'Sofía', 'Gerardo', 'Javier'] },
   ];
 
   const PARTIDOS = [
@@ -2476,23 +2507,62 @@
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
+  const WALL_PER_PAGE = 15;
+  let wallPage = 1;
+  const wallPagerEl = document.getElementById('wallPager');
   function renderWall() {
     if (!posts.length) {
       wallEl.innerHTML = '<div class="chisme-empty">Todavía nadie escribió chismes. Sé el primero — todo es anónimo.</div>';
+      wallPagerEl.hidden = true;
       return;
     }
-    wallEl.innerHTML = posts.map((p, i) => {
-      const tilt = (((i * 41) % 7) - 3) * 0.5;
-      const tint = i % 5;
+    const totalPages = Math.max(1, Math.ceil(posts.length / WALL_PER_PAGE));
+    if (wallPage > totalPages) wallPage = totalPages;
+    if (wallPage < 1) wallPage = 1;
+    const start = (wallPage - 1) * WALL_PER_PAGE;
+    const slice = posts.slice(start, start + WALL_PER_PAGE);
+    wallEl.innerHTML = slice.map((p, i) => {
+      const tilt = ((((start + i) * 41) % 7) - 3) * 0.5;
+      const tint = (start + i) % 5;
       return `<article class="chisme tint-${tint}" style="--r:${tilt}deg">
         <p>${escapeHtml(p.text)}</p>
         <div class="chisme-meta"><span>Anónimo</span><span class="dot"></span><span>${timeAgo(p.created_at)}</span></div>
       </article>`;
     }).join('');
+    renderWallPager(totalPages);
+  }
+  function renderWallPager(totalPages) {
+    if (totalPages <= 1) { wallPagerEl.hidden = true; return; }
+    wallPagerEl.hidden = false;
+    const pageBtns = [];
+    // Compact pager: always show 1, current-1, current, current+1, last; dots between
+    const shown = new Set([1, totalPages, wallPage - 1, wallPage, wallPage + 1]);
+    let last = 0;
+    const numbers = [...shown].filter(n => n >= 1 && n <= totalPages).sort((a, b) => a - b);
+    for (const n of numbers) {
+      if (n - last > 1) pageBtns.push('<span class="dots">…</span>');
+      pageBtns.push(`<button type="button" class="${n === wallPage ? 'is-active' : ''}" data-page="${n}">${n}</button>`);
+      last = n;
+    }
+    wallPagerEl.innerHTML = `
+      <span class="pager-count">Pág ${wallPage} de ${totalPages}</span>
+      <button type="button" data-page="${wallPage - 1}" ${wallPage === 1 ? 'disabled' : ''} aria-label="Anterior">‹</button>
+      ${pageBtns.join('')}
+      <button type="button" data-page="${wallPage + 1}" ${wallPage === totalPages ? 'disabled' : ''} aria-label="Siguiente">›</button>
+    `;
+    wallPagerEl.querySelectorAll('button[data-page]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const n = parseInt(btn.dataset.page, 10);
+        if (isNaN(n) || n < 1 || n > totalPages || n === wallPage) return;
+        wallPage = n;
+        renderWall();
+        document.getElementById('chismes').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
   }
 
   async function refreshChismes() {
-    const { data, error } = await sb.from('chismes').select('id, text, created_at').order('created_at', { ascending: false }).limit(120);
+    const { data, error } = await sb.from('chismes').select('id, text, created_at').order('created_at', { ascending: false }).limit(500);
     if (error) return;
     posts = data || [];
     renderWall();
@@ -2761,7 +2831,7 @@
     dbNotice.textContent = 'Sincronizado en vivo · Supabase';
 
     sb.channel('chismes-live').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chismes' }, (payload) => {
-      posts = [payload.new, ...posts].slice(0, 120);
+      posts = [payload.new, ...posts].slice(0, 500);
       renderWall();
     }).subscribe();
 
