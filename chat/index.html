@@ -366,6 +366,18 @@
     padding: 12px 20px;
     background: var(--paper); border-bottom: 1px solid var(--line);
   }
+  .chat-header-action {
+    margin-left: auto;
+    width: 38px; height: 38px; border-radius: 10px;
+    background: var(--paper-soft); border: 1px solid var(--line);
+    display: grid; place-items: center;
+    color: var(--ink-soft);
+    transition: background .15s, color .15s;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .chat-header-action:hover { background: var(--school-tint); color: var(--school); }
+  .chat-header-action:active { transform: scale(.96); }
   .chat-back {
     display: none;
     width: 34px; height: 34px; border-radius: 8px;
@@ -755,6 +767,32 @@
 </div>
 
 <!-- ================ MODAL: create group ================ -->
+<!-- ================ MODAL: agregar miembros a grupo existente ================ -->
+<div class="modal-backdrop" id="addMembersModal" role="dialog" aria-modal="true" hidden>
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h3>Agregar al grupo</h3>
+        <p id="addMembersHint">Elegí quién más querés que entre. Solo salen los que tienen cuenta y no están todavía.</p>
+      </div>
+      <button class="modal-close" id="addMembersClose" aria-label="Cerrar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input class="picker-search" id="addMembersSearch" placeholder="Buscar…">
+      <div class="section-title">Sección A</div>
+      <div class="person-grid" id="addMembersNamesA"></div>
+      <div class="section-title">Sección B</div>
+      <div class="person-grid" id="addMembersNamesB"></div>
+    </div>
+    <div class="modal-foot">
+      <span class="fill" id="addMembersCount">0 seleccionados</span>
+      <button class="primary" id="addMembersConfirm" disabled>Agregar</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="groupModal" role="dialog" aria-modal="true" hidden>
   <div class="modal">
     <div class="modal-head">
@@ -1154,6 +1192,82 @@
     openChat(chat.id);
   });
 
+  // ================ ADD MEMBERS a un grupo existente ================
+  const addMembersModal    = document.getElementById('addMembersModal');
+  const addMembersClose    = document.getElementById('addMembersClose');
+  const addMembersSearch   = document.getElementById('addMembersSearch');
+  const addMembersNamesA   = document.getElementById('addMembersNamesA');
+  const addMembersNamesB   = document.getElementById('addMembersNamesB');
+  const addMembersCount    = document.getElementById('addMembersCount');
+  const addMembersConfirm  = document.getElementById('addMembersConfirm');
+  const addMembersHint     = document.getElementById('addMembersHint');
+  const addSelected = new Set();
+  let addTargetChat = null;
+
+  addMembersClose.addEventListener('click', () => closeBackdrop(addMembersModal));
+
+  function openAddMembers(chat) {
+    addTargetChat = chat;
+    addSelected.clear();
+    addMembersSearch.value = '';
+    addMembersHint.textContent = `Elegí quién más querés que entre a "${chat.name}". Solo salen los que ya tienen cuenta.`;
+    renderAddMembersPicker();
+    openBackdrop(addMembersModal);
+  }
+
+  function renderAddMembersPicker() {
+    if (!addTargetChat) return;
+    const q = addMembersSearch.value.trim().toLowerCase();
+    const already = new Set(addTargetChat.members || []);
+    const bySec = { A: [], B: [] };
+    STUDENTS.forEach(st => {
+      const k = keyOf(st.n, st.s);
+      const claimed = profilesByKey.get(k);
+      if (!claimed) return;
+      if (already.has(claimed.user_id)) return;
+      if (q && !st.n.toLowerCase().includes(q)) return;
+      bySec[st.s].push({ ...st, uid: claimed.user_id });
+    });
+    const build = (list, container) => {
+      const html = list.length ? list.map(st => {
+        const isSel = addSelected.has(st.uid);
+        return `<button class="person-chip ${isSel ? 'selected' : ''}" type="button" data-uid="${st.uid}">
+          <span class="avatar-mini" style="background:${colorFor(st.n)}">${st.n[0].toUpperCase()}</span>
+          <span class="person-chip-name">${escapeHtml(st.n)}</span>
+          <span class="person-chip-check">✓</span>
+        </button>`;
+      }).join('') : '<div style="grid-column:1/-1;padding:16px;text-align:center;color:var(--ink-mute);font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase">Nadie más disponible</div>';
+      container.innerHTML = html;
+      container.querySelectorAll('.person-chip').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const uid = btn.dataset.uid;
+          if (addSelected.has(uid)) addSelected.delete(uid);
+          else addSelected.add(uid);
+          renderAddMembersPicker();
+        });
+      });
+    };
+    build(bySec.A, addMembersNamesA);
+    build(bySec.B, addMembersNamesB);
+    addMembersCount.textContent = `${addSelected.size} seleccionados`;
+    addMembersConfirm.disabled = addSelected.size < 1;
+  }
+  addMembersSearch.addEventListener('input', renderAddMembersPicker);
+
+  addMembersConfirm.addEventListener('click', async () => {
+    if (!addTargetChat || addSelected.size < 1) return;
+    addMembersConfirm.disabled = true;
+    const rows = [...addSelected].map(uid => ({ chat_id: addTargetChat.id, user_id: uid }));
+    const { error } = await sb.from('chat_members').insert(rows);
+    addMembersConfirm.disabled = false;
+    if (error) { alert('No se pudieron agregar: ' + error.message); return; }
+    addSelected.clear();
+    closeBackdrop(addMembersModal);
+    await refreshChats();
+    const updated = chats.find(c => c.id === addTargetChat.id);
+    if (updated) renderChatMain(updated);
+  });
+
   // ================ SIDEBAR / CHAT LIST ================
   let currentTab = 'all';
   let searchQuery = '';
@@ -1410,6 +1524,9 @@
           <div class="chat-header-name">${escapeHtml(name)}${otherRole ? ' <span style="color:var(--lemon);font-size:14px">★</span>' : ''}</div>
           <div class="chat-header-meta">${meta}</div>
         </div>
+        ${isGroup ? `<button class="chat-header-action" id="addMembersBtn" type="button" title="Agregar miembros" aria-label="Agregar miembros">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>
+        </button>` : ''}
       </header>
       <div class="chat-messages" id="chatMessages">
         ${bubblesHtml || '<div class="chat-empty" style="padding:20px 0"><p style="margin:0;color:var(--ink-mute);font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase">Sin mensajes aún — mandá el primero</p></div>'}
@@ -1431,6 +1548,8 @@
     document.getElementById('chatBack').addEventListener('click', () => {
       document.body.classList.remove('chat-open');
     });
+    const addBtn = document.getElementById('addMembersBtn');
+    if (addBtn) addBtn.addEventListener('click', () => openAddMembers(chat));
     wireComposer(chat);
   }
 
