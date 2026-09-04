@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1E3AAB" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#070D24" media="(prefers-color-scheme: dark)">
+<title>Perfil · Clase de 6to</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%231E3AAB'/%3E%3Ccircle cx='20' cy='16' r='6' fill='white'/%3E%3Cpath d='M8 34c0-6 5-10 12-10s12 4 12 10' fill='white'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+
+<style>
+  :root {
+    --ground: #EEF1FA; --ground-2: #E4EAF7; --paper: #FFFFFF; --paper-soft: #F7F9FE;
+    --ink: #0C1846; --ink-soft: #2C3866; --ink-mute: #556388;
+    --line: #DBE1F2; --line-strong: #B9C3E1;
+    --school: #1E3AAB; --school-2: #3B5EF0; --school-tint: #DDE4FF;
+    --coral: #D91F26; --mint: #35C89A; --lemon: #F5DE3A;
+    --shadow-sm: 0 1px 2px rgba(12,24,70,.06), 0 4px 14px rgba(12,24,70,.06);
+    --shadow-lg: 0 4px 12px rgba(12,24,70,.08), 0 22px 44px rgba(12,24,70,.10);
+    --radius: 14px; --radius-lg: 22px;
+    --f-display: 'Bricolage Grotesque', system-ui, sans-serif;
+    --f-body: 'Manrope', system-ui, sans-serif;
+    --f-mono: 'JetBrains Mono', ui-monospace, monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #070D24; --ground-2: #0D163B; --paper: #121E4A; --paper-soft: #0F1940;
+      --ink: #F5F8FF; --ink-soft: #CBD5F5; --ink-mute: #9CACD9;
+      --line: #2C3D75; --line-strong: #364785;
+      --school: #7091FF; --school-2: #9DB3FF; --school-tint: #1A2A6B;
+      --coral: #FF6B72; --mint: #52D9AE; --lemon: #FFE85B;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,.5), 0 4px 14px rgba(0,0,0,.35);
+      --shadow-lg: 0 4px 12px rgba(0,0,0,.55), 0 22px 44px rgba(0,0,0,.45);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #070D24; --ground-2: #0D163B; --paper: #121E4A; --paper-soft: #0F1940;
+    --ink: #F5F8FF; --ink-soft: #CBD5F5; --ink-mute: #9CACD9;
+    --line: #2C3D75; --line-strong: #364785;
+    --school: #7091FF; --school-2: #9DB3FF; --school-tint: #1A2A6B;
+    --coral: #FF6B72; --mint: #52D9AE; --lemon: #FFE85B;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.5), 0 4px 14px rgba(0,0,0,.35);
+    --shadow-lg: 0 4px 12px rgba(0,0,0,.55), 0 22px 44px rgba(0,0,0,.45);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: var(--f-body); color: var(--ink); background: var(--ground); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--school-2); outline-offset: 3px; border-radius: 6px; }
+  input, textarea { font: inherit; color: inherit; }
+
+  /* NAV */
+  .nav { position: sticky; top: 0; z-index: 40; backdrop-filter: saturate(140%) blur(14px); background: color-mix(in oklab, var(--ground) 78%, transparent); border-bottom: 1px solid var(--line); }
+  .nav-inner { display: flex; align-items: center; gap: 10px; padding: 12px 20px; max-width: 980px; margin: 0 auto; }
+  .brand { display: flex; align-items: center; gap: 10px; font-family: var(--f-display); font-weight: 800; font-size: 16px; }
+  .brand-mark { width: 30px; height: 30px; border-radius: 9px; background: var(--school); color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 13px; }
+  .brand em { font-style: normal; color: var(--school); }
+  .nav-links { margin-left: auto; display: flex; gap: 4px; }
+  .nav-link { padding: 7px 12px; border-radius: 999px; font-weight: 600; font-size: 13px; color: var(--ink-soft); }
+  .nav-link:hover, .nav-link.is-active { background: var(--paper); color: var(--ink); }
+  .icon-btn { width: 36px; height: 36px; border-radius: 999px; display: grid; place-items: center; background: var(--paper); border: 1px solid var(--line); color: var(--ink-soft); }
+  .icon-btn:hover { background: var(--school-tint); color: var(--school); }
+
+  .wrap { max-width: 980px; margin: 0 auto; padding: 24px 20px 60px; }
+
+  /* HERO */
+  .profile-hero { display: grid; grid-template-columns: 180px 1fr; gap: 28px; margin-bottom: 24px; align-items: start; }
+  @media (max-width: 640px) { .profile-hero { grid-template-columns: 1fr; text-align: center; } }
+  .avatar-wrap { position: relative; width: 180px; height: 180px; margin: 0 auto; }
+  .profile-avatar { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: var(--school); display: grid; place-items: center; color: #fff; font-family: var(--f-display); font-weight: 800; font-size: 64px; overflow: hidden; box-shadow: 0 10px 30px rgba(12,24,70,.15); }
+  .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .avatar-edit { position: absolute; bottom: 6px; right: 6px; width: 40px; height: 40px; border-radius: 50%; background: var(--ink); color: var(--paper); border: 3px solid var(--paper); display: grid; place-items: center; box-shadow: var(--shadow-sm); cursor: pointer; }
+  .profile-info h1 { font-family: var(--f-display); font-weight: 800; font-size: clamp(28px, 4vw, 40px); line-height: 1; letter-spacing: -0.02em; margin: 0 0 6px; }
+  .section-badge { display: inline-block; font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--school); background: var(--school-tint); padding: 4px 10px; border-radius: 999px; font-weight: 700; margin-bottom: 8px; }
+  .role-badge { display: inline-block; font-family: var(--f-display); font-size: 13px; color: var(--paper); background: var(--school); padding: 4px 12px; border-radius: 999px; font-weight: 700; margin-left: 6px; }
+  .bio { color: var(--ink-soft); font-size: 15px; margin: 8px 0 12px; line-height: 1.5; max-width: 56ch; }
+  .socials { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  @media (max-width: 640px) { .socials { justify-content: center; } }
+  .social-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: var(--paper); border: 1px solid var(--line); font-size: 13px; font-weight: 600; color: var(--ink); }
+  .social-chip:hover { background: var(--school-tint); border-color: var(--school-2); }
+  .stats { display: flex; gap: 22px; margin: 14px 0; }
+  @media (max-width: 640px) { .stats { justify-content: center; } }
+  .stat { text-align: left; }
+  @media (max-width: 640px) { .stat { text-align: center; } }
+  .stat-num { font-family: var(--f-display); font-weight: 800; font-size: 22px; letter-spacing: -0.02em; }
+  .stat-label { font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-mute); }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+  @media (max-width: 640px) { .actions { justify-content: center; } }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 999px; font-weight: 700; font-size: 14px; }
+  .btn-primary { background: var(--ink); color: var(--paper); }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+  .btn-secondary { background: var(--paper); color: var(--ink); border: 1px solid var(--line); }
+  .btn-secondary:hover { background: var(--paper-soft); }
+  .btn-follow { background: var(--school); color: #fff; }
+  .btn-follow.following { background: var(--paper); color: var(--ink); border: 1px solid var(--line); }
+
+  /* VIEWERS */
+  .viewers-panel { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; margin-bottom: 20px; }
+  .viewers-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .viewers-head h3 { font-family: var(--f-display); font-weight: 700; font-size: 16px; margin: 0; letter-spacing: -0.01em; }
+  .viewers-head .badge { font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-mute); }
+  .viewers-list { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 4px; }
+  .viewer-chip { flex-shrink: 0; display: flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px; border-radius: 999px; background: var(--paper-soft); border: 1px solid var(--line); font-size: 13px; font-weight: 600; }
+  .viewer-chip:hover { background: var(--school-tint); border-color: var(--school-2); }
+  .viewer-chip .mini-avatar { width: 26px; height: 26px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; color: #fff; font-family: var(--f-display); font-weight: 800; font-size: 11px; }
+  .viewer-chip .mini-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .viewer-chip .time { color: var(--ink-mute); font-family: var(--f-mono); font-size: 10px; }
+  .viewers-empty { color: var(--ink-mute); font-family: var(--f-mono); font-size: 12px; padding: 12px; letter-spacing: 0.06em; }
+
+  /* TABS */
+  .post-tabs { display: flex; gap: 4px; padding: 4px; background: var(--paper); border: 1px solid var(--line); border-radius: 999px; box-shadow: var(--shadow-sm); margin-bottom: 18px; width: fit-content; }
+  .post-tab { padding: 8px 16px; border-radius: 999px; font-weight: 700; font-size: 13px; color: var(--ink-soft); }
+  .post-tab.is-active { background: var(--ink); color: var(--paper); }
+
+  /* POSTS GRID (profile view) */
+  .posts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 4px; }
+  .post-tile { aspect-ratio: 1; background: var(--paper-soft); border: 1px solid var(--line); position: relative; overflow: hidden; cursor: pointer; border-radius: 8px; }
+  .post-tile img, .post-tile video { width: 100%; height: 100%; object-fit: cover; }
+  .post-tile .type-badge { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,.65); color: #fff; padding: 3px 8px; border-radius: 999px; font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; }
+  .post-tile.opinion-tile { padding: 16px; background: var(--paper); }
+  .post-tile.opinion-tile .op-text { font-size: 14px; line-height: 1.4; color: var(--ink); font-weight: 600; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; }
+  .post-tile:hover { transform: scale(1.02); box-shadow: var(--shadow-lg); z-index: 1; transition: transform .15s; }
+  .posts-empty { grid-column: 1/-1; padding: 60px 20px; text-align: center; color: var(--ink-mute); font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; background: var(--paper); border: 1px dashed var(--line); border-radius: var(--radius); }
+
+  /* MODAL base */
+  .modal-backdrop { position: fixed; inset: 0; z-index: 100; background: rgba(12,24,70,.6); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; padding: 20px; }
+  .modal-backdrop.open { display: flex; }
+  .modal { background: var(--paper); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); max-width: 560px; width: 100%; max-height: 92vh; overflow: hidden; display: flex; flex-direction: column; animation: slide .22s ease; }
+  @keyframes slide { from { transform: translateY(12px); opacity: 0 } to { transform: none; opacity: 1 } }
+  .modal.wide { max-width: 720px; }
+  .modal-head { display: flex; justify-content: space-between; align-items: start; padding: 20px 22px 6px; gap: 12px; }
+  .modal-head h3 { font-family: var(--f-display); font-weight: 800; font-size: 22px; margin: 0; letter-spacing: -0.02em; }
+  .modal-head p { color: var(--ink-soft); font-size: 14px; margin: 6px 0 0; }
+  .modal-close { width: 32px; height: 32px; border-radius: 999px; background: var(--paper-soft); border: 1px solid var(--line); display: grid; place-items: center; color: var(--ink-soft); flex-shrink: 0; }
+  .modal-body { padding: 12px 22px 20px; overflow-y: auto; }
+  .modal-foot { padding: 14px 22px; border-top: 1px solid var(--line); background: var(--paper-soft); display: flex; justify-content: flex-end; gap: 10px; }
+
+  /* Edit form */
+  .form-row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+  .form-row label { font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-mute); font-weight: 600; }
+  .form-row input, .form-row textarea { padding: 10px 14px; background: var(--paper-soft); border: 1.5px solid var(--line); border-radius: 10px; font-size: 14px; outline: none; }
+  .form-row input:focus, .form-row textarea:focus { border-color: var(--school-2); }
+  .form-row textarea { resize: vertical; min-height: 80px; }
+
+  /* Composer */
+  .composer-tabs { display: flex; gap: 4px; margin-bottom: 14px; }
+  .composer-tab { padding: 8px 16px; border-radius: 10px; font-weight: 700; font-size: 13px; color: var(--ink-soft); background: var(--paper-soft); border: 1.5px solid var(--line); flex: 1; text-align: center; }
+  .composer-tab.is-active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+  /* Follow list */
+  .follow-list { display: flex; flex-direction: column; gap: 6px; }
+  .follow-item { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 12px; background: var(--paper-soft); border: 1px solid var(--line); }
+  .follow-item:hover { background: var(--school-tint); }
+  .follow-item .mini-avatar { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; color: #fff; font-family: var(--f-display); font-weight: 800; }
+  .follow-item .mini-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .follow-item .fname { flex: 1; font-weight: 700; }
+  .follow-item .fname small { display: block; font-family: var(--f-mono); font-size: 10px; color: var(--ink-mute); font-weight: 500; letter-spacing: 0.08em; margin-top: 2px; }
+
+  /* Post preview in composer */
+  .composer-media { margin-top: 10px; padding: 10px; background: var(--paper-soft); border: 1px dashed var(--line); border-radius: 12px; text-align: center; }
+  .composer-media img, .composer-media video { max-width: 100%; max-height: 240px; border-radius: 8px; }
+  .composer-media .picker-btn { padding: 12px 22px; border-radius: 999px; background: var(--paper); border: 1.5px dashed var(--line-strong); font-weight: 700; color: var(--ink-soft); cursor: pointer; }
+
+  .loading { display: flex; align-items: center; justify-content: center; padding: 80px 20px; color: var(--ink-mute); font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="brand">
+      <span class="brand-mark">6</span>
+      <span>Clase de <em>6to</em></span>
+    </a>
+    <div class="nav-links">
+      <a href="/" class="nav-link">Inicio</a>
+      <a href="/feed/" class="nav-link">Feed</a>
+      <a href="/chat/" class="nav-link">Chat</a>
+      <a href="/profile/" class="nav-link is-active">Perfil</a>
+    </div>
+  </div>
+</nav>
+
+<main class="wrap" id="app">
+  <div class="loading">Cargando perfil…</div>
+</main>
+
+<!-- MODAL: edit profile -->
+<div class="modal-backdrop" id="editModal" hidden>
+  <div class="modal">
+    <div class="modal-head">
+      <div><h3>Editar perfil</h3><p>Actualizá tu bio, redes sociales y avatar.</p></div>
+      <button class="modal-close" id="editClose" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label>Bio (máx 200)</label>
+        <textarea id="editBio" maxlength="200" placeholder="Contá algo sobre vos…"></textarea>
+      </div>
+      <div class="form-row">
+        <label>Instagram @</label>
+        <input id="editInstagram" maxlength="60" placeholder="tuusuario">
+      </div>
+      <div class="form-row">
+        <label>TikTok @</label>
+        <input id="editTiktok" maxlength="60" placeholder="tuusuario">
+      </div>
+      <div class="form-row">
+        <label>Twitter / X @</label>
+        <input id="editTwitter" maxlength="60" placeholder="tuusuario">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" id="editCancel">Cancelar</button>
+      <button class="btn btn-primary" id="editSave">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: crear post -->
+<div class="modal-backdrop" id="composerModal" hidden>
+  <div class="modal wide">
+    <div class="modal-head">
+      <div><h3>Nueva publicación</h3><p>Elegí el tipo y compartí con el salón.</p></div>
+      <button class="modal-close" id="composerClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="composer-tabs" id="composerTabs">
+        <button class="composer-tab is-active" data-type="opinion">💬 Opinión</button>
+        <button class="composer-tab" data-type="photo">📷 Foto</button>
+        <button class="composer-tab" data-type="reel">🎬 Reel</button>
+      </div>
+      <div class="form-row">
+        <label>Descripción</label>
+        <textarea id="composerDesc" maxlength="500" placeholder="¿Qué querés contar?"></textarea>
+      </div>
+      <div id="composerMediaWrap" class="composer-media" hidden>
+        <input type="file" id="composerFile" hidden>
+        <div id="composerMediaContent"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" id="composerCancel">Cancelar</button>
+      <button class="btn btn-primary" id="composerSubmit">Publicar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: followers/following -->
+<div class="modal-backdrop" id="followListModal" hidden>
+  <div class="modal">
+    <div class="modal-head">
+      <div><h3 id="followListTitle">Seguidores</h3></div>
+      <button class="modal-close" id="followListClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="follow-list" id="followListBody"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  const SUPABASE_URL = 'https://qmxugyqwgptgafitbquw.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFteHVneXF3Z3B0Z2FmaXRicXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzOTQ0NDcsImV4cCI6MjEwMzk3MDQ0N30.AtfxRuD_zSojiVCW170wmQjZudRQJyUl_mdm_L5ii_I';
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
+
+  // theme
+  const rootEl = document.documentElement;
+  try { const t = localStorage.getItem('sixth-theme'); if (t === 'dark' || t === 'light') rootEl.setAttribute('data-theme', t); } catch(e){}
+
+  const PALETTE = ['#1E3AAB','#3B5EF0','#6B3EE8','#D91F26','#35C89A','#0C1846','#C68416','#7A4A00'];
+  function colorFor(name) { let h=0; for(let i=0;i<name.length;i++) h=(h*31+name.charCodeAt(i))>>>0; return PALETTE[h%PALETTE.length]; }
+  function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function slug(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,''); }
+  function keyOf(name, section){ return `${section}-${slug(name)}`.toLowerCase(); }
+  function timeAgo(ts){ const d=Math.max(0,Date.now()-new Date(ts).getTime()); if(d<60000) return 'ahora'; if(d<3600000) return Math.floor(d/60000)+'m'; if(d<86400000) return Math.floor(d/3600000)+'h'; return Math.floor(d/86400000)+'d'; }
+  function qparam(k){ return new URLSearchParams(location.search).get(k); }
+
+  let me = null;               // auth user
+  let myProfile = null;        // { user_id, name, section, bio, avatar_url, ... }
+  let allProfiles = new Map(); // key -> profile
+  let profilesById = new Map();// uid -> profile
+  let viewedProfile = null;    // the profile being viewed
+  let currentPostFilter = 'all';
+
+  async function boot() {
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session && session.user) me = session.user;
+      else { const { data } = await sb.auth.signInAnonymously(); me = data.user; }
+    } catch(e){ console.error(e); document.getElementById('app').innerHTML = '<div class="loading">Sin conexión. Recargá.</div>'; return; }
+
+    await loadAllProfiles();
+    if (me) myProfile = profilesById.get(me.id) || null;
+
+    // Determine which profile to show
+    const uParam = qparam('u'); // format: name-section slug like "iglesias-b"
+    if (uParam) {
+      viewedProfile = [...allProfiles.values()].find(p => keyOf(p.name, p.section) === uParam.toLowerCase()) || null;
+    } else {
+      viewedProfile = myProfile;
+    }
+
+    if (!viewedProfile) {
+      if (!myProfile && !uParam) {
+        document.getElementById('app').innerHTML = `
+          <div class="loading" style="flex-direction:column;gap:14px">
+            <div>No tenés cuenta aún.</div>
+            <a href="/" class="btn btn-primary">Ir al inicio a elegir tu nombre</a>
+          </div>`;
+        return;
+      }
+      document.getElementById('app').innerHTML = `<div class="loading">Perfil no encontrado</div>`;
+      return;
+    }
+
+    // Register profile view (if not viewing own)
+    if (me && viewedProfile.user_id !== me.id) {
+      sb.from('profile_views').upsert({
+        viewer_id: me.id, viewed_user_id: viewedProfile.user_id, viewed_at: new Date().toISOString()
+      }, { onConflict: 'viewer_id,viewed_user_id' }).then(()=>{});
+    }
+
+    await renderProfile();
+    subscribeUpdates();
+  }
+
+  async function loadAllProfiles() {
+    const { data } = await sb.from('profiles').select('user_id, name, section, role, bio, avatar_url, instagram, tiktok, twitter');
+    (data || []).forEach(p => {
+      allProfiles.set(keyOf(p.name, p.section), p);
+      profilesById.set(p.user_id, p);
+    });
+  }
+
+  async function renderProfile() {
+    const p = viewedProfile;
+    const isMe = me && p.user_id === me.id;
+    // Load followers, following, posts in parallel
+    const [followers, following, iFollow, posts] = await Promise.all([
+      sb.from('follows').select('follower_id').eq('followed_id', p.user_id),
+      sb.from('follows').select('followed_id').eq('follower_id', p.user_id),
+      me ? sb.from('follows').select('followed_id').eq('follower_id', me.id).eq('followed_id', p.user_id).maybeSingle() : Promise.resolve({ data: null }),
+      sb.from('posts').select('id, type, description, media_url, media_type, created_at').eq('author_user_id', p.user_id).order('created_at', { ascending: false }),
+    ]);
+    const followerCount = (followers.data || []).length;
+    const followingCount = (following.data || []).length;
+    const amFollowing = !!(iFollow.data);
+    const userPosts = posts.data || [];
+
+    const avatarHtml = p.avatar_url
+      ? `<img src="${escapeHtml(p.avatar_url)}" alt="${escapeHtml(p.name)}">`
+      : p.name[0].toUpperCase();
+
+    const socialsHtml = [
+      p.instagram ? `<a class="social-chip" href="https://instagram.com/${encodeURIComponent(p.instagram.replace(/^@/,''))}" target="_blank" rel="noopener">📷 @${escapeHtml(p.instagram.replace(/^@/,''))}</a>` : '',
+      p.tiktok    ? `<a class="social-chip" href="https://tiktok.com/@${encodeURIComponent(p.tiktok.replace(/^@/,''))}" target="_blank" rel="noopener">🎵 @${escapeHtml(p.tiktok.replace(/^@/,''))}</a>` : '',
+      p.twitter   ? `<a class="social-chip" href="https://twitter.com/${encodeURIComponent(p.twitter.replace(/^@/,''))}" target="_blank" rel="noopener">🐦 @${escapeHtml(p.twitter.replace(/^@/,''))}</a>` : '',
+    ].filter(Boolean).join('');
+
+    const actionsHtml = isMe
+      ? `<button class="btn btn-primary" id="editBtn">Editar perfil</button>
+         <button class="btn btn-secondary" id="newPostBtn">＋ Nueva publicación</button>`
+      : `<button class="btn btn-follow ${amFollowing ? 'following' : ''}" id="followBtn">${amFollowing ? '✓ Siguiendo' : '＋ Seguir'}</button>
+         <a class="btn btn-secondary" href="/chat/">💬 Mensaje</a>`;
+
+    // Viewers panel (only for owner)
+    let viewersHtml = '';
+    if (isMe) {
+      const { data: views } = await sb.from('profile_views')
+        .select('viewer_id, viewed_at').eq('viewed_user_id', me.id)
+        .order('viewed_at', { ascending: false }).limit(20);
+      const viewers = (views || []).map(v => {
+        const vp = profilesById.get(v.viewer_id);
+        if (!vp) return null;
+        const key = keyOf(vp.name, vp.section);
+        const avatar = vp.avatar_url ? `<img src="${escapeHtml(vp.avatar_url)}">` : vp.name[0].toUpperCase();
+        return `<a class="viewer-chip" href="/profile/?u=${key}"><span class="mini-avatar" style="background:${colorFor(vp.name)}">${avatar}</span>${escapeHtml(vp.name)}<span class="time">${timeAgo(v.viewed_at)}</span></a>`;
+      }).filter(Boolean);
+      viewersHtml = `
+        <section class="viewers-panel">
+          <div class="viewers-head"><h3>👀 Quién vio tu perfil</h3><span class="badge">últimos 20</span></div>
+          <div class="viewers-list">${viewers.length ? viewers.join('') : '<div class="viewers-empty">Todavía nadie te vio</div>'}</div>
+        </section>`;
+    }
+
+    document.getElementById('app').innerHTML = `
+      <header class="profile-hero">
+        <div class="avatar-wrap">
+          <div class="profile-avatar" style="background:${colorFor(p.name)}">${avatarHtml}</div>
+          ${isMe ? '<button class="avatar-edit" id="avatarEditBtn" title="Cambiar foto">📷</button>' : ''}
+          <input type="file" id="avatarFile" accept="image/*" hidden>
+        </div>
+        <div class="profile-info">
+          <h1>${escapeHtml(p.name)}${p.role ? `<span class="role-badge">★ ${escapeHtml(p.role)}</span>` : ''}</h1>
+          <div class="section-badge">Sección ${escapeHtml(p.section)}</div>
+          ${p.bio ? `<p class="bio">${escapeHtml(p.bio)}</p>` : (isMe ? '<p class="bio" style="font-style:italic">Todavía no escribiste tu bio. Editá tu perfil para agregar una.</p>' : '')}
+          ${socialsHtml ? `<div class="socials">${socialsHtml}</div>` : ''}
+          <div class="stats">
+            <div class="stat"><div class="stat-num">${userPosts.length}</div><div class="stat-label">Publicaciones</div></div>
+            <button class="stat" id="showFollowers"><div class="stat-num">${followerCount}</div><div class="stat-label">Seguidores</div></button>
+            <button class="stat" id="showFollowing"><div class="stat-num">${followingCount}</div><div class="stat-label">Siguiendo</div></button>
+          </div>
+          <div class="actions">${actionsHtml}</div>
+        </div>
+      </header>
+
+      ${viewersHtml}
+
+      <div class="post-tabs" role="tablist">
+        <button class="post-tab ${currentPostFilter==='all'?'is-active':''}" data-filter="all">Todo</button>
+        <button class="post-tab ${currentPostFilter==='photo'?'is-active':''}" data-filter="photo">📷 Fotos</button>
+        <button class="post-tab ${currentPostFilter==='reel'?'is-active':''}" data-filter="reel">🎬 Reels</button>
+        <button class="post-tab ${currentPostFilter==='opinion'?'is-active':''}" data-filter="opinion">💬 Opiniones</button>
+      </div>
+
+      <div class="posts-grid" id="postsGrid"></div>
+    `;
+
+    renderPosts(userPosts);
+    wireProfileActions(p, isMe, amFollowing, userPosts);
+  }
+
+  function renderPosts(posts) {
+    const grid = document.getElementById('postsGrid');
+    const filtered = currentPostFilter === 'all' ? posts : posts.filter(p => p.type === currentPostFilter);
+    if (!filtered.length) {
+      grid.innerHTML = '<div class="posts-empty">— sin publicaciones acá —</div>';
+      return;
+    }
+    grid.innerHTML = filtered.map(post => {
+      if (post.type === 'opinion') {
+        return `<a class="post-tile opinion-tile" href="/feed/?post=${post.id}"><span class="type-badge">💬 Opinión</span><div class="op-text">${escapeHtml(post.description || '')}</div></a>`;
+      }
+      const media = post.type === 'reel'
+        ? `<video muted loop playsinline preload="metadata" src="${escapeHtml(post.media_url)}"></video>`
+        : `<img src="${escapeHtml(post.media_url)}" alt="post">`;
+      return `<a class="post-tile" href="/feed/?post=${post.id}">${media}<span class="type-badge">${post.type === 'reel' ? '🎬 Reel' : '📷 Foto'}</span></a>`;
+    }).join('');
+    // autoplay hover for reels
+    grid.querySelectorAll('video').forEach(v => {
+      v.addEventListener('mouseenter', () => v.play().catch(()=>{}));
+      v.addEventListener('mouseleave', () => v.pause());
+    });
+  }
+
+  function wireProfileActions(p, isMe, amFollowing, userPosts) {
+    document.querySelectorAll('.post-tab').forEach(t => t.addEventListener('click', () => {
+      currentPostFilter = t.dataset.filter;
+      document.querySelectorAll('.post-tab').forEach(x => x.classList.remove('is-active'));
+      t.classList.add('is-active');
+      renderPosts(userPosts);
+    }));
+
+    document.getElementById('showFollowers')?.addEventListener('click', () => openFollowList('followers', p.user_id, p.name));
+    document.getElementById('showFollowing')?.addEventListener('click', () => openFollowList('following', p.user_id, p.name));
+
+    if (isMe) {
+      document.getElementById('editBtn')?.addEventListener('click', openEditModal);
+      document.getElementById('newPostBtn')?.addEventListener('click', openComposer);
+      document.getElementById('avatarEditBtn')?.addEventListener('click', () => document.getElementById('avatarFile').click());
+      document.getElementById('avatarFile')?.addEventListener('change', onAvatarChange);
+    } else {
+      document.getElementById('followBtn')?.addEventListener('click', async (e) => {
+        if (!me || !myProfile) { alert('Necesitás cuenta primero'); return; }
+        const btn = e.currentTarget;
+        btn.disabled = true;
+        if (amFollowing) {
+          await sb.from('follows').delete().eq('follower_id', me.id).eq('followed_id', p.user_id);
+        } else {
+          await sb.from('follows').insert({ follower_id: me.id, followed_id: p.user_id });
+        }
+        await renderProfile();
+      });
+    }
+  }
+
+  // ============ EDIT PROFILE ============
+  function openEditModal() {
+    document.getElementById('editBio').value = myProfile.bio || '';
+    document.getElementById('editInstagram').value = myProfile.instagram || '';
+    document.getElementById('editTiktok').value = myProfile.tiktok || '';
+    document.getElementById('editTwitter').value = myProfile.twitter || '';
+    document.getElementById('editModal').hidden = false;
+    document.getElementById('editModal').classList.add('open');
+  }
+  function closeEditModal() { document.getElementById('editModal').classList.remove('open'); document.getElementById('editModal').hidden = true; }
+  document.getElementById('editClose').addEventListener('click', closeEditModal);
+  document.getElementById('editCancel').addEventListener('click', closeEditModal);
+  document.getElementById('editSave').addEventListener('click', async () => {
+    const bio = document.getElementById('editBio').value.trim() || null;
+    const instagram = document.getElementById('editInstagram').value.trim().replace(/^@/,'') || null;
+    const tiktok = document.getElementById('editTiktok').value.trim().replace(/^@/,'') || null;
+    const twitter = document.getElementById('editTwitter').value.trim().replace(/^@/,'') || null;
+    const { error } = await sb.from('profiles').update({ bio, instagram, tiktok, twitter }).eq('user_id', me.id);
+    if (error) { alert('No se pudo guardar: ' + error.message); return; }
+    Object.assign(myProfile, { bio, instagram, tiktok, twitter });
+    Object.assign(viewedProfile, { bio, instagram, tiktok, twitter });
+    closeEditModal();
+    renderProfile();
+  });
+
+  async function onAvatarChange(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { alert('Foto muy grande (máx 5 MB)'); return; }
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().slice(0, 5);
+    const path = `${me.id}/avatar-${Date.now()}.${ext}`;
+    const { error: upErr } = await sb.storage.from('avatars').upload(path, file, { contentType: file.type, upsert: false });
+    if (upErr) { alert('No se pudo subir: ' + upErr.message); return; }
+    const url = sb.storage.from('avatars').getPublicUrl(path).data.publicUrl;
+    const { error } = await sb.from('profiles').update({ avatar_url: url }).eq('user_id', me.id);
+    if (error) { alert(error.message); return; }
+    myProfile.avatar_url = url;
+    viewedProfile.avatar_url = url;
+    renderProfile();
+  }
+
+  // ============ COMPOSER ============
+  let composerType = 'opinion';
+  let composerFile = null;
+  function openComposer() {
+    composerType = 'opinion'; composerFile = null;
+    document.getElementById('composerDesc').value = '';
+    document.querySelectorAll('.composer-tab').forEach(t => t.classList.toggle('is-active', t.dataset.type === 'opinion'));
+    updateComposerMedia();
+    document.getElementById('composerModal').hidden = false;
+    document.getElementById('composerModal').classList.add('open');
+  }
+  function closeComposer() { document.getElementById('composerModal').classList.remove('open'); document.getElementById('composerModal').hidden = true; }
+  document.getElementById('composerClose').addEventListener('click', closeComposer);
+  document.getElementById('composerCancel').addEventListener('click', closeComposer);
+  document.querySelectorAll('.composer-tab').forEach(t => t.addEventListener('click', () => {
+    composerType = t.dataset.type; composerFile = null;
+    document.querySelectorAll('.composer-tab').forEach(x => x.classList.remove('is-active'));
+    t.classList.add('is-active');
+    updateComposerMedia();
+  }));
+  function updateComposerMedia() {
+    const wrap = document.getElementById('composerMediaWrap');
+    const content = document.getElementById('composerMediaContent');
+    const input = document.getElementById('composerFile');
+    if (composerType === 'opinion') { wrap.hidden = true; return; }
+    wrap.hidden = false;
+    input.accept = composerType === 'reel' ? 'video/*' : 'image/*';
+    if (!composerFile) {
+      content.innerHTML = `<button type="button" class="picker-btn" id="pickMediaBtn">${composerType === 'reel' ? '🎬 Elegir video' : '📷 Elegir foto'}</button>`;
+      document.getElementById('pickMediaBtn').addEventListener('click', () => input.click());
+    } else {
+      const url = URL.createObjectURL(composerFile);
+      content.innerHTML = composerType === 'reel'
+        ? `<video src="${url}" controls muted playsinline></video><br><button type="button" class="picker-btn" id="clearMediaBtn" style="margin-top:8px">Cambiar</button>`
+        : `<img src="${url}"><br><button type="button" class="picker-btn" id="clearMediaBtn" style="margin-top:8px">Cambiar</button>`;
+      document.getElementById('clearMediaBtn').addEventListener('click', () => { composerFile = null; updateComposerMedia(); });
+    }
+  }
+  document.getElementById('composerFile').addEventListener('change', (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    const maxMB = composerType === 'reel' ? 40 : 8;
+    if (f.size > maxMB * 1024 * 1024) { alert(`Muy pesado (máx ${maxMB} MB)`); return; }
+    composerFile = f; updateComposerMedia();
+  });
+  document.getElementById('composerSubmit').addEventListener('click', async () => {
+    const desc = document.getElementById('composerDesc').value.trim();
+    if (composerType === 'opinion' && !desc) { alert('Escribí algo'); return; }
+    if (composerType !== 'opinion' && !composerFile) { alert('Elegí un archivo'); return; }
+    const btn = document.getElementById('composerSubmit');
+    btn.disabled = true; btn.textContent = 'Subiendo…';
+    let media_url = null, media_type = null;
+    if (composerFile) {
+      const ext = (composerFile.name.split('.').pop() || 'bin').toLowerCase().slice(0, 5);
+      const path = `${me.id}/${composerType}-${Date.now()}-${Math.random().toString(36).slice(2,6)}.${ext}`;
+      const { error: upErr } = await sb.storage.from('posts').upload(path, composerFile, { contentType: composerFile.type, upsert: false });
+      if (upErr) { alert('Error subiendo: ' + upErr.message); btn.disabled = false; btn.textContent = 'Publicar'; return; }
+      media_url = sb.storage.from('posts').getPublicUrl(path).data.publicUrl;
+      media_type = composerFile.type;
+    }
+    const { error } = await sb.from('posts').insert({ author_user_id: me.id, type: composerType, description: desc || null, media_url, media_type });
+    btn.disabled = false; btn.textContent = 'Publicar';
+    if (error) { alert('No se pudo publicar: ' + error.message); return; }
+    closeComposer();
+    renderProfile();
+  });
+
+  // ============ FOLLOW LIST ============
+  async function openFollowList(kind, uid, name) {
+    document.getElementById('followListTitle').textContent = (kind === 'followers' ? 'Seguidores de ' : 'A quién sigue ') + name;
+    document.getElementById('followListBody').innerHTML = '<div class="loading" style="padding:30px">Cargando…</div>';
+    document.getElementById('followListModal').hidden = false;
+    document.getElementById('followListModal').classList.add('open');
+    const col = kind === 'followers' ? 'follower_id' : 'followed_id';
+    const filter = kind === 'followers' ? 'followed_id' : 'follower_id';
+    const { data } = await sb.from('follows').select(col).eq(filter, uid);
+    const body = document.getElementById('followListBody');
+    if (!data || !data.length) { body.innerHTML = '<div class="viewers-empty" style="padding:20px">— sin usuarios —</div>'; return; }
+    body.innerHTML = data.map(row => {
+      const otherId = row[col];
+      const p = profilesById.get(otherId);
+      if (!p) return '';
+      const key = keyOf(p.name, p.section);
+      const avatar = p.avatar_url ? `<img src="${escapeHtml(p.avatar_url)}">` : p.name[0].toUpperCase();
+      return `<a class="follow-item" href="/profile/?u=${key}">
+        <div class="mini-avatar" style="background:${colorFor(p.name)}">${avatar}</div>
+        <div class="fname">${escapeHtml(p.name)}<small>Sección ${escapeHtml(p.section)}</small></div>
+      </a>`;
+    }).join('');
+  }
+  document.getElementById('followListClose').addEventListener('click', () => { document.getElementById('followListModal').classList.remove('open'); document.getElementById('followListModal').hidden = true; });
+
+  // ============ REALTIME ============
+  function subscribeUpdates() {
+    sb.channel('profile-live')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'follows' }, () => renderProfile())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, () => renderProfile())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profile_views', filter: `viewed_user_id=eq.${me ? me.id : '00000000-0000-0000-0000-000000000000'}` }, () => renderProfile())
+      .subscribe();
+  }
+
+  boot();
+</script>
+
+</body>
+</html>
