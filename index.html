@@ -777,6 +777,90 @@
     position: absolute; top: 14px; right: 16px;
     font-size: 22px; opacity: .7;
   }
+  .record.votable {
+    cursor: pointer;
+    transition: transform .18s, box-shadow .18s, border-color .18s;
+  }
+  .record.votable:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--line-strong);
+  }
+  .record.votable::after {
+    content: "★ Votá";
+    position: absolute; bottom: 12px; right: 16px;
+    font-family: var(--f-mono); font-size: 10px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--school);
+    padding: 4px 8px; border-radius: 999px;
+    background: var(--school-tint);
+  }
+  .record .rec-votes {
+    font-family: var(--f-mono); font-size: 11px;
+    color: var(--ink-mute); letter-spacing: 0.06em;
+    margin-top: 2px;
+  }
+  .record .rec-empty {
+    font-size: 13px; color: var(--ink-mute);
+    font-style: italic;
+  }
+
+  /* ============ VOTE modal ============ */
+  .vote-list {
+    display: flex; flex-direction: column; gap: 6px;
+    max-height: 60vh; overflow-y: auto;
+    margin: 6px -6px 0;
+    padding: 0 6px;
+  }
+  .vote-option {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px; border-radius: 10px;
+    background: var(--paper-soft);
+    border: 1.5px solid var(--line);
+    font: inherit; color: var(--ink);
+    text-align: left; cursor: pointer;
+    transition: all .12s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .vote-option:hover:not(.picked) {
+    border-color: var(--school-2);
+    background: var(--school-tint);
+  }
+  .vote-option:active { transform: scale(.98); }
+  .vote-option.picked {
+    border-color: var(--school);
+    background: var(--school-tint);
+    box-shadow: inset 0 0 0 1px var(--school);
+  }
+  .vote-option .vote-avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: grid; place-items: center;
+    color: #fff; font-family: var(--f-display); font-weight: 800; font-size: 12px;
+    flex-shrink: 0;
+  }
+  .vote-option .vote-name {
+    flex: 1; min-width: 0;
+    font-weight: 700; font-size: 14px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .vote-option .vote-name span {
+    font-family: var(--f-mono); font-size: 10px;
+    color: var(--ink-mute); font-weight: 500;
+    letter-spacing: 0.06em; margin-left: 6px;
+  }
+  .vote-option .vote-count {
+    font-family: var(--f-mono); font-size: 12px;
+    color: var(--ink-soft); font-weight: 700;
+    background: var(--paper); padding: 4px 9px; border-radius: 999px;
+    min-width: 32px; text-align: center;
+    border: 1px solid var(--line);
+  }
+  .vote-option.picked .vote-count {
+    background: var(--school); color: #fff; border-color: var(--school);
+  }
+  .vote-option.leader .vote-count::before {
+    content: "★ "; color: var(--lemon);
+  }
 
   /* ============ CHAT CTA ============ */
   .chat-cta {
@@ -1739,47 +1823,10 @@
       <div class="section-tag">05 · <em>récords del salón</em></div>
       <h2>Los honores no oficiales.</h2>
     </div>
-    <p>Datos duros, chismes suaves. Se actualiza al final de cada trimestre.</p>
+    <p>Datos duros, chismes suaves. Se actualiza al final de cada periodo. Los con ★ los vota el salón — tocalos para votar.</p>
   </div>
 
-  <div class="records reveal">
-    <div class="record">
-      <span class="rec-icon">🏆</span>
-      <div class="rec-tag">Mejor promedio</div>
-      <div class="rec-title">9.6 / 10</div>
-      <div class="rec-holder">Vigente: <b>Andrea R.</b> · Sección A</div>
-    </div>
-    <div class="record">
-      <span class="rec-icon">⚽</span>
-      <div class="rec-tag">Máx. goleador</div>
-      <div class="rec-title">11 goles</div>
-      <div class="rec-holder">Vigente: <b>Deleón</b> · Equipo 2</div>
-    </div>
-    <div class="record">
-      <span class="rec-icon">📚</span>
-      <div class="rec-tag">Más tarea entregada a tiempo</div>
-      <div class="rec-title">100 %</div>
-      <div class="rec-holder">Vigente: <b>Sofía L.</b> · Sección A</div>
-    </div>
-    <div class="record">
-      <span class="rec-icon">🎨</span>
-      <div class="rec-tag">Mejor proyecto de arte</div>
-      <div class="rec-title">"Mural del pasillo"</div>
-      <div class="rec-holder">Vigente: <b>Grupo Verde</b> · Sección B</div>
-    </div>
-    <div class="record">
-      <span class="rec-icon">🎤</span>
-      <div class="rec-tag">Mejor exposición del año</div>
-      <div class="rec-title">"Volcanes de SV"</div>
-      <div class="rec-holder">Vigente: <b>Camila &amp; Rodrigo</b></div>
-    </div>
-    <div class="record">
-      <span class="rec-icon">🔥</span>
-      <div class="rec-tag">Racha sin reportes</div>
-      <div class="rec-title">37 días</div>
-      <div class="rec-holder">Vigente: <b>Sección B</b> (¡y contando!)</div>
-    </div>
-  </div>
+  <div class="records reveal" id="recordsGrid"></div>
 </section>
 
 <!-- =================== CHAT CTA =================== -->
@@ -1855,6 +1902,30 @@
     </div>
   </div>
 </footer>
+
+<!-- =================== MODAL · votación de récord =================== -->
+<div class="modal-backdrop" id="voteModal" role="dialog" aria-modal="true" aria-labelledby="voteTitle" hidden>
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="section-tag" id="voteCategory" style="color: var(--school)">votación abierta</div>
+        <h3 id="voteTitle">Votar</h3>
+        <p id="voteDescription">Tocá a quien elijas. Podés cambiar tu voto cuando quieras.</p>
+      </div>
+      <button class="modal-close" id="voteClose" aria-label="Cerrar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="db-notice" id="voteNotice">Cargando…</div>
+      <div class="vote-list" id="voteList"></div>
+    </div>
+    <div class="modal-foot">
+      <span id="voteStatus">— votos</span>
+      <button id="voteClear" hidden type="button">Quitar mi voto</button>
+    </div>
+  </div>
+</div>
 
 <!-- =================== MODAL · perfil de estudiante =================== -->
 <div class="modal-backdrop" id="profileModal" role="dialog" aria-modal="true" aria-labelledby="profileName" hidden>
@@ -2414,6 +2485,231 @@
     setNotifBadge(count);
   }
 
+  // ---------- récords: goleador + votaciones ----------
+  const VOTE_CATEGORIES = {
+    maestro: {
+      label: 'Mejor maestro',
+      icon: '🎓',
+      candidates: [
+        { name: 'Mr Rodas' }, { name: 'Ms Vero' }, { name: 'Ms Iris' },
+        { name: 'Mr Neto' }, { name: 'Mr Francisco' }, { name: 'Ms Vasquez' },
+        { name: 'Ms Dolores' }, { name: 'Mr Jeffrey' }, { name: 'Ms Rebeca' },
+        { name: 'Mr Pablo' },
+      ],
+    },
+    portado: {
+      label: 'Mejor portado',
+      icon: '😇',
+      candidates: 'STUDENTS',
+    },
+    futbol: {
+      label: 'Mejor en fútbol',
+      icon: '⚽',
+      candidates: 'STUDENTS',
+    },
+    payaso: {
+      label: 'Más payaso',
+      icon: '🤡',
+      candidates: 'STUDENTS',
+    },
+    aura: {
+      label: 'Más aura',
+      icon: '✨',
+      candidates: 'STUDENTS',
+    },
+  };
+  function candidatesOf(catKey) {
+    const c = VOTE_CATEGORIES[catKey].candidates;
+    if (c === 'STUDENTS') return STUDENTS.map(s => ({ name: s.n, section: s.s }));
+    return c;
+  }
+  function candidateId(cand) { return cand.section ? `${cand.section}·${cand.name}` : cand.name; }
+  function candidateFromId(catKey, id) {
+    return candidatesOf(catKey).find(c => candidateId(c) === id);
+  }
+
+  // { [category]: { [candidateId]: count } }
+  let voteCounts = {};
+  // { [category]: candidateId }   ← nuestro voto
+  let myVotes = {};
+  let voteActiveCategory = null;
+
+  function tallyLeader(catKey) {
+    const counts = voteCounts[catKey] || {};
+    let best = null, bestN = 0;
+    for (const id in counts) {
+      if (counts[id] > bestN) { best = id; bestN = counts[id]; }
+    }
+    return best ? { id: best, count: bestN, cand: candidateFromId(catKey, best) } : null;
+  }
+  function totalVotes(catKey) {
+    const counts = voteCounts[catKey] || {};
+    return Object.values(counts).reduce((s, n) => s + n, 0);
+  }
+
+  function renderRecords() {
+    const grid = document.getElementById('recordsGrid');
+    if (!grid) return;
+    // Card 1: goleador (dinámico desde GOLEADORES)
+    const top = GOLEADORES[0];
+    let html = `
+      <div class="record">
+        <span class="rec-icon">⚽</span>
+        <div class="rec-tag">Máx. goleador</div>
+        <div class="rec-title">${top.goles} goles</div>
+        <div class="rec-holder">Vigente: <b>${escapeHtml(top.name)}</b></div>
+      </div>
+    `;
+    // Cards votables
+    for (const key in VOTE_CATEGORIES) {
+      const cat = VOTE_CATEGORIES[key];
+      const leader = tallyLeader(key);
+      const total = totalVotes(key);
+      const title = leader ? escapeHtml(leader.cand.name) : '—';
+      const holder = leader
+        ? `Vigente: <b>${escapeHtml(leader.cand.name)}</b>${leader.cand.section ? ' · Sección ' + escapeHtml(leader.cand.section) : ''}`
+        : '<span class="rec-empty">Sin votos todavía</span>';
+      html += `
+        <div class="record votable" data-cat="${key}">
+          <span class="rec-icon">${cat.icon}</span>
+          <div class="rec-tag">${escapeHtml(cat.label)}</div>
+          <div class="rec-title">${title}</div>
+          <div class="rec-holder">${holder}</div>
+          <div class="rec-votes">${total} ${total === 1 ? 'voto' : 'votos'}</div>
+        </div>
+      `;
+    }
+    grid.innerHTML = html;
+    grid.querySelectorAll('.record.votable').forEach(el => {
+      el.addEventListener('click', () => openVoteModal(el.dataset.cat));
+    });
+  }
+
+  // ---------- vote modal ----------
+  const voteModal    = document.getElementById('voteModal');
+  const voteClose    = document.getElementById('voteClose');
+  const voteTitle    = document.getElementById('voteTitle');
+  const voteCategory = document.getElementById('voteCategory');
+  const voteDesc     = document.getElementById('voteDescription');
+  const voteList     = document.getElementById('voteList');
+  const voteStatus   = document.getElementById('voteStatus');
+  const voteNotice   = document.getElementById('voteNotice');
+  const voteClear    = document.getElementById('voteClear');
+
+  function closeVote() { voteModal.classList.remove('open'); voteModal.hidden = true; voteActiveCategory = null; }
+  voteClose.addEventListener('click', closeVote);
+  voteModal.addEventListener('click', (e) => { if (e.target === voteModal) closeVote(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !voteModal.hidden) closeVote(); });
+
+  function openVoteModal(catKey) {
+    voteActiveCategory = catKey;
+    const cat = VOTE_CATEGORIES[catKey];
+    voteTitle.textContent = cat.icon + ' ' + cat.label;
+    voteCategory.textContent = 'Votación · ' + cat.label.toLowerCase();
+    voteDesc.textContent = 'Tocá a quien elijas. Podés cambiar tu voto cuando quieras.';
+    if (!currentUser) {
+      voteNotice.classList.add('offline');
+      voteNotice.textContent = 'Necesitás cuenta para votar';
+    } else if (!account) {
+      voteNotice.classList.add('offline');
+      voteNotice.textContent = 'Reclamá tu nombre arriba para votar';
+    } else {
+      voteNotice.classList.remove('offline');
+      voteNotice.textContent = 'Cada persona vota una vez por categoría';
+    }
+    renderVoteList();
+    voteModal.hidden = false;
+    voteModal.classList.add('open');
+  }
+
+  function renderVoteList() {
+    if (!voteActiveCategory) return;
+    const catKey = voteActiveCategory;
+    const list = candidatesOf(catKey);
+    const counts = voteCounts[catKey] || {};
+    const mine = myVotes[catKey];
+    const leader = tallyLeader(catKey);
+    // sort by count desc, then name
+    const sorted = list.slice().sort((a, b) => {
+      const ca = counts[candidateId(a)] || 0;
+      const cb = counts[candidateId(b)] || 0;
+      if (cb !== ca) return cb - ca;
+      return a.name.localeCompare(b.name);
+    });
+    voteList.innerHTML = sorted.map(c => {
+      const id = candidateId(c);
+      const n = counts[id] || 0;
+      const picked = mine === id;
+      const isLeader = leader && leader.id === id && n > 0;
+      const initial = c.name.replace(/^Mr |^Ms /, '')[0].toUpperCase();
+      return `<button type="button" class="vote-option ${picked ? 'picked' : ''} ${isLeader ? 'leader' : ''}" data-id="${escapeHtml(id)}">
+        <span class="vote-avatar" style="background:${colorFor(c.name)}">${initial}</span>
+        <span class="vote-name">${escapeHtml(c.name)}${c.section ? `<span>Secc. ${escapeHtml(c.section)}</span>` : ''}</span>
+        <span class="vote-count">${n}</span>
+      </button>`;
+    }).join('');
+    voteList.querySelectorAll('.vote-option').forEach(btn => {
+      btn.addEventListener('click', () => castVote(catKey, btn.dataset.id));
+    });
+    const total = totalVotes(catKey);
+    voteStatus.textContent = `${total} ${total === 1 ? 'voto' : 'votos'} · ${list.length} opciones`;
+    voteClear.hidden = !mine;
+  }
+
+  async function castVote(catKey, id) {
+    if (!currentUser) { alert('Cargando…'); return; }
+    if (!account) { alert('Necesitás reclamar tu nombre arriba para votar'); return; }
+    const prev = myVotes[catKey];
+    // Optimistic update
+    if (prev) {
+      voteCounts[catKey][prev] = Math.max(0, (voteCounts[catKey][prev] || 1) - 1);
+    }
+    voteCounts[catKey] = voteCounts[catKey] || {};
+    voteCounts[catKey][id] = (voteCounts[catKey][id] || 0) + 1;
+    myVotes[catKey] = id;
+    renderVoteList();
+    renderRecords();
+    const { error } = await sb.from('votes').upsert({
+      user_id: currentUser.id, category: catKey, candidate: id, updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id,category' });
+    if (error) {
+      alert('No se pudo votar: ' + error.message);
+      await refreshVotes();
+    }
+  }
+  voteClear.addEventListener('click', async () => {
+    const catKey = voteActiveCategory;
+    if (!catKey || !currentUser) return;
+    const prev = myVotes[catKey];
+    if (prev && voteCounts[catKey]) {
+      voteCounts[catKey][prev] = Math.max(0, (voteCounts[catKey][prev] || 1) - 1);
+    }
+    delete myVotes[catKey];
+    renderVoteList();
+    renderRecords();
+    const { error } = await sb.from('votes').delete().eq('user_id', currentUser.id).eq('category', catKey);
+    if (error) { alert('No se pudo quitar: ' + error.message); await refreshVotes(); }
+  });
+
+  async function refreshVotes() {
+    const { data, error } = await sb.from('votes').select('user_id, category, candidate');
+    if (error) return;
+    voteCounts = {};
+    myVotes = {};
+    (data || []).forEach(row => {
+      voteCounts[row.category] = voteCounts[row.category] || {};
+      voteCounts[row.category][row.candidate] = (voteCounts[row.category][row.candidate] || 0) + 1;
+      if (currentUser && row.user_id === currentUser.id) {
+        myVotes[row.category] = row.candidate;
+      }
+    });
+    renderRecords();
+    if (!voteModal.hidden && voteActiveCategory) renderVoteList();
+  }
+
+  // Render inicial con GOLEADORES (sin votos aún)
+  renderRecords();
+
   async function initSupabase() {
     dbNotice.textContent = 'Conectando…';
     dbNotice.classList.remove('offline');
@@ -2435,6 +2731,7 @@
     await refreshProfiles();
     await refreshChismes();
     await refreshNotifBadge();
+    await refreshVotes();
     updateAccountChip();
     renderComposer();
     dbNotice.textContent = 'Sincronizado en vivo · Supabase';
@@ -2450,6 +2747,10 @@
 
     sb.channel('messages-badge').on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, () => {
       refreshNotifBadge();
+    }).subscribe();
+
+    sb.channel('votes-live').on('postgres_changes', { event: '*', schema: 'public', table: 'votes' }, () => {
+      refreshVotes();
     }).subscribe();
 
     window.addEventListener('focus', refreshNotifBadge);
