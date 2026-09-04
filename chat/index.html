@@ -81,7 +81,7 @@
   }
 
   * { box-sizing: border-box; }
-  html, body { height: 100%; }
+  html { height: 100%; }
   body {
     margin: 0;
     font-family: var(--f-body);
@@ -91,6 +91,8 @@
     -webkit-font-smoothing: antialiased;
     display: flex; flex-direction: column;
     overflow: hidden;
+    height: 100vh;
+    height: 100dvh;
   }
   a { color: inherit; text-decoration: none; }
   button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
@@ -206,7 +208,7 @@
 
   /* ============ CHAT APP LAYOUT ============ */
   .chat-app {
-    flex: 1; display: grid;
+    flex: 1 1 0; display: grid;
     grid-template-columns: 340px 1fr;
     min-height: 0;
     overflow: hidden;
@@ -332,6 +334,8 @@
     display: flex; flex-direction: column;
     background: var(--ground);
     min-width: 0;
+    min-height: 0;
+    overflow: hidden;
     background-image:
       radial-gradient(600px 400px at 90% 10%, rgba(59,94,240,.06), transparent 60%),
       radial-gradient(500px 300px at 0% 100%, rgba(217,31,38,.03), transparent 60%);
@@ -389,7 +393,10 @@
   }
 
   .chat-messages {
-    flex: 1; overflow-y: auto;
+    flex: 1 1 0; min-height: 0;
+    overflow-y: auto; overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
     padding: 20px 20px 8px;
     display: flex; flex-direction: column; gap: 8px;
   }
@@ -474,13 +481,26 @@
   }
   .composer-input:focus { border-color: var(--school-2); }
   .composer-preview {
-    padding: 8px 16px;
+    padding: 10px 16px;
     background: var(--paper-soft);
     border-top: 1px solid var(--line);
-    display: flex; align-items: center; gap: 10px;
+    display: flex; align-items: center; gap: 12px;
+    flex-shrink: 0;
   }
-  .composer-preview img { height: 60px; border-radius: 8px; }
-  .composer-preview button { color: var(--coral); font-weight: 700; font-size: 12px; }
+  .composer-preview img { height: 56px; width: 56px; object-fit: cover; border-radius: 10px; flex-shrink: 0; }
+  .composer-preview .composer-preview-info { flex: 1; min-width: 0; font-size: 13px; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .composer-preview button {
+    color: var(--coral); font-weight: 700; font-size: 13px;
+    padding: 10px 16px; border-radius: 999px;
+    background: color-mix(in oklab, var(--coral) 12%, var(--paper));
+    border: 1px solid color-mix(in oklab, var(--coral) 35%, var(--line));
+    min-height: 40px;
+    flex-shrink: 0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  .composer-preview button:active { transform: scale(.96); }
 
   /* ============ LOCKED / login ============ */
   .locked {
@@ -1508,7 +1528,7 @@
         return;
       }
       preview.hidden = false;
-      preview.innerHTML = `<span style="flex:1;font-size:13px;color:var(--ink-soft)">Procesando foto…</span>`;
+      preview.innerHTML = `<span class="composer-preview-info">Procesando foto…</span>`;
       let photo;
       try {
         // Se comprime/convierte a JPEG en el cliente: así las fotos pesadas de
@@ -1535,15 +1555,20 @@
       pendingPhoto = photo;
       preview.innerHTML = `
         <img src="${photo.dataUrl}" alt="preview">
-        <span style="flex:1;font-size:13px;color:var(--ink-soft)">Foto lista (${photo.sizeKB.toFixed(0)} KB)</span>
+        <span class="composer-preview-info">Foto lista (${photo.sizeKB.toFixed(0)} KB)</span>
         <button type="button" id="removePhoto">Quitar</button>
       `;
       preview.hidden = false;
-      document.getElementById('removePhoto').addEventListener('click', () => {
+      const removeBtn = document.getElementById('removePhoto');
+      const removePhoto = (ev) => {
+        if (ev) { ev.preventDefault(); ev.stopPropagation(); }
         pendingPhoto = null;
         preview.hidden = true;
+        preview.innerHTML = '';
         attachInput.value = '';
-      });
+      };
+      removeBtn.addEventListener('click', removePhoto);
+      removeBtn.addEventListener('touchend', removePhoto, { passive: false });
     });
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
