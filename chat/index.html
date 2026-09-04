@@ -1534,15 +1534,23 @@
         renderChatList();
         updateNotifBadge();
       })
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'messages', filter: `chat_id=eq.${chatId}` }, (payload) => {
-        const arr = messagesByChat.get(chatId) || [];
-        const idx = arr.findIndex(m => m.id === payload.old.id);
-        if (idx >= 0) { arr.splice(idx, 1); messagesByChat.set(chatId, arr); }
-        if (activeChatId === chatId) {
-          const el = document.querySelector(`.msg[data-mid="${payload.old.id}"]`);
-          if (el) el.remove();
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'messages' }, (payload) => {
+        // Filter DELETE por chat_id no anda sin REPLICA IDENTITY FULL — filtramos client-side por id
+        const deletedId = payload.old && payload.old.id;
+        if (!deletedId) return;
+        for (const [cid, arr] of messagesByChat.entries()) {
+          const idx = arr.findIndex(m => m.id === deletedId);
+          if (idx >= 0) {
+            arr.splice(idx, 1);
+            messagesByChat.set(cid, arr);
+            if (activeChatId === cid) {
+              const el = document.querySelector(`.msg[data-mid="${deletedId}"]`);
+              if (el) el.remove();
+            }
+            renderChatList();
+            break;
+          }
         }
-        renderChatList();
       })
       .subscribe();
   }
@@ -1878,8 +1886,20 @@
       if (act === 'reply') setReply(msg);
       else if (act === 'delete') {
         if (!confirm('¿Eliminar este mensaje?')) return;
+        // Optimistic remove local (por si realtime tarda o falla)
+        const localEl = document.querySelector(`.msg[data-mid="${msg.id}"]`);
+        const arr = messagesByChat.get(activeChatId) || [];
+        const localIdx = arr.findIndex(x => x.id === msg.id);
+        if (localEl) localEl.remove();
+        if (localIdx >= 0) { arr.splice(localIdx, 1); messagesByChat.set(activeChatId, arr); renderChatList(); }
         const { error } = await sb.from('messages').delete().eq('id', msg.id);
-        if (error) alert('No se pudo eliminar: ' + error.message);
+        if (error) {
+          alert('No se pudo eliminar: ' + error.message);
+          // Restore
+          if (localIdx >= 0) { arr.splice(localIdx, 0, msg); messagesByChat.set(activeChatId, arr); }
+          const chat = chats.find(c => c.id === activeChatId);
+          if (chat) renderChatMain(chat);
+        }
       }
     }));
   }
