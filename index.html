@@ -1978,24 +1978,27 @@
     { fecha: 'Jornada 11', tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 1, gb: 1, res: 'tie',  note: 'Repartieron puntos.' },
     { fecha: 'Jornada 12', tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 5, gb: 5, res: 'tie',  note: 'Partidazo: empataron a cinco.' },
     { fecha: 'Jornada 13', tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 0, gb: 1, res: 'lost', note: 'Gol único de <b>Gerardo</b>. Se definió al final.' },
+    { fecha: 'Jornada 14', tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 5, gb: 4, res: 'won',  note: 'Partidazo. <b>Magaña</b> ×2, <b>Mateo</b> ×2 y <b>Gerardo</b> para Equipo 1; <b>Suil</b> ×2, <b>Gerardo</b> y <b>Deleón</b> para Equipo 2.' },
+    { fecha: 'Jornada 15', tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 1, gb: 0, res: 'won',  note: 'Gol único de <b>Javier</b>. Triunfo mínimo.' },
   ];
 
   const STANDINGS = [
-    { name: 'Equipo 1', pj: 13, g: 4, e: 4, p: 5, gf: 19, gc: 20 },
-    { name: 'Equipo 2', pj: 13, g: 5, e: 4, p: 4, gf: 20, gc: 19 },
+    { name: 'Equipo 1', pj: 15, g: 6, e: 4, p: 5, gf: 25, gc: 24 },
+    { name: 'Equipo 2', pj: 15, g: 5, e: 4, p: 6, gf: 24, gc: 25 },
   ].map(t => ({ ...t, pts: t.g * 3 + t.e }))
    .sort((a,b) => b.pts - a.pts || (b.gf - b.gc) - (a.gf - a.gc));
 
   const GOLEADORES = [
-    { name: 'Deleón',   goles: 11 },
-    { name: 'Mateo',    goles: 6 },
-    { name: 'Gerardo',  goles: 6 },
+    { name: 'Deleón',   goles: 12 },
+    { name: 'Mateo',    goles: 8 },
+    { name: 'Gerardo',  goles: 8 },
+    { name: 'Magaña',   goles: 6 },
+    { name: 'Javier',   goles: 4 },
     { name: 'Lucas',    goles: 4 },
-    { name: 'Magaña',   goles: 4 },
     { name: 'Iglesias', goles: 3 },
     { name: 'Osegueda', goles: 3 },
-    { name: 'Javier',   goles: 3 },
     { name: 'Josué',    goles: 2 },
+    { name: 'Suil',     goles: 2 },
     { name: 'Fabricio', goles: 1 },
   ].sort((a, b) => b.goles - a.goles);
 
