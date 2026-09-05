@@ -83,6 +83,23 @@
   .composer-locked a { color: var(--school); font-weight: 700; }
 
   /* TABS */
+  /* LIVES BAR */
+  .lives-bar { background: linear-gradient(135deg, #1a0510 0%, #33061e 100%); border: 1px solid #4a1a2f; border-radius: 14px; padding: 10px 12px; margin-bottom: 12px; }
+  .lives-title { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: #ff6b78; font-weight: 700; }
+  .lives-title::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #ff3040; animation: livesDot 1.4s ease-in-out infinite; box-shadow: 0 0 12px #ff3040; }
+  @keyframes livesDot { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .4; transform: scale(.85); } }
+  .lives-list { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; }
+  .lives-list::-webkit-scrollbar { display: none; }
+  .live-tile { flex-shrink: 0; display: flex; align-items: center; gap: 10px; padding: 8px 14px 8px 8px; border-radius: 999px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,48,64,.35); text-decoration: none; color: #fff; cursor: pointer; transition: background .15s, transform .12s; max-width: 260px; }
+  .live-tile:hover { background: rgba(255,255,255,.12); transform: translateY(-1px); border-color: rgba(255,48,64,.7); }
+  .live-tile .lt-avatar-shell { position: relative; flex-shrink: 0; padding: 2px; border-radius: 50%; background: linear-gradient(135deg, #ff3040, #ff6b78, #f5de3a); }
+  .live-tile .lt-avatar { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; color: #fff; font-family: var(--f-display); font-weight: 800; font-size: 14px; background: var(--school); border: 2px solid #1a0510; }
+  .live-tile .lt-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .live-tile .lt-body { min-width: 0; flex: 1; }
+  .live-tile .lt-name { font-weight: 800; font-size: 14px; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 6px; }
+  .live-tile .lt-tag { display: inline-flex; align-items: center; gap: 3px; padding: 1px 6px; border-radius: 999px; background: #ff3040; color: #fff; font-family: var(--f-mono); font-size: 8px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
+  .live-tile .lt-title { font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.06em; color: rgba(255,255,255,.7); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
   /* STORIES BAR */
   .stories-bar { display: flex; gap: 12px; padding: 12px 4px; margin-bottom: 12px; overflow-x: auto; scrollbar-width: none; }
   .stories-bar::-webkit-scrollbar { display: none; }
@@ -227,6 +244,7 @@
 </nav>
 
 <main class="wrap">
+  <div id="livesBar" class="lives-bar" hidden></div>
   <div id="storiesBar" class="stories-bar" hidden></div>
   <div id="composerHost"></div>
 
@@ -363,6 +381,7 @@
     renderComposer();
     await loadFeed();
     await loadStories();
+    await loadLives();
     subscribe();
     // Auto-open story viewer si viene con ?story=<uid>
     const qs = new URLSearchParams(location.search);
@@ -676,6 +695,40 @@
   let seenStories = new Set();
   try { seenStories = new Set(JSON.parse(localStorage.getItem('sixth-seen-stories') || '[]')); } catch(e){}
   const persistSeen = () => { try { localStorage.setItem('sixth-seen-stories', JSON.stringify([...seenStories])); } catch(e){} };
+
+  // =========== LIVES BAR ===========
+  let activeLives = [];
+  async function loadLives() {
+    const { data, error } = await sb.from('lives')
+      .select('id, broadcaster_user_id, title, started_at')
+      .is('ended_at', null)
+      .order('started_at', { ascending: false });
+    if (error) return;
+    activeLives = data || [];
+    renderLivesBar();
+  }
+  function renderLivesBar() {
+    const bar = document.getElementById('livesBar');
+    if (!bar) return;
+    if (!activeLives.length) { bar.hidden = true; return; }
+    const html = activeLives.map(l => {
+      const p = profilesById.get(l.broadcaster_user_id);
+      const name = p ? p.name : 'Anónimo';
+      const av = p && p.avatar_url ? `<img src="${escapeHtml(p.avatar_url)}" alt="">` : name[0].toUpperCase();
+      return `<a class="live-tile" href="/live/?id=${l.id}">
+        <span class="lt-avatar-shell"><span class="lt-avatar" style="background:${colorFor(name)}">${av}</span></span>
+        <span class="lt-body">
+          <span class="lt-name">${escapeHtml(name)} <span class="lt-tag">Live</span></span>
+          ${l.title ? `<span class="lt-title">${escapeHtml(l.title)}</span>` : ''}
+        </span>
+      </a>`;
+    }).join('');
+    bar.innerHTML = `
+      <div class="lives-title">En vivo ahora · ${activeLives.length}</div>
+      <div class="lives-list">${html}</div>
+    `;
+    bar.hidden = false;
+  }
 
   async function loadStories() {
     const cutoff = new Date(Date.now() - STORY_TTL).toISOString();
@@ -997,6 +1050,7 @@
       .on('postgres_changes', { event: '*', schema: 'public', table: 'post_likes' }, () => loadFeed())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'post_comments' }, () => loadFeed())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'stories' }, () => loadStories())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'lives' }, () => loadLives())
       .subscribe();
   }
 
