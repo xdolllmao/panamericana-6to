@@ -453,24 +453,24 @@
     position: relative;
   }
   .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .avatar.has-story-new,
-  .avatar.has-story-seen {
-    overflow: visible;
+  .avatar-shell {
+    position: relative;
+    flex-shrink: 0;
+    display: inline-block;
+    line-height: 0;
   }
-  .avatar.has-story-new img,
-  .avatar.has-story-seen img { border-radius: 50%; }
-  .avatar.has-story-new::after,
-  .avatar.has-story-seen::after {
+  .avatar-shell.has-story-new::after,
+  .avatar-shell.has-story-seen::after {
     content: ""; position: absolute; inset: -5px; border-radius: 50%;
     padding: 2.5px;
     -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor; mask-composite: exclude;
     pointer-events: none;
   }
-  .avatar.has-story-new::after {
+  .avatar-shell.has-story-new::after {
     background: conic-gradient(from 210deg, #3B5EF0, #6B3EE8, #D91F26, #F5DE3A, #3B5EF0);
   }
-  .avatar.has-story-seen::after {
+  .avatar-shell.has-story-seen::after {
     background: var(--line-strong);
     opacity: .75;
   }
@@ -1568,25 +1568,19 @@
     background: linear-gradient(135deg, #3B5EF0, #6B3EE8, #D91F26);
     color: #fff;
   }
-  .profile-avatar.has-story-new,
-  .profile-avatar.has-story-seen {
-    position: relative;
-    overflow: visible;
-  }
-  .profile-avatar.has-story-new img,
-  .profile-avatar.has-story-seen img { border-radius: 50%; }
-  .profile-avatar.has-story-new::after,
-  .profile-avatar.has-story-seen::after {
+  .profile-avatar-shell { position: relative; display: inline-block; line-height: 0; }
+  .profile-avatar-shell.has-story-new::after,
+  .profile-avatar-shell.has-story-seen::after {
     content: ""; position: absolute; inset: -7px; border-radius: 50%;
     padding: 3px;
     -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor; mask-composite: exclude;
     pointer-events: none;
   }
-  .profile-avatar.has-story-new::after {
+  .profile-avatar-shell.has-story-new::after {
     background: conic-gradient(from 210deg, #3B5EF0, #6B3EE8, #D91F26, #F5DE3A, #3B5EF0);
   }
-  .profile-avatar.has-story-seen::after {
+  .profile-avatar-shell.has-story-seen::after {
     background: var(--line-strong); opacity: .75;
   }
   .profile-name {
@@ -2315,9 +2309,10 @@
           storyClass = allSeen ? ' has-story-seen' : ' has-story-new';
         }
       } catch(e){}
-      const av = (prof && prof.avatar_url)
-        ? `<div class="avatar${storyClass}" style="background:${colorFor(st.n)}"><img src="${prof.avatar_url}" alt=""></div>`
-        : `<div class="avatar${storyClass}" style="background:${colorFor(st.n)}">${initials(st.n)}</div>`;
+      const inner = (prof && prof.avatar_url)
+        ? `<div class="avatar" style="background:${colorFor(st.n)}"><img src="${prof.avatar_url}" alt=""></div>`
+        : `<div class="avatar" style="background:${colorFor(st.n)}">${initials(st.n)}</div>`;
+      const av = storyClass ? `<span class="avatar-shell${storyClass}">${inner}</span>` : inner;
       return `
         <button class="student" type="button" data-name="${st.n}" data-section="${st.s}" ${st.r ? `data-role="${st.r}"` : ''} aria-label="Ver perfil de ${st.n}">
           ${av}
@@ -3339,8 +3334,9 @@
       : init;
     const avatarStoryClass = hasStory ? (allStoriesSeen ? ' has-story-seen' : ' has-story-new') : '';
     profileCard.style.setProperty('--profile-color', color);
+    const avatarBox = `<div class="profile-avatar" style="background:${color}">${avatarInner}</div>`;
     profileCard.innerHTML = `
-      <div class="profile-avatar${avatarStoryClass}" style="background:${color}">${avatarInner}</div>
+      ${avatarStoryClass ? `<span class="profile-avatar-shell${avatarStoryClass}">${avatarBox}</span>` : avatarBox}
       <h3 class="profile-name" id="profileName">${escapeHtml(name)}</h3>
       <div class="profile-section">Sección ${escapeHtml(section)} · 6to grado</div>
       ${roleHtml}
