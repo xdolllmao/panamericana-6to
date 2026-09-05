@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Live · Clase de 6to</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='18' fill='%23D91F26'/%3E%3Ccircle cx='20' cy='20' r='6' fill='white'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Manrope:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+  :root {
+    --paper: #fff;
+    --coral: #FF3040;
+    --school: #3B5EF0;
+    --lemon: #F5DE3A;
+    --f-display: 'Bricolage Grotesque', system-ui, sans-serif;
+    --f-body: 'Manrope', system-ui, sans-serif;
+    --f-mono: 'JetBrains Mono', ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; color: #fff; font-family: var(--f-body); -webkit-font-smoothing: antialiased; }
+  button, input, textarea { font: inherit; color: inherit; }
+  button { background: none; border: 0; cursor: pointer; color: inherit; }
+
+  .live-app { position: relative; width: 100vw; height: 100vh; height: 100dvh; overflow: hidden; }
+
+  #jitsi { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; background: #000; }
+  #jitsi iframe { width: 100% !important; height: 100% !important; border: 0 !important; }
+
+  .live-overlay { position: absolute; inset: 0; pointer-events: none; z-index: 10; display: flex; flex-direction: column; }
+
+  /* Header */
+  .live-head { pointer-events: auto; display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: linear-gradient(to bottom, rgba(0,0,0,.65), transparent); }
+  .live-head-avatar { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; color: #fff; font-family: var(--f-display); font-weight: 800; font-size: 15px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,.5); }
+  .live-head-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .live-head-info { flex: 1; min-width: 0; }
+  .live-head-name { font-family: var(--f-display); font-weight: 800; font-size: 15px; display: flex; align-items: center; gap: 6px; }
+  .live-head-tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; background: var(--coral); color: #fff; font-family: var(--f-mono); font-size: 9px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
+  .live-head-tag::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #fff; animation: livePulse 1.4s ease-in-out infinite; }
+  @keyframes livePulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+  .live-head-meta { font-family: var(--f-mono); font-size: 10px; opacity: .82; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
+  .live-close { pointer-events: auto; width: 36px; height: 36px; border-radius: 999px; background: rgba(0,0,0,.5); backdrop-filter: blur(8px); display: grid; place-items: center; margin-left: auto; }
+  .live-close:hover { background: rgba(0,0,0,.75); }
+
+  /* Comments layer (flow up from bottom) */
+  .live-comments { position: absolute; left: 12px; right: 90px; bottom: 90px; max-height: 55%; display: flex; flex-direction: column-reverse; gap: 6px; pointer-events: none; overflow: hidden; }
+  .live-comment { display: flex; align-items: start; gap: 8px; max-width: 100%; opacity: 0; transform: translateY(20px); animation: commentIn .35s cubic-bezier(.2,.9,.3,1.2) forwards, commentOut .5s ease 6s forwards; }
+  @keyframes commentIn { to { opacity: 1; transform: translateY(0); } }
+  @keyframes commentOut { to { opacity: 0; transform: translateY(-20px); } }
+  .live-comment .lc-avatar { width: 26px; height: 26px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; color: #fff; font-family: var(--f-display); font-weight: 800; font-size: 11px; flex-shrink: 0; }
+  .live-comment .lc-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .live-comment .lc-body { max-width: calc(100% - 34px); padding: 6px 12px; border-radius: 14px; background: rgba(0,0,0,.55); backdrop-filter: blur(8px); font-size: 13px; line-height: 1.35; word-wrap: break-word; }
+  .live-comment .lc-body strong { display: block; font-weight: 800; font-size: 11px; opacity: .85; margin-bottom: 1px; }
+  .live-comment.join .lc-body { background: rgba(59,94,240,.6); }
+  .live-comment.join .lc-body::before { content: "👋 "; }
+  .live-comment.gift .lc-body { background: linear-gradient(135deg, rgba(217,31,38,.75), rgba(245,222,58,.6)); }
+  .live-comment.gift .lc-body strong { color: #fff; }
+
+  /* Gift bursts */
+  .live-gifts { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .gift-fly { position: absolute; font-size: 48px; text-shadow: 0 4px 12px rgba(0,0,0,.6); animation: giftFly 3.6s cubic-bezier(.4,0,.5,1) forwards; will-change: transform, opacity; }
+  @keyframes giftFly {
+    0% { transform: translateY(20vh) scale(.4) rotate(-20deg); opacity: 0; }
+    15% { transform: translateY(10vh) scale(1.4) rotate(6deg); opacity: 1; }
+    30% { transform: translateY(-10vh) scale(1) rotate(-4deg); opacity: 1; }
+    100% { transform: translateY(-90vh) scale(.6) rotate(20deg); opacity: 0; }
+  }
+  .gift-big { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%) scale(0); font-size: 120px; text-shadow: 0 8px 24px rgba(0,0,0,.7); animation: giftBig 2.4s ease forwards; pointer-events: none; z-index: 20; }
+  @keyframes giftBig {
+    0% { transform: translate(-50%, -50%) scale(0) rotate(-30deg); opacity: 0; }
+    20% { transform: translate(-50%, -50%) scale(1.3) rotate(10deg); opacity: 1; }
+    60% { transform: translate(-50%, -50%) scale(1) rotate(-5deg); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1.5) rotate(0); opacity: 0; }
+  }
+
+  /* Likes side counter */
+  .live-hearts { position: absolute; right: 10px; bottom: 90px; display: flex; flex-direction: column; align-items: center; gap: 4px; pointer-events: none; z-index: 12; }
+  .heart-fly { font-size: 28px; animation: heartFly 2.4s ease-out forwards; }
+  @keyframes heartFly {
+    0% { opacity: 0; transform: translateY(0) scale(.5); }
+    15% { opacity: 1; transform: translateY(-20px) scale(1.2); }
+    100% { opacity: 0; transform: translateY(-180px) scale(.9) translateX(-40px); }
+  }
+
+  /* Composer */
+  .live-composer { pointer-events: auto; position: absolute; left: 0; right: 0; bottom: 0; padding: 10px 12px 14px; padding-bottom: max(14px, env(safe-area-inset-bottom)); background: linear-gradient(to top, rgba(0,0,0,.7), transparent); display: flex; gap: 8px; align-items: center; z-index: 15; }
+  .live-composer input { flex: 1; padding: 12px 16px; border-radius: 999px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.22); color: #fff; font-size: 14px; outline: none; backdrop-filter: blur(8px); }
+  .live-composer input::placeholder { color: rgba(255,255,255,.6); }
+  .live-composer input:focus { border-color: rgba(255,255,255,.5); background: rgba(255,255,255,.18); }
+  .live-composer .lc-btn { width: 44px; height: 44px; border-radius: 999px; display: grid; place-items: center; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2); font-size: 20px; backdrop-filter: blur(8px); flex-shrink: 0; }
+  .live-composer .lc-btn:hover { background: rgba(255,255,255,.24); }
+  .live-composer .lc-btn.primary { background: var(--coral); border-color: var(--coral); }
+  .live-composer .lc-btn.primary:hover { background: #ff4a58; }
+
+  /* Gift picker popup */
+  .gift-picker { pointer-events: auto; position: absolute; right: 12px; bottom: 74px; background: rgba(20,20,20,.9); backdrop-filter: blur(12px); border-radius: 16px; padding: 10px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; z-index: 20; box-shadow: 0 12px 40px rgba(0,0,0,.6); border: 1px solid rgba(255,255,255,.14); }
+  .gift-picker[hidden] { display: none; }
+  .gift-picker button { width: 54px; height: 54px; border-radius: 12px; font-size: 30px; background: rgba(255,255,255,.06); display: grid; place-items: center; }
+  .gift-picker button:hover { background: rgba(255,255,255,.16); transform: scale(1.05); }
+
+  /* Broadcast start screen */
+  .live-splash { position: absolute; inset: 0; background: linear-gradient(135deg, #1E3AAB, #6B3EE8); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; z-index: 30; }
+  .live-splash h1 { font-family: var(--f-display); font-size: clamp(28px, 5vw, 44px); font-weight: 800; margin: 12px 0 8px; letter-spacing: -0.02em; }
+  .live-splash p { opacity: .85; margin: 0 0 24px; max-width: 42ch; font-size: 15px; }
+  .live-splash input { width: 100%; max-width: 340px; padding: 14px 18px; border-radius: 12px; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.28); color: #fff; font-size: 15px; outline: none; margin-bottom: 14px; }
+  .live-splash input::placeholder { color: rgba(255,255,255,.6); }
+  .live-splash button { padding: 14px 28px; border-radius: 999px; background: var(--coral); color: #fff; font-weight: 800; font-size: 16px; }
+  .live-splash button:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,48,64,.4); }
+  .live-splash .ghost { background: transparent; border: 1px solid rgba(255,255,255,.28); margin-top: 10px; }
+  .live-splash .icon { font-size: 64px; }
+
+  .loading-full { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,.7); font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; background: #000; z-index: 40; }
+</style>
+</head>
+<body>
+
+<div class="live-app">
+  <div id="jitsi"></div>
+  <div class="live-overlay" id="overlay" hidden>
+    <div class="live-head">
+      <div class="live-head-avatar" id="headAvatar"></div>
+      <div class="live-head-info">
+        <div class="live-head-name" id="headName">
+          <span></span> <span class="live-head-tag">Live</span>
+        </div>
+        <div class="live-head-meta" id="headMeta">— viewers</div>
+      </div>
+      <button class="live-close" id="closeBtn" aria-label="Cerrar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="live-comments" id="comments"></div>
+    <div class="live-gifts" id="gifts"></div>
+    <div class="live-hearts" id="hearts"></div>
+    <div class="gift-picker" id="giftPicker" hidden></div>
+    <form class="live-composer" id="composer">
+      <input id="chatInput" placeholder="Escribí un mensaje…" autocomplete="off" maxlength="200">
+      <button type="button" class="lc-btn" id="giftBtn" aria-label="Regalo">🎁</button>
+      <button type="button" class="lc-btn" id="heartBtn" aria-label="Me gusta">❤️</button>
+      <button type="submit" class="lc-btn primary" aria-label="Enviar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+      </button>
+    </form>
+  </div>
+
+  <div class="live-splash" id="splash" hidden>
+    <div class="icon">🔴</div>
+    <h1>Nuevo live</h1>
+    <p>Vas a transmitir en vivo para los del salón. Tu cámara y mic se van a activar. Los que entren solo van a ver — no pueden abrir su cámara.</p>
+    <input id="liveTitleInput" placeholder="Título (ej. Vamos por el partido)" maxlength="60">
+    <button id="startLiveBtn" type="button">Empezar transmisión</button>
+    <button class="ghost" id="cancelBtn" type="button">Cancelar</button>
+  </div>
+
+  <div class="loading-full" id="loading">Cargando…</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://meet.jit.si/external_api.js"></script>
+<script>
+  const SUPABASE_URL = 'https://qmxugyqwgptgafitbquw.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFteHVneXF3Z3B0Z2FmaXRicXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzOTQ0NDcsImV4cCI6MjEwMzk3MDQ0N30.AtfxRuD_zSojiVCW170wmQjZudRQJyUl_mdm_L5ii_I';
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
+
+  const PALETTE = ['#1E3AAB','#3B5EF0','#6B3EE8','#D91F26','#35C89A','#0C1846','#C68416','#7A4A00'];
+  function colorFor(name) { let h=0; for(let i=0;i<name.length;i++) h=(h*31+name.charCodeAt(i))>>>0; return PALETTE[h%PALETTE.length]; }
+  function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function slug(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,''); }
+  function keyOf(name, section){ return `${section}-${slug(name)}`.toLowerCase(); }
+
+  const GIFTS = ['🎁','🌹','💎','🦁','🍕','✨','🔥','🎉','🚀','👑','⚡','🌈','🍀','💯'];
+
+  const q = new URLSearchParams(location.search);
+  const liveIdParam = q.get('id');
+  const startAsNew = q.get('new') === '1';
+
+  let me = null, myProfile = null;
+  let profilesById = new Map();
+  let live = null;
+  let jitsi = null;
+  let realtimeSub = null;
+  let composerEl, chatInput, giftBtn, heartBtn, giftPicker;
+
+  const $ = id => document.getElementById(id);
+  const loading = $('loading');
+  const overlay = $('overlay');
+  const splash = $('splash');
+
+  async function boot() {
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session && session.user) me = session.user;
+      else { const { data } = await sb.auth.signInAnonymously(); me = data.user; }
+    } catch(e){ loading.textContent = 'Sin conexión'; return; }
+
+    const { data: profs } = await sb.from('profiles').select('user_id, name, section, role, avatar_url');
+    (profs || []).forEach(p => profilesById.set(p.user_id, p));
+    myProfile = me ? profilesById.get(me.id) : null;
+
+    if (startAsNew) {
+      if (!myProfile) { loading.innerHTML = 'Reclamá tu nombre primero en <a href="/" style="color:#fff">la home</a>'; return; }
+      loading.hidden = true; showSplash();
+      return;
+    }
+
+    if (!liveIdParam) {
+      loading.innerHTML = 'Faltó el id del live · <a href="/" style="color:#fff">Volver</a>';
+      return;
+    }
+
+    const { data: liveRow, error } = await sb.from('lives').select('*').eq('id', liveIdParam).maybeSingle();
+    if (error || !liveRow) { loading.textContent = 'Live no encontrado'; return; }
+    if (liveRow.ended_at) {
+      loading.innerHTML = 'Este live ya terminó · <a href="/" style="color:#fff">Volver</a>';
+      return;
+    }
+    live = liveRow;
+    joinLive(live.broadcaster_user_id === me.id);
+  }
+
+  function showSplash() {
+    splash.hidden = false;
+    const titleInp = $('liveTitleInput');
+    titleInp.focus();
+    $('startLiveBtn').addEventListener('click', async () => {
+      const title = titleInp.value.trim() || `Live de ${myProfile.name}`;
+      const room = `pana6to-${Math.random().toString(36).slice(2, 10)}-${Date.now().toString(36)}`;
+      const { data, error } = await sb.from('lives').insert({
+        broadcaster_user_id: me.id, title, room_name: room
+      }).select().single();
+      if (error) { alert('Error: ' + error.message); return; }
+      live = data;
+      splash.hidden = true;
+      joinLive(true);
+      history.replaceState({}, '', `/live/?id=${live.id}`);
+    });
+    $('cancelBtn').addEventListener('click', () => { location.href = '/'; });
+  }
+
+  function joinLive(isBroadcaster) {
+    loading.hidden = true;
+    const broadcaster = profilesById.get(live.broadcaster_user_id);
+    const bName = broadcaster ? broadcaster.name : 'Anónimo';
+    const bColor = colorFor(bName);
+    const bAv = broadcaster && broadcaster.avatar_url ? `<img src="${escapeHtml(broadcaster.avatar_url)}" alt="">` : bName[0].toUpperCase();
+
+    $('headAvatar').style.background = bColor;
+    $('headAvatar').innerHTML = bAv;
+    $('headName').innerHTML = `<span>${escapeHtml(bName)}</span><span class="live-head-tag">Live</span>`;
+    $('headMeta').textContent = live.title ? escapeHtml(live.title) : '';
+
+    overlay.hidden = false;
+    initJitsi(isBroadcaster);
+    wireComposer(isBroadcaster);
+    loadRecentMessages();
+    subscribeLive();
+
+    // Post join event
+    if (!isBroadcaster) {
+      postMessage('join', null, null);
+    }
+
+    $('closeBtn').addEventListener('click', () => {
+      if (isBroadcaster) {
+        if (!confirm('¿Terminar la transmisión?')) return;
+        endLive();
+      } else {
+        location.href = '/';
+      }
+    });
+  }
+
+  function initJitsi(isBroadcaster) {
+    const displayName = myProfile ? myProfile.name : 'Anónimo';
+    const opts = {
+      roomName: live.room_name,
+      width: '100%', height: '100%',
+      parentNode: $('jitsi'),
+      userInfo: { displayName },
+      configOverwrite: {
+        prejoinPageEnabled: false,
+        startWithAudioMuted: !isBroadcaster,
+        startWithVideoMuted: !isBroadcaster,
+        disableInviteFunctions: true,
+        toolbarButtons: isBroadcaster
+          ? ['microphone', 'camera', 'hangup', 'settings', 'raisehand', 'tileview', 'fullscreen']
+          : ['hangup', 'fullscreen'],
+        readOnlyName: true,
+      },
+      interfaceConfigOverwrite: {
+        MOBILE_APP_PROMO: false,
+        SHOW_JITSI_WATERMARK: false,
+        SHOW_WATERMARK_FOR_GUESTS: false,
+        HIDE_INVITE_MORE_HEADER: true,
+        DEFAULT_BACKGROUND: '#000',
+        DISABLE_JOIN_LEAVE_NOTIFICATIONS: true,
+      }
+    };
+    jitsi = new JitsiMeetExternalAPI('meet.jit.si', opts);
+    jitsi.addListener('participantJoined', updateViewerCount);
+    jitsi.addListener('participantLeft', updateViewerCount);
+    jitsi.addListener('readyToClose', () => {
+      if (isBroadcaster) endLive();
+      else location.href = '/';
+    });
+    setTimeout(updateViewerCount, 1500);
+  }
+
+  async function updateViewerCount() {
+    try {
+      const n = jitsi.getNumberOfParticipants();
+      // n includes broadcaster + viewers. Show n-1 as viewer count, or just n for total
+      $('headMeta').innerHTML = `${escapeHtml(live.title || '')}${live.title ? ' · ' : ''}<b>${n}</b> en vivo`;
+    } catch(e){}
+  }
+
+  function wireComposer(isBroadcaster) {
+    composerEl = $('composer');
+    chatInput = $('chatInput');
+    giftBtn = $('giftBtn');
+    heartBtn = $('heartBtn');
+    giftPicker = $('giftPicker');
+    if (!myProfile) {
+      chatInput.disabled = true;
+      chatInput.placeholder = 'Reclamá tu nombre para comentar';
+      giftBtn.disabled = true; heartBtn.disabled = true;
+      composerEl.querySelector('button[type="submit"]').disabled = true;
+      return;
+    }
+    composerEl.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const t = chatInput.value.trim();
+      if (!t) return;
+      postMessage('text', t, null);
+      chatInput.value = '';
+    });
+    heartBtn.addEventListener('click', () => {
+      spawnHeart();
+      postMessage('like', null, null);
+    });
+    giftBtn.addEventListener('click', () => {
+      if (giftPicker.hidden) {
+        giftPicker.innerHTML = GIFTS.map(g => `<button type="button" data-g="${g}">${g}</button>`).join('');
+        giftPicker.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+          const g = b.dataset.g;
+          giftPicker.hidden = true;
+          postMessage('gift', null, g);
+        }));
+      }
+      giftPicker.hidden = !giftPicker.hidden;
+    });
+    document.addEventListener('click', (e) => {
+      if (!giftPicker.hidden && !giftPicker.contains(e.target) && e.target !== giftBtn) giftPicker.hidden = true;
+    });
+  }
+
+  async function postMessage(kind, text, gift) {
+    if (!myProfile) return;
+    await sb.from('live_messages').insert({
+      live_id: live.id, author_user_id: me.id, kind, text: text || null, gift: gift || null
+    });
+  }
+
+  async function loadRecentMessages() {
+    const { data } = await sb.from('live_messages')
+      .select('id, author_user_id, kind, text, gift, created_at')
+      .eq('live_id', live.id)
+      .order('created_at', { ascending: true })
+      .limit(30);
+    (data || []).forEach(m => renderMessage(m, /*silent=*/true));
+  }
+
+  function subscribeLive() {
+    if (realtimeSub) sb.removeChannel(realtimeSub);
+    realtimeSub = sb.channel(`live-${live.id}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'live_messages', filter: `live_id=eq.${live.id}` }, (payload) => {
+        renderMessage(payload.new);
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'lives', filter: `id=eq.${live.id}` }, (payload) => {
+        if (payload.new.ended_at && !live.ended_at) {
+          live.ended_at = payload.new.ended_at;
+          alert('El live terminó');
+          location.href = '/';
+        }
+      })
+      .subscribe();
+  }
+
+  function renderMessage(m, silent) {
+    const author = profilesById.get(m.author_user_id);
+    const name = author ? author.name : 'Anónimo';
+    const av = author && author.avatar_url ? `<img src="${escapeHtml(author.avatar_url)}" alt="">` : name[0].toUpperCase();
+
+    if (m.kind === 'like') { if (!silent) spawnHeart(); return; }
+    if (m.kind === 'gift') { if (!silent) { spawnGift(m.gift); spawnGiftText(name, m.gift); } return; }
+
+    const kindClass = m.kind === 'join' ? ' join' : (m.kind === 'gift' ? ' gift' : '');
+    const bodyText = m.kind === 'join' ? 'se unió al live' : escapeHtml(m.text || '');
+    const el = document.createElement('div');
+    el.className = 'live-comment' + kindClass;
+    el.innerHTML = `
+      <div class="lc-avatar" style="background:${colorFor(name)}">${av}</div>
+      <div class="lc-body"><strong>${escapeHtml(name)}</strong>${bodyText}</div>
+    `;
+    const list = $('comments');
+    list.insertBefore(el, list.firstChild);
+    setTimeout(() => el.remove(), 7000);
+    // Keep only ~30 latest
+    while (list.children.length > 30) list.lastChild.remove();
+  }
+
+  function spawnGift(g) {
+    const el = document.createElement('div');
+    el.className = 'gift-fly';
+    el.textContent = g || '🎁';
+    el.style.left = (10 + Math.random() * 80) + '%';
+    $('gifts').appendChild(el);
+    setTimeout(() => el.remove(), 3800);
+  }
+  function spawnGiftText(name, g) {
+    const big = document.createElement('div');
+    big.className = 'gift-big';
+    big.textContent = g || '🎁';
+    $('gifts').appendChild(big);
+    setTimeout(() => big.remove(), 2600);
+
+    // Also insert as a comment
+    const author = { name };
+    const el = document.createElement('div');
+    el.className = 'live-comment gift';
+    el.innerHTML = `
+      <div class="lc-avatar" style="background:${colorFor(name)}">${name[0].toUpperCase()}</div>
+      <div class="lc-body"><strong>${escapeHtml(name)}</strong>mandó ${g || '🎁'}</div>
+    `;
+    const list = $('comments');
+    list.insertBefore(el, list.firstChild);
+    setTimeout(() => el.remove(), 7000);
+  }
+  function spawnHeart() {
+    const el = document.createElement('div');
+    el.className = 'heart-fly';
+    el.textContent = ['❤️','💛','💜','💙','🧡'][Math.floor(Math.random()*5)];
+    $('hearts').appendChild(el);
+    setTimeout(() => el.remove(), 2500);
+  }
+
+  async function endLive() {
+    if (!live) return;
+    await sb.from('lives').update({ ended_at: new Date().toISOString() }).eq('id', live.id);
+    if (jitsi) { try { jitsi.dispose(); } catch(e){} }
+    location.href = '/';
+  }
+
+  window.addEventListener('beforeunload', () => {
+    // Best-effort: if broadcaster, mark ended
+    if (live && me && live.broadcaster_user_id === me.id && !live.ended_at) {
+      try { navigator.sendBeacon(`${SUPABASE_URL}/rest/v1/lives?id=eq.${live.id}`,
+        new Blob([JSON.stringify({ ended_at: new Date().toISOString() })], { type: 'application/json' })); } catch(e){}
+    }
+  });
+
+  boot();
+</script>
+
+</body>
+</html>
