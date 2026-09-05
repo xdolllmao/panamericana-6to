@@ -91,23 +91,6 @@
     text-decoration: none;
   }
   .avatar-story-add:hover { transform: scale(1.08); }
-  .avatar-live-btn {
-    position: absolute; top: 54px; right: 0;
-    width: 40px; height: 40px; border-radius: 50%;
-    background: #FF3040; color: #fff;
-    border: 3px solid var(--paper);
-    display: grid; place-items: center;
-    box-shadow: var(--shadow-sm), 0 0 0 0 rgba(255,48,64,.7);
-    text-decoration: none;
-    font-size: 14px; line-height: 1;
-    animation: livePulseRing 1.6s ease-out infinite;
-    transition: transform .18s;
-  }
-  .avatar-live-btn:hover { transform: scale(1.08); }
-  @keyframes livePulseRing {
-    0% { box-shadow: var(--shadow-sm), 0 0 0 0 rgba(255,48,64,.55); }
-    100% { box-shadow: var(--shadow-sm), 0 0 0 14px rgba(255,48,64,0); }
-  }
   .profile-info h1 { font-family: var(--f-display); font-weight: 800; font-size: clamp(28px, 4vw, 40px); line-height: 1; letter-spacing: -0.02em; margin: 0 0 6px; }
   .section-badge { display: inline-block; font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--school); background: var(--school-tint); padding: 4px 10px; border-radius: 999px; font-weight: 700; margin-bottom: 8px; }
   .role-badge { display: inline-block; font-family: var(--f-display); font-size: 13px; color: var(--paper); background: var(--school); padding: 4px 12px; border-radius: 999px; font-weight: 700; margin-left: 6px; }
@@ -428,7 +411,6 @@
         <div class="avatar-wrap">
           <div class="profile-avatar" style="background:${colorFor(p.name)}">${avatarHtml}</div>
           ${isMe ? '<a class="avatar-story-add" href="/feed/?compose=story" title="Publicar historia" aria-label="Publicar historia">+</a>' : ''}
-          ${isMe ? '<a class="avatar-live-btn" href="/live/?new=1" title="Empezar live" aria-label="Empezar live">🔴</a>' : ''}
           ${isMe ? '<button class="avatar-edit" id="avatarEditBtn" title="Cambiar foto">📷</button>' : ''}
           <input type="file" id="avatarFile" accept="image/*" hidden>
         </div>
