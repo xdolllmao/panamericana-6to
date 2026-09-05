@@ -77,6 +77,20 @@
   .profile-avatar { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: var(--school); display: grid; place-items: center; color: #fff; font-family: var(--f-display); font-weight: 800; font-size: 64px; overflow: hidden; box-shadow: 0 10px 30px rgba(12,24,70,.15); }
   .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
   .avatar-edit { position: absolute; bottom: 6px; right: 6px; width: 40px; height: 40px; border-radius: 50%; background: var(--ink); color: var(--paper); border: 3px solid var(--paper); display: grid; place-items: center; box-shadow: var(--shadow-sm); cursor: pointer; }
+  .avatar-story-add {
+    position: absolute; top: 4px; right: 4px;
+    width: 44px; height: 44px; border-radius: 50%;
+    background: linear-gradient(135deg, #3B5EF0, #6B3EE8, #D91F26, #F5DE3A);
+    color: #fff; border: 3px solid var(--paper);
+    display: grid; place-items: center;
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    font-family: var(--f-display); font-weight: 800; font-size: 22px;
+    line-height: 1;
+    transition: transform .18s;
+    text-decoration: none;
+  }
+  .avatar-story-add:hover { transform: scale(1.08); }
   .profile-info h1 { font-family: var(--f-display); font-weight: 800; font-size: clamp(28px, 4vw, 40px); line-height: 1; letter-spacing: -0.02em; margin: 0 0 6px; }
   .section-badge { display: inline-block; font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--school); background: var(--school-tint); padding: 4px 10px; border-radius: 999px; font-weight: 700; margin-bottom: 8px; }
   .role-badge { display: inline-block; font-family: var(--f-display); font-size: 13px; color: var(--paper); background: var(--school); padding: 4px 12px; border-radius: 999px; font-weight: 700; margin-left: 6px; }
@@ -396,6 +410,7 @@
       <header class="profile-hero">
         <div class="avatar-wrap">
           <div class="profile-avatar" style="background:${colorFor(p.name)}">${avatarHtml}</div>
+          ${isMe ? '<a class="avatar-story-add" href="/feed/?compose=story" title="Publicar historia" aria-label="Publicar historia">+</a>' : ''}
           ${isMe ? '<button class="avatar-edit" id="avatarEditBtn" title="Cambiar foto">📷</button>' : ''}
           <input type="file" id="avatarFile" accept="image/*" hidden>
         </div>

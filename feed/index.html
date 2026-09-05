@@ -365,9 +365,14 @@
     await loadStories();
     subscribe();
     // Auto-open story viewer si viene con ?story=<uid>
-    const storyUid = new URLSearchParams(location.search).get('story');
+    const qs = new URLSearchParams(location.search);
+    const storyUid = qs.get('story');
     if (storyUid && storiesByAuthor.has(storyUid)) {
       setTimeout(() => openStoryViewer(storyUid, 0), 100);
+    }
+    // Auto-open story composer si viene con ?compose=story
+    if (qs.get('compose') === 'story') {
+      setTimeout(() => { if (myProfile) openStoryComposer(); }, 100);
     }
     document.querySelectorAll('.feed-tab').forEach(t => t.addEventListener('click', () => {
       currentFilter = t.dataset.filter;
