@@ -481,14 +481,29 @@
       parentNode: $('jitsi'),
       userInfo: { displayName },
       configOverwrite: {
+        // Sin prejoin: entra directo, sin pantalla de "Unirse a la reunión"
         prejoinPageEnabled: false,
+        prejoinConfig: { enabled: false },
+        // Sin pantalla de bienvenida ni acciones extra
+        disableDeepLinking: true,
+        disableInviteFunctions: true,
+        readOnlyName: true,
+        hideConferenceSubject: true,
+        hideConferenceTimer: true,
+        hideParticipantsStats: true,
+        hideRecordingLabel: true,
+        disableProfile: true,
+        // Para viewers: pantalla completa del broadcaster, sin filmstrip ni tiles
+        filmstrip: { disabled: !isBroadcaster },
+        tileView: { disabled: !isBroadcaster },
+        disableTileEnlargement: !isBroadcaster,
         startWithAudioMuted: !isBroadcaster,
         startWithVideoMuted: !isBroadcaster,
-        disableInviteFunctions: true,
+        // Viewer no puede desmutear ni activar cámara (sin permisos + UI oculta)
+        remoteVideoMenu: { disabled: true, disableKick: true, disableGrantModerator: true },
         toolbarButtons: isBroadcaster
           ? ['microphone', 'camera', 'hangup', 'settings', 'raisehand', 'tileview', 'fullscreen']
-          : ['hangup', 'fullscreen'],
-        readOnlyName: true,
+          : [],
       },
       interfaceConfigOverwrite: {
         MOBILE_APP_PROMO: false,
@@ -497,6 +512,18 @@
         HIDE_INVITE_MORE_HEADER: true,
         DEFAULT_BACKGROUND: '#000',
         DISABLE_JOIN_LEAVE_NOTIFICATIONS: true,
+        DISABLE_FOCUS_INDICATOR: true,
+        DISABLE_DOMINANT_SPEAKER_INDICATOR: !isBroadcaster,
+        DISABLE_TRANSCRIPTION_SUBTITLES: true,
+        DISABLE_VIDEO_BACKGROUND: false,
+        FILMSTRIP_MAX_HEIGHT: 0,
+        TOOLBAR_ALWAYS_VISIBLE: isBroadcaster,
+        VERTICAL_FILMSTRIP: false,
+        RECENT_LIST_ENABLED: false,
+        SHOW_CHROME_EXTENSION_BANNER: false,
+        TOOLBAR_BUTTONS: isBroadcaster
+          ? ['microphone', 'camera', 'hangup', 'settings', 'raisehand', 'tileview', 'fullscreen']
+          : [],
       }
     };
     jitsi = new JitsiMeetExternalAPI('meet.jit.si', opts);
@@ -506,6 +533,24 @@
       if (isBroadcaster) endLive();
       else location.href = '/';
     });
+
+    // Para viewers: apenas se detecta al broadcaster, se pinea su video para que
+    // ocupe la pantalla completa siempre (aunque otros se unan/enciendan cámara)
+    if (!isBroadcaster) {
+      const broadcasterName = profilesById.get(live.broadcaster_user_id)?.name;
+      function tryPinBroadcaster() {
+        try {
+          const parts = jitsi.getParticipantsInfo() || [];
+          const b = parts.find(p => p.displayName === broadcasterName || p.formattedDisplayName === broadcasterName);
+          if (b) {
+            jitsi.executeCommand('setLargeVideoParticipant', b.participantId);
+            jitsi.executeCommand('pinParticipant', b.participantId);
+          }
+        } catch(e){}
+      }
+      jitsi.addListener('videoConferenceJoined', () => setTimeout(tryPinBroadcaster, 800));
+      jitsi.addListener('participantJoined', () => setTimeout(tryPinBroadcaster, 500));
+    }
 
     // Broadcaster-only mic/camera toggles en el header (encima del overlay)
     if (isBroadcaster) {
