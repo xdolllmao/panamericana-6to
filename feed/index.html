@@ -83,6 +83,47 @@
   .composer-locked a { color: var(--school); font-weight: 700; }
 
   /* TABS */
+  /* STORIES BAR */
+  .stories-bar { display: flex; gap: 12px; padding: 12px 4px; margin-bottom: 12px; overflow-x: auto; scrollbar-width: none; }
+  .stories-bar::-webkit-scrollbar { display: none; }
+  .story-item { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; width: 68px; cursor: pointer; text-decoration: none; color: inherit; }
+  .story-ring { width: 62px; height: 62px; border-radius: 50%; padding: 2px; background: var(--line); display: grid; place-items: center; position: relative; }
+  .story-ring.has-new { background: linear-gradient(135deg, var(--school), #6B3EE8, var(--coral), var(--lemon)); }
+  .story-ring.seen { background: var(--line-strong); opacity: .65; }
+  .story-ring .inner { width: 100%; height: 100%; border-radius: 50%; overflow: hidden; background: var(--paper); display: grid; place-items: center; border: 2px solid var(--paper); color: #fff; font-family: var(--f-display); font-weight: 800; font-size: 18px; }
+  .story-ring .inner img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .story-ring .plus { position: absolute; bottom: -2px; right: -2px; width: 22px; height: 22px; border-radius: 50%; background: var(--school); color: #fff; display: grid; place-items: center; font-size: 14px; font-weight: 800; border: 2px solid var(--ground); line-height: 1; }
+  .story-name { font-size: 11px; font-weight: 600; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 68px; text-align: center; letter-spacing: -0.01em; }
+  .story-name.mine { color: var(--ink); }
+
+  /* STORY VIEWER */
+  .story-viewer { position: fixed; inset: 0; z-index: 200; background: #000; display: none; flex-direction: column; align-items: center; justify-content: center; touch-action: manipulation; }
+  .story-viewer.open { display: flex; }
+  .story-viewer-inner { width: 100%; max-width: 460px; height: 100%; max-height: 92dvh; position: relative; display: flex; flex-direction: column; background: #000; overflow: hidden; }
+  @media (min-width: 640px) { .story-viewer-inner { max-height: 88vh; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,.6); } }
+  .story-progress-bar { display: flex; gap: 4px; padding: 10px 12px 6px; z-index: 3; }
+  .story-progress { flex: 1; height: 3px; background: rgba(255,255,255,.28); border-radius: 999px; overflow: hidden; }
+  .story-progress .bar { display: block; height: 100%; background: #fff; width: 0%; transition: width .1s linear; }
+  .story-progress.done .bar { width: 100%; }
+  .story-header { display: flex; align-items: center; gap: 10px; padding: 6px 14px 10px; z-index: 3; color: #fff; }
+  .story-header a { display: flex; align-items: center; gap: 10px; color: #fff; text-decoration: none; }
+  .story-header .avatar-mini { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-family: var(--f-display); font-weight: 800; font-size: 13px; overflow: hidden; flex-shrink: 0; }
+  .story-header .avatar-mini img { width: 100%; height: 100%; object-fit: cover; }
+  .story-header .who { font-weight: 700; font-size: 14px; }
+  .story-header .when { font-family: var(--f-mono); font-size: 10px; opacity: .7; letter-spacing: 0.06em; }
+  .story-header .spacer { flex: 1; }
+  .story-header button { color: rgba(255,255,255,.9); background: rgba(255,255,255,.12); border-radius: 999px; width: 34px; height: 34px; display: grid; place-items: center; cursor: pointer; }
+  .story-header button:hover { background: rgba(255,255,255,.24); }
+  .story-stage { flex: 1; position: relative; display: grid; place-items: center; overflow: hidden; user-select: none; -webkit-user-select: none; }
+  .story-stage img, .story-stage video { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+  .story-stage .opinion-view { padding: 40px 28px; text-align: center; color: #fff; font-family: var(--f-display); font-weight: 700; font-size: clamp(26px, 6vw, 42px); line-height: 1.2; letter-spacing: -0.02em; word-wrap: break-word; }
+  .story-caption { position: absolute; left: 0; right: 0; bottom: 0; padding: 40px 20px 20px; background: linear-gradient(to top, rgba(0,0,0,.7), transparent); color: #fff; font-size: 14px; line-height: 1.4; z-index: 2; }
+  .story-tap { position: absolute; top: 0; bottom: 0; width: 30%; z-index: 2; }
+  .story-tap.left { left: 0; }
+  .story-tap.right { right: 0; }
+  .story-tap:active { background: rgba(255,255,255,.03); }
+  .story-delete { position: absolute; bottom: 14px; right: 14px; z-index: 4; background: rgba(0,0,0,.5); color: #fff; padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 700; }
+
   .feed-tabs { display: flex; gap: 4px; padding: 4px; background: var(--paper); border: 1px solid var(--line); border-radius: 999px; box-shadow: var(--shadow-sm); margin-bottom: 16px; overflow-x: auto; }
   .feed-tab { padding: 8px 14px; border-radius: 999px; font-weight: 700; font-size: 13px; color: var(--ink-soft); white-space: nowrap; }
   .feed-tab.is-active { background: var(--ink); color: var(--paper); }
@@ -186,6 +227,7 @@
 </nav>
 
 <main class="wrap">
+  <div id="storiesBar" class="stories-bar" hidden></div>
   <div id="composerHost"></div>
 
   <div class="feed-tabs" role="tablist">
@@ -223,6 +265,47 @@
     <div class="modal-foot">
       <button class="btn btn-secondary" id="cmpCancel">Cancelar</button>
       <button class="btn btn-primary" id="cmpSubmit">Publicar</button>
+    </div>
+  </div>
+</div>
+
+<!-- STORY VIEWER -->
+<div class="story-viewer" id="storyViewer" role="dialog" aria-modal="true">
+  <div class="story-viewer-inner">
+    <div class="story-progress-bar" id="storyProgressBar"></div>
+    <div class="story-header" id="storyHeader"></div>
+    <div class="story-stage" id="storyStage">
+      <button class="story-tap left" id="storyTapLeft" aria-label="Anterior"></button>
+      <button class="story-tap right" id="storyTapRight" aria-label="Siguiente"></button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: story composer -->
+<div class="modal-backdrop" id="storyComposerModal" hidden>
+  <div class="modal">
+    <div class="modal-head">
+      <div><h3>Nueva historia</h3><p>Se borra sola en 24 horas.</p></div>
+      <button class="modal-close" id="stClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="composer-tabs" id="stTabs">
+        <button class="ct is-active" data-type="opinion">💬 Opinión</button>
+        <button class="ct" data-type="photo">📷 Foto</button>
+        <button class="ct" data-type="reel">🎬 Reel</button>
+      </div>
+      <div class="form-row">
+        <label>Texto (opcional en fotos/reels)</label>
+        <textarea id="stContent" maxlength="300" placeholder="¿Qué querés contar?"></textarea>
+      </div>
+      <div id="stMediaWrap" class="media-preview" hidden>
+        <input type="file" id="stFile" hidden>
+        <div id="stMediaContent"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" id="stCancel">Cancelar</button>
+      <button class="btn btn-primary" id="stSubmit">Publicar historia</button>
     </div>
   </div>
 </div>
@@ -279,6 +362,7 @@
     myProfile = me ? profilesById.get(me.id) : null;
     renderComposer();
     await loadFeed();
+    await loadStories();
     subscribe();
     document.querySelectorAll('.feed-tab').forEach(t => t.addEventListener('click', () => {
       currentFilter = t.dataset.filter;
@@ -574,16 +658,345 @@
     try { navigator.clipboard.writeText(shareUrl(sharePost)); } catch {}
   });
 
+  // ============ STORIES ============
+  const STORY_TTL = 24 * 3600 * 1000;
+  const STORY_DURATION = 5000; // ms per still story
+  let stories = [];              // all fresh stories
+  let storiesByAuthor = new Map(); // uid -> [stories]
+  let seenStories = new Set();
+  try { seenStories = new Set(JSON.parse(localStorage.getItem('sixth-seen-stories') || '[]')); } catch(e){}
+  const persistSeen = () => { try { localStorage.setItem('sixth-seen-stories', JSON.stringify([...seenStories])); } catch(e){} };
+
+  async function loadStories() {
+    const cutoff = new Date(Date.now() - STORY_TTL).toISOString();
+    const { data, error } = await sb.from('stories')
+      .select('id, author_user_id, type, content, media_url, media_type, created_at')
+      .gt('created_at', cutoff)
+      .order('created_at', { ascending: true });
+    if (error) return;
+    stories = data || [];
+    storiesByAuthor = new Map();
+    stories.forEach(s => {
+      const arr = storiesByAuthor.get(s.author_user_id) || [];
+      arr.push(s);
+      storiesByAuthor.set(s.author_user_id, arr);
+    });
+    renderStoriesBar();
+  }
+
+  function renderStoriesBar() {
+    const bar = document.getElementById('storiesBar');
+    if (!bar) return;
+    const items = [];
+    // Own tile first (either "add" or ring if has stories)
+    if (me && myProfile) {
+      const mineArr = storiesByAuthor.get(me.id) || [];
+      const av = myProfile.avatar_url ? `<img src="${escapeHtml(myProfile.avatar_url)}" alt="">` : myProfile.name[0].toUpperCase();
+      const bg = colorFor(myProfile.name);
+      items.push(`<a href="#" class="story-item" data-mine="1">
+        <div class="story-ring ${mineArr.length ? 'has-new' : ''}"><div class="inner" style="background:${bg}">${av}</div><div class="plus">+</div></div>
+        <div class="story-name mine">Tu historia</div>
+      </a>`);
+    }
+    // Group others' stories
+    const others = [...storiesByAuthor.entries()].filter(([uid]) => !me || uid !== me.id);
+    // Order: unseen first
+    others.sort(([uidA, a], [uidB, b]) => {
+      const aUnseen = a.some(s => !seenStories.has(s.id));
+      const bUnseen = b.some(s => !seenStories.has(s.id));
+      if (aUnseen !== bUnseen) return aUnseen ? -1 : 1;
+      const lastA = new Date(a[a.length-1].created_at).getTime();
+      const lastB = new Date(b[b.length-1].created_at).getTime();
+      return lastB - lastA;
+    });
+    others.forEach(([uid, arr]) => {
+      const p = profilesById.get(uid);
+      const name = p ? p.name : 'Anónimo';
+      const av = p && p.avatar_url ? `<img src="${escapeHtml(p.avatar_url)}" alt="">` : name[0].toUpperCase();
+      const allSeen = arr.every(s => seenStories.has(s.id));
+      items.push(`<a href="#" class="story-item" data-author="${uid}">
+        <div class="story-ring ${allSeen ? 'seen' : 'has-new'}"><div class="inner" style="background:${colorFor(name)}">${av}</div></div>
+        <div class="story-name">${escapeHtml(name)}</div>
+      </a>`);
+    });
+    if (!items.length) { bar.hidden = true; return; }
+    bar.hidden = false;
+    bar.innerHTML = items.join('');
+    bar.querySelectorAll('.story-item').forEach(a => a.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (a.dataset.mine) {
+        const mineArr = storiesByAuthor.get(me.id) || [];
+        const clickedPlus = e.target.closest('.plus');
+        if (clickedPlus || !mineArr.length) {
+          openStoryComposer();
+        } else {
+          openStoryViewer(me.id, 0);
+        }
+      } else {
+        openStoryViewer(a.dataset.author, 0);
+      }
+    }));
+  }
+
+  // Story viewer
+  const storyViewer = document.getElementById('storyViewer');
+  const storyProgressBar = document.getElementById('storyProgressBar');
+  const storyHeader = document.getElementById('storyHeader');
+  const storyStage = document.getElementById('storyStage');
+  let viewerAuthorUid = null;
+  let viewerIdx = 0;
+  let viewerTimer = null;
+  let viewerRAF = null;
+  let viewerStart = 0;
+  let viewerDuration = STORY_DURATION;
+
+  function openStoryViewer(authorUid, idx) {
+    viewerAuthorUid = authorUid;
+    viewerIdx = idx || 0;
+    storyViewer.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    showViewerStory();
+  }
+  function closeStoryViewer() {
+    storyViewer.classList.remove('open');
+    document.body.style.overflow = '';
+    if (viewerTimer) { clearTimeout(viewerTimer); viewerTimer = null; }
+    if (viewerRAF) { cancelAnimationFrame(viewerRAF); viewerRAF = null; }
+    // Remove any video
+    const oldMedia = storyStage.querySelector('img, video, .opinion-view, .story-caption, .story-delete');
+    if (oldMedia) storyStage.querySelectorAll('img, video, .opinion-view, .story-caption, .story-delete').forEach(n => n.remove());
+    renderStoriesBar();
+  }
+  function showViewerStory() {
+    const arr = storiesByAuthor.get(viewerAuthorUid) || [];
+    if (!arr.length) { closeStoryViewer(); return; }
+    if (viewerIdx >= arr.length) { closeStoryViewer(); return; }
+    if (viewerIdx < 0) viewerIdx = 0;
+    const s = arr[viewerIdx];
+    seenStories.add(s.id);
+    persistSeen();
+
+    // Progress bars
+    storyProgressBar.innerHTML = arr.map((_, i) => `<div class="story-progress ${i < viewerIdx ? 'done' : ''}"><span class="bar"></span></div>`).join('');
+
+    // Header
+    const p = profilesById.get(s.author_user_id);
+    const name = p ? p.name : 'Anónimo';
+    const isMine = me && s.author_user_id === me.id;
+    const key = p ? keyOf(p.name, p.section) : '';
+    const av = p && p.avatar_url ? `<img src="${escapeHtml(p.avatar_url)}" alt="">` : name[0].toUpperCase();
+    storyHeader.innerHTML = `
+      <a href="/profile/?u=${key}"><div class="avatar-mini" style="background:${colorFor(name)}">${av}</div><div><div class="who">${escapeHtml(name)}</div><div class="when">${timeAgo(s.created_at)}</div></div></a>
+      <div class="spacer"></div>
+      <button id="storyCloseBtn" aria-label="Cerrar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    `;
+    document.getElementById('storyCloseBtn').addEventListener('click', closeStoryViewer);
+
+    // Clear stage keeping tap zones
+    storyStage.querySelectorAll('img, video, .opinion-view, .story-caption, .story-delete').forEach(n => n.remove());
+
+    viewerDuration = STORY_DURATION;
+    if (s.type === 'opinion') {
+      const div = document.createElement('div');
+      div.className = 'opinion-view';
+      div.textContent = s.content || '';
+      storyStage.prepend(div);
+    } else if (s.type === 'photo' && s.media_url) {
+      const img = document.createElement('img');
+      img.src = s.media_url;
+      storyStage.prepend(img);
+      if (s.content) {
+        const cap = document.createElement('div');
+        cap.className = 'story-caption';
+        cap.textContent = s.content;
+        storyStage.appendChild(cap);
+      }
+    } else if (s.type === 'reel' && s.media_url) {
+      const v = document.createElement('video');
+      v.src = s.media_url;
+      v.autoplay = true; v.playsInline = true; v.muted = false;
+      v.controls = false;
+      v.addEventListener('loadedmetadata', () => {
+        viewerDuration = Math.max(1500, Math.min(v.duration * 1000, 60000));
+        startProgress();
+      });
+      v.addEventListener('ended', nextStory);
+      storyStage.prepend(v);
+      if (s.content) {
+        const cap = document.createElement('div');
+        cap.className = 'story-caption';
+        cap.textContent = s.content;
+        storyStage.appendChild(cap);
+      }
+    }
+
+    if (isMine) {
+      const del = document.createElement('button');
+      del.className = 'story-delete';
+      del.textContent = '🗑 Borrar';
+      del.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        if (!confirm('¿Borrar esta historia?')) return;
+        await sb.from('stories').delete().eq('id', s.id);
+        // remove locally
+        const authorArr = storiesByAuthor.get(viewerAuthorUid) || [];
+        const localIdx = authorArr.findIndex(x => x.id === s.id);
+        if (localIdx >= 0) authorArr.splice(localIdx, 1);
+        if (!authorArr.length) { storiesByAuthor.delete(viewerAuthorUid); closeStoryViewer(); return; }
+        if (viewerIdx >= authorArr.length) viewerIdx = authorArr.length - 1;
+        showViewerStory();
+      });
+      storyStage.appendChild(del);
+    }
+
+    if (s.type !== 'reel') startProgress();
+  }
+  function startProgress() {
+    if (viewerRAF) cancelAnimationFrame(viewerRAF);
+    viewerStart = performance.now();
+    const bars = storyProgressBar.querySelectorAll('.story-progress:not(.done) .bar');
+    const currentBar = bars[0];
+    function step(t) {
+      const pct = Math.min(1, (t - viewerStart) / viewerDuration);
+      if (currentBar) currentBar.style.width = (pct * 100) + '%';
+      if (pct >= 1) nextStory();
+      else viewerRAF = requestAnimationFrame(step);
+    }
+    viewerRAF = requestAnimationFrame(step);
+  }
+  function nextStory() {
+    if (viewerRAF) cancelAnimationFrame(viewerRAF);
+    viewerIdx++;
+    // If done with this author, move to next author with unseen stories, or close
+    const arr = storiesByAuthor.get(viewerAuthorUid) || [];
+    if (viewerIdx >= arr.length) {
+      const authorsList = [...storiesByAuthor.keys()];
+      const currentPos = authorsList.indexOf(viewerAuthorUid);
+      if (currentPos >= 0 && currentPos + 1 < authorsList.length) {
+        viewerAuthorUid = authorsList[currentPos + 1];
+        viewerIdx = 0;
+        showViewerStory();
+        return;
+      }
+      closeStoryViewer();
+      return;
+    }
+    showViewerStory();
+  }
+  function prevStory() {
+    if (viewerRAF) cancelAnimationFrame(viewerRAF);
+    if (viewerIdx > 0) { viewerIdx--; showViewerStory(); return; }
+    // Go to previous author's last story
+    const authorsList = [...storiesByAuthor.keys()];
+    const currentPos = authorsList.indexOf(viewerAuthorUid);
+    if (currentPos > 0) {
+      viewerAuthorUid = authorsList[currentPos - 1];
+      const arr = storiesByAuthor.get(viewerAuthorUid) || [];
+      viewerIdx = Math.max(0, arr.length - 1);
+      showViewerStory();
+    }
+  }
+  document.getElementById('storyTapLeft').addEventListener('click', prevStory);
+  document.getElementById('storyTapRight').addEventListener('click', nextStory);
+  document.addEventListener('keydown', (e) => {
+    if (!storyViewer.classList.contains('open')) return;
+    if (e.key === 'Escape') closeStoryViewer();
+    else if (e.key === 'ArrowRight') nextStory();
+    else if (e.key === 'ArrowLeft') prevStory();
+  });
+
+  // Story composer
+  const stModal = document.getElementById('storyComposerModal');
+  const stTabs = document.getElementById('stTabs');
+  const stContent = document.getElementById('stContent');
+  const stFile = document.getElementById('stFile');
+  const stMediaWrap = document.getElementById('stMediaWrap');
+  const stMediaContent = document.getElementById('stMediaContent');
+  const stSubmit = document.getElementById('stSubmit');
+  const stCancel = document.getElementById('stCancel');
+  const stCloseBtn = document.getElementById('stClose');
+  let stType = 'opinion';
+  let stPending = null;
+
+  function openStoryComposer() {
+    if (!myProfile) { alert('Reclamá tu nombre primero'); return; }
+    stType = 'opinion'; stPending = null;
+    stContent.value = '';
+    stTabs.querySelectorAll('.ct').forEach(t => t.classList.toggle('is-active', t.dataset.type === stType));
+    updateStMedia();
+    stModal.hidden = false; stModal.classList.add('open');
+  }
+  function closeStoryComposer() { stModal.classList.remove('open'); stModal.hidden = true; }
+  stCloseBtn.addEventListener('click', closeStoryComposer);
+  stCancel.addEventListener('click', closeStoryComposer);
+  stModal.addEventListener('click', e => { if (e.target === stModal) closeStoryComposer(); });
+  stTabs.querySelectorAll('.ct').forEach(t => t.addEventListener('click', () => {
+    stType = t.dataset.type; stPending = null;
+    stTabs.querySelectorAll('.ct').forEach(x => x.classList.remove('is-active'));
+    t.classList.add('is-active');
+    updateStMedia();
+  }));
+  function updateStMedia() {
+    if (stType === 'opinion') { stMediaWrap.hidden = true; return; }
+    stMediaWrap.hidden = false;
+    stFile.accept = stType === 'reel' ? 'video/*' : 'image/*';
+    if (!stPending) {
+      stMediaContent.innerHTML = `<button type="button" class="picker-btn" id="stPickBtn">${stType === 'reel' ? '🎬 Elegir video' : '📷 Elegir foto'}</button>`;
+      document.getElementById('stPickBtn').addEventListener('click', () => stFile.click());
+    } else {
+      const url = URL.createObjectURL(stPending);
+      stMediaContent.innerHTML = stType === 'reel'
+        ? `<video src="${url}" controls muted playsinline></video><br><button type="button" class="picker-btn" id="stClrBtn" style="margin-top:8px">Cambiar</button>`
+        : `<img src="${url}"><br><button type="button" class="picker-btn" id="stClrBtn" style="margin-top:8px">Cambiar</button>`;
+      document.getElementById('stClrBtn').addEventListener('click', () => { stPending = null; updateStMedia(); });
+    }
+  }
+  stFile.addEventListener('change', (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    const maxMB = stType === 'reel' ? 40 : 8;
+    if (f.size > maxMB * 1024 * 1024) { alert(`Muy pesado (máx ${maxMB} MB)`); return; }
+    stPending = f; updateStMedia();
+  });
+  stSubmit.addEventListener('click', async () => {
+    const content = stContent.value.trim();
+    if (stType === 'opinion' && !content) { alert('Escribí algo'); return; }
+    if (stType !== 'opinion' && !stPending) { alert('Elegí un archivo'); return; }
+    stSubmit.disabled = true; stSubmit.textContent = 'Subiendo…';
+    let media_url = null, media_type = null;
+    if (stPending) {
+      const ext = (stPending.name.split('.').pop() || 'bin').toLowerCase().slice(0, 5);
+      const path = `${me.id}/story-${Date.now()}-${Math.random().toString(36).slice(2,6)}.${ext}`;
+      const { error: upErr } = await sb.storage.from('posts').upload(path, stPending, { contentType: stPending.type, upsert: false });
+      if (upErr) { alert('Error subiendo: ' + upErr.message); stSubmit.disabled = false; stSubmit.textContent = 'Publicar historia'; return; }
+      media_url = sb.storage.from('posts').getPublicUrl(path).data.publicUrl;
+      media_type = stPending.type;
+    }
+    const { error } = await sb.from('stories').insert({
+      author_user_id: me.id, type: stType, content: content || null, media_url, media_type
+    });
+    stSubmit.disabled = false; stSubmit.textContent = 'Publicar historia';
+    if (error) { alert(error.message); return; }
+    closeStoryComposer();
+    loadStories();
+  });
+
   // ============ REALTIME ============
   function subscribe() {
     sb.channel('feed-live')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, () => loadFeed())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'post_likes' }, () => loadFeed())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'post_comments' }, () => loadFeed())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'stories' }, () => loadStories())
       .subscribe();
   }
 
+  // Refresh stories cada 60s para que expiren visualmente
+  setInterval(() => { loadStories(); }, 60000);
+
   boot();
+  // Mark story as seen when viewer is active on it (already handled in showViewerStory)
+  // Also: si hay una historia mía en el composer rápido, mostrar acceso rápido
+
 </script>
 
 </body>
