@@ -544,6 +544,41 @@
     letter-spacing: 0.08em; text-transform: uppercase;
   }
 
+  /* ============ COMING SOON card ============ */
+  .soon-card {
+    display: flex; align-items: center; gap: 24px;
+    padding: 32px 34px;
+    background: var(--paper);
+    border: 1.5px dashed var(--line-strong);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    position: relative;
+  }
+  .soon-lock {
+    width: 72px; height: 72px; border-radius: 22px;
+    background: var(--paper-soft);
+    border: 1.5px solid var(--line);
+    color: var(--ink-mute);
+    display: grid; place-items: center;
+    flex-shrink: 0;
+  }
+  .soon-body { flex: 1; min-width: 0; }
+  .soon-body .section-tag { color: var(--ink-mute); }
+  .soon-body h2 {
+    font-family: var(--f-display); font-weight: 800;
+    font-size: clamp(28px, 3.4vw, 40px);
+    letter-spacing: -0.03em; line-height: 1;
+    margin: 8px 0 10px;
+  }
+  .soon-body p {
+    margin: 0; color: var(--ink-mute);
+    font-family: var(--f-mono); font-size: 13px;
+    letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600;
+  }
+  @media (max-width: 640px) {
+    .soon-card { flex-direction: column; text-align: center; padding: 28px 22px; }
+  }
+
   /* ============ EMPRESAS ============ */
   .empresas {
     display: grid;
@@ -1735,6 +1770,20 @@
 
   <div class="schedule-wrap reveal">
     <table class="schedule" id="scheduleTable"></table>
+  </div>
+</section>
+
+<!-- =================== PERIÓDICO (coming soon) =================== -->
+<section id="periodico" class="wrap block">
+  <div class="soon-card reveal">
+    <div class="soon-lock" aria-hidden="true">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+    </div>
+    <div class="soon-body">
+      <div class="section-tag">Nueva página</div>
+      <h2>Periódico Panamericano</h2>
+      <p>Pronto…</p>
+    </div>
   </div>
 </section>
 
