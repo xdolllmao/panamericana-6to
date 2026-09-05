@@ -998,7 +998,7 @@
   const loginStatus = document.getElementById('loginStatus');
   const loginLogout = document.getElementById('loginLogout');
 
-  function openLogin() { renderLoginNames(); openBackdrop(loginModal); }
+  function openLogin() { recoverMode = false; renderLoginNames(); openBackdrop(loginModal); }
   accountChip.addEventListener('click', openLogin);
   loginClose.addEventListener('click', () => closeBackdrop(loginModal));
 
@@ -1012,6 +1012,7 @@
     }
   }
 
+  let recoverMode = false; // true = permitir reclamar nombres ocupados (con confirmación)
   function renderLoginNames() {
     const q = loginSearch.value.trim().toLowerCase();
     const bySec = { A: [], B: [] };
@@ -1024,17 +1025,18 @@
         const k = keyOf(st.n, st.s);
         const claimed = profilesByKey.get(k);
         const isMe = account && account.name === st.n && account.section === st.s;
-        const active = !!claimed && !isMe && isActive(claimed);  // en línea ahora en otro dispositivo
-        const idle   = !!claimed && !isMe && !isActive(claimed); // claimado pero sin actividad → reclamable
-        // Solo los ACTIVOS se bloquean. Los inactivos se pueden reclamar.
+        const taken = !!claimed && !isMe;
+        // En modo recuperar, los tomados son clickeables (con confirmación).
+        // En modo normal, siempre bloqueados igual en PC y celular.
+        const blocked = taken && !recoverMode;
         const tag = isMe
           ? '<span class="person-chip-check">Yo</span>'
-          : active
-            ? '<span class="person-chip-check" style="color:#10b981">● En línea</span>'
-            : idle
-              ? '<span class="person-chip-check" style="opacity:.55">Abierto</span>'
-              : '';
-        return `<button class="person-chip" ${active ? 'disabled style="opacity:.5;text-decoration:line-through"' : ''} data-name="${escapeHtml(st.n)}" data-section="${st.s}" data-idle="${idle ? 1 : 0}" type="button">
+          : taken
+            ? (recoverMode
+                ? '<span class="person-chip-check" style="color:#ff8a00">↩ Recuperar</span>'
+                : '<span class="person-chip-check">tomado</span>')
+            : '';
+        return `<button class="person-chip" ${blocked ? 'disabled style="opacity:.45;text-decoration:line-through"' : ''} data-name="${escapeHtml(st.n)}" data-section="${st.s}" data-taken="${taken ? 1 : 0}" type="button">
           <span class="avatar-mini" style="background:${colorFor(st.n)}">${st.n[0].toUpperCase()}</span>
           <span class="person-chip-name">${escapeHtml(st.n)}</span>
           ${tag}
@@ -1042,8 +1044,8 @@
       }).join('');
       container.querySelectorAll('.person-chip:not([disabled])').forEach(btn => {
         btn.addEventListener('click', () => {
-          if (btn.dataset.idle === '1') {
-            const ok = confirm(`"${btn.dataset.name}" quedó abierto en otro dispositivo, pero nadie está en línea con ese nombre ahora mismo. ¿Reclamarlo?`);
+          if (btn.dataset.taken === '1') {
+            const ok = confirm(`Vas a tomar "${btn.dataset.name}" desde este dispositivo. El otro dispositivo con esa cuenta va a perder acceso, y tus chats se mueven acá. ¿Continuar?`);
             if (!ok) return;
           }
           claimName(btn.dataset.name, btn.dataset.section);
@@ -1054,8 +1056,13 @@
     build(bySec.B, loginNamesB);
     const total = STUDENTS.length;
     const claimedCount = profilesByKey.size;
-    const activeCount = [...profilesByKey.values()].filter(isActive).length;
-    loginStatus.textContent = `${total - claimedCount} libres · ${activeCount} en línea`;
+    loginStatus.innerHTML = `${total - claimedCount} libres · ${claimedCount} tomados${claimedCount ? ' · <a href="#" id="recoverToggle" style="color:var(--school);text-decoration:underline;pointer-events:auto">' + (recoverMode ? 'cancelar' : '¿recuperar mi cuenta?') + '</a>' : ''}`;
+    const rt = document.getElementById('recoverToggle');
+    if (rt) rt.addEventListener('click', (e) => {
+      e.preventDefault();
+      recoverMode = !recoverMode;
+      renderLoginNames();
+    });
     loginLogout.hidden = !account;
   }
   loginSearch.addEventListener('input', renderLoginNames);
