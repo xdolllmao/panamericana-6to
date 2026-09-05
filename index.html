@@ -450,8 +450,30 @@
     flex-shrink: 0;
     box-shadow: inset 0 0 0 2px rgba(255,255,255,.35);
     overflow: hidden;
+    position: relative;
   }
   .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .avatar.has-story-new,
+  .avatar.has-story-seen {
+    overflow: visible;
+  }
+  .avatar.has-story-new img,
+  .avatar.has-story-seen img { border-radius: 50%; }
+  .avatar.has-story-new::after,
+  .avatar.has-story-seen::after {
+    content: ""; position: absolute; inset: -5px; border-radius: 50%;
+    padding: 2.5px;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    pointer-events: none;
+  }
+  .avatar.has-story-new::after {
+    background: conic-gradient(from 210deg, #3B5EF0, #6B3EE8, #D91F26, #F5DE3A, #3B5EF0);
+  }
+  .avatar.has-story-seen::after {
+    background: var(--line-strong);
+    opacity: .75;
+  }
   .student-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
   .student-name {
     font-weight: 700; font-size: 15px; letter-spacing: -0.01em;
@@ -1540,6 +1562,33 @@
     text-decoration: none;
   }
   .profile-goto:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+  .profile-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 14px; }
+  .profile-actions .profile-goto { margin-top: 0; }
+  .profile-goto.story-btn {
+    background: linear-gradient(135deg, #3B5EF0, #6B3EE8, #D91F26);
+    color: #fff;
+  }
+  .profile-avatar.has-story-new,
+  .profile-avatar.has-story-seen {
+    position: relative;
+    overflow: visible;
+  }
+  .profile-avatar.has-story-new img,
+  .profile-avatar.has-story-seen img { border-radius: 50%; }
+  .profile-avatar.has-story-new::after,
+  .profile-avatar.has-story-seen::after {
+    content: ""; position: absolute; inset: -7px; border-radius: 50%;
+    padding: 3px;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    pointer-events: none;
+  }
+  .profile-avatar.has-story-new::after {
+    background: conic-gradient(from 210deg, #3B5EF0, #6B3EE8, #D91F26, #F5DE3A, #3B5EF0);
+  }
+  .profile-avatar.has-story-seen::after {
+    background: var(--line-strong); opacity: .75;
+  }
   .profile-name {
     font-family: var(--f-display); font-weight: 800;
     font-size: 32px; letter-spacing: -0.02em; margin: 0;
@@ -2258,9 +2307,17 @@
     roster.innerHTML = list.map(st => {
       let prof = null;
       try { prof = profilesByKey.get(`${st.s}-${st.n.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'')}`); } catch(e){}
+      let storyClass = '';
+      try {
+        if (prof && storiesByAuthor && storiesByAuthor.has(prof.user_id)) {
+          const sArr = storiesByAuthor.get(prof.user_id);
+          const allSeen = sArr.every(s => seenStories.has(s.id));
+          storyClass = allSeen ? ' has-story-seen' : ' has-story-new';
+        }
+      } catch(e){}
       const av = (prof && prof.avatar_url)
-        ? `<div class="avatar" style="background:${colorFor(st.n)}"><img src="${prof.avatar_url}" alt=""></div>`
-        : `<div class="avatar" style="background:${colorFor(st.n)}">${initials(st.n)}</div>`;
+        ? `<div class="avatar${storyClass}" style="background:${colorFor(st.n)}"><img src="${prof.avatar_url}" alt=""></div>`
+        : `<div class="avatar${storyClass}" style="background:${colorFor(st.n)}">${initials(st.n)}</div>`;
       return `
         <button class="student" type="button" data-name="${st.n}" data-section="${st.s}" ${st.r ? `data-role="${st.r}"` : ''} aria-label="Ver perfil de ${st.n}">
           ${av}
@@ -2467,6 +2524,9 @@
   let account = null;
   let profilesByKey = new Map();
   let posts = [];
+  let storiesByAuthor = new Map();
+  let seenStories = new Set();
+  try { seenStories = new Set(JSON.parse(localStorage.getItem('sixth-seen-stories') || '[]')); } catch(e){}
 
   function openModal() { renderNames(); loginModal.hidden = false; loginModal.classList.add('open'); }
   function closeModal() { loginModal.classList.remove('open'); loginModal.hidden = true; }
@@ -2898,6 +2958,21 @@
     if (error) { alert('No se pudo quitar: ' + error.message); await refreshVotes(); }
   });
 
+  async function refreshStories() {
+    const cutoff = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+    const { data, error } = await sb.from('stories')
+      .select('id, author_user_id, created_at')
+      .gt('created_at', cutoff);
+    if (error) return;
+    storiesByAuthor = new Map();
+    (data || []).forEach(s => {
+      const arr = storiesByAuthor.get(s.author_user_id) || [];
+      arr.push(s);
+      storiesByAuthor.set(s.author_user_id, arr);
+    });
+    if (typeof renderStudents === 'function' && document.getElementById('roster')) renderStudents();
+  }
+
   async function refreshVotes() {
     const { data, error } = await sb.from('votes').select('user_id, category, candidate');
     if (error) return;
@@ -2939,6 +3014,7 @@
     await refreshChismes();
     await refreshNotifBadge();
     await refreshVotes();
+    await refreshStories();
     updateAccountChip();
     renderComposer();
     dbNotice.textContent = 'Sincronizado en vivo · Supabase';
@@ -2959,6 +3035,12 @@
     sb.channel('votes-live').on('postgres_changes', { event: '*', schema: 'public', table: 'votes' }, () => {
       refreshVotes();
     }).subscribe();
+
+    sb.channel('stories-live').on('postgres_changes', { event: '*', schema: 'public', table: 'stories' }, () => {
+      refreshStories();
+    }).subscribe();
+
+    setInterval(refreshStories, 60000);
 
     window.addEventListener('focus', refreshNotifBadge);
   }
@@ -3244,12 +3326,21 @@
     let prof = null;
     try { prof = profilesByKey.get(keyOf(name, section)); } catch(e){}
     const key = keyOf(name, section);
+    let hasStory = false, allStoriesSeen = false;
+    try {
+      if (prof && storiesByAuthor && storiesByAuthor.has(prof.user_id)) {
+        const sArr = storiesByAuthor.get(prof.user_id);
+        hasStory = sArr.length > 0;
+        allStoriesSeen = sArr.every(s => seenStories.has(s.id));
+      }
+    } catch(e){}
     const avatarInner = (prof && prof.avatar_url)
       ? `<img src="${escapeHtml(prof.avatar_url)}" alt="">`
       : init;
+    const avatarStoryClass = hasStory ? (allStoriesSeen ? ' has-story-seen' : ' has-story-new') : '';
     profileCard.style.setProperty('--profile-color', color);
     profileCard.innerHTML = `
-      <div class="profile-avatar" style="background:${color}">${avatarInner}</div>
+      <div class="profile-avatar${avatarStoryClass}" style="background:${color}">${avatarInner}</div>
       <h3 class="profile-name" id="profileName">${escapeHtml(name)}</h3>
       <div class="profile-section">Sección ${escapeHtml(section)} · 6to grado</div>
       ${roleHtml}
@@ -3263,10 +3354,16 @@
           <div class="profile-fact-value">2026</div>
         </div>
       </div>
-      <a class="profile-goto" href="/profile/?u=${encodeURIComponent(key)}">
-        Ver perfil completo
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-      </a>
+      <div class="profile-actions">
+        ${hasStory && prof ? `<a class="profile-goto story-btn" href="/feed/?story=${encodeURIComponent(prof.user_id)}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+          Ver historia
+        </a>` : ''}
+        <a class="profile-goto" href="/profile/?u=${encodeURIComponent(key)}">
+          Ver perfil completo
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </a>
+      </div>
     `;
     profileModal.hidden = false;
     profileModal.classList.add('open');

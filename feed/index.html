@@ -364,6 +364,11 @@
     await loadFeed();
     await loadStories();
     subscribe();
+    // Auto-open story viewer si viene con ?story=<uid>
+    const storyUid = new URLSearchParams(location.search).get('story');
+    if (storyUid && storiesByAuthor.has(storyUid)) {
+      setTimeout(() => openStoryViewer(storyUid, 0), 100);
+    }
     document.querySelectorAll('.feed-tab').forEach(t => t.addEventListener('click', () => {
       currentFilter = t.dataset.filter;
       document.querySelectorAll('.feed-tab').forEach(x => x.classList.remove('is-active'));
