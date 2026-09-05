@@ -43,6 +43,19 @@
   .live-head-meta { font-family: var(--f-mono); font-size: 10px; opacity: .82; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
   .live-close { pointer-events: auto; width: 36px; height: 36px; border-radius: 999px; background: rgba(0,0,0,.5); backdrop-filter: blur(8px); display: grid; place-items: center; margin-left: auto; }
   .live-close:hover { background: rgba(0,0,0,.75); }
+  .live-ctrls { pointer-events: auto; display: flex; gap: 6px; margin-left: auto; }
+  .live-ctrl {
+    width: 40px; height: 40px; border-radius: 999px;
+    background: rgba(255,255,255,.14); backdrop-filter: blur(8px);
+    color: #fff; display: grid; place-items: center;
+    font-size: 15px; cursor: pointer;
+    border: 1px solid rgba(255,255,255,.18);
+    transition: background .18s, transform .12s;
+  }
+  .live-ctrl:hover { background: rgba(255,255,255,.28); transform: scale(1.05); }
+  .live-ctrl:active { transform: scale(.95); }
+  .live-ctrl.off { background: var(--coral); border-color: var(--coral); }
+  .live-ctrl svg { width: 18px; height: 18px; }
 
   /* Comments layer (flow up from bottom) */
   .live-comments { position: absolute; left: 12px; right: 90px; bottom: 90px; max-height: 55%; display: flex; flex-direction: column-reverse; gap: 6px; pointer-events: none; overflow: hidden; }
@@ -240,6 +253,7 @@
         </div>
         <div class="live-head-meta" id="headMeta">— viewers</div>
       </div>
+      <div class="live-ctrls" id="liveCtrls"></div>
       <button class="live-close" id="closeBtn" aria-label="Cerrar">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
       </button>
@@ -305,35 +319,104 @@
   const overlay = $('overlay');
   const splash = $('splash');
 
-  async function boot() {
-    try {
-      const { data: { session } } = await sb.auth.getSession();
-      if (session && session.user) me = session.user;
-      else { const { data } = await sb.auth.signInAnonymously(); me = data.user; }
-    } catch(e){ loading.textContent = 'Sin conexión'; return; }
+  function setLoading(msg) { loading.hidden = false; loading.innerHTML = msg; }
+  function bail(msg) {
+    setLoading(`${msg}<br><br><a href="/" style="color:#fff;text-decoration:underline">Volver al inicio</a>&nbsp;·&nbsp;<a href="javascript:location.reload()" style="color:#fff;text-decoration:underline">Reintentar</a>`);
+  }
+  function withTimeout(promise, ms, label) {
+    return Promise.race([
+      promise,
+      new Promise((_, r) => setTimeout(() => r(new Error(`timeout: ${label}`)), ms))
+    ]);
+  }
 
-    const { data: profs } = await sb.from('profiles').select('user_id, name, section, role, avatar_url');
+  async function boot() {
+    // Fallback watchdog: si en 15s no cambia loading a hidden, mostrar error
+    const watchdog = setTimeout(() => {
+      if (!loading.hidden) bail('Muy lento — algo no anda bien.');
+    }, 15000);
+
+    setLoading('Conectando…');
+    try {
+      const { data: { session } } = await withTimeout(sb.auth.getSession(), 5000, 'getSession');
+      if (session && session.user) {
+        me = session.user;
+      } else {
+        setLoading('Iniciando sesión…');
+        const { data, error } = await withTimeout(sb.auth.signInAnonymously(), 8000, 'signIn');
+        if (error) throw error;
+        me = data.user;
+      }
+    } catch(e){
+      console.error('auth', e);
+      clearTimeout(watchdog);
+      bail('No se pudo conectar a Supabase (' + (e.message || 'error') + ').');
+      return;
+    }
+
+    setLoading('Cargando perfiles…');
+    let profs;
+    try {
+      const r = await withTimeout(
+        sb.from('profiles').select('user_id, name, section, role, avatar_url'),
+        8000, 'profiles');
+      if (r.error) throw r.error;
+      profs = r.data;
+    } catch(e){
+      console.error('profiles', e);
+      clearTimeout(watchdog);
+      bail('No se pudieron cargar los perfiles.');
+      return;
+    }
     (profs || []).forEach(p => profilesById.set(p.user_id, p));
     myProfile = me ? profilesById.get(me.id) : null;
 
     if (startAsNew) {
-      if (!myProfile) { loading.innerHTML = 'Reclamá tu nombre primero en <a href="/" style="color:#fff">la home</a>'; return; }
-      loading.hidden = true; showSplash();
+      if (!myProfile) {
+        clearTimeout(watchdog);
+        bail('Necesitás reclamar tu nombre primero.');
+        return;
+      }
+      if (typeof JitsiMeetExternalAPI === 'undefined') {
+        clearTimeout(watchdog);
+        bail('No se pudo cargar el motor de video (Jitsi). Revisá tu WiFi.');
+        return;
+      }
+      clearTimeout(watchdog);
+      loading.hidden = true;
+      showSplash();
       return;
     }
 
     if (!liveIdParam) {
-      loading.innerHTML = 'Faltó el id del live · <a href="/" style="color:#fff">Volver</a>';
+      clearTimeout(watchdog);
+      bail('Faltó el id del live.');
       return;
     }
 
-    const { data: liveRow, error } = await sb.from('lives').select('*').eq('id', liveIdParam).maybeSingle();
-    if (error || !liveRow) { loading.textContent = 'Live no encontrado'; return; }
-    if (liveRow.ended_at) {
-      loading.innerHTML = 'Este live ya terminó · <a href="/" style="color:#fff">Volver</a>';
+    setLoading('Buscando el live…');
+    let liveRow;
+    try {
+      const r = await withTimeout(
+        sb.from('lives').select('*').eq('id', liveIdParam).maybeSingle(),
+        8000, 'live lookup');
+      if (r.error) throw r.error;
+      liveRow = r.data;
+    } catch(e){
+      console.error('lives', e);
+      clearTimeout(watchdog);
+      bail('No se pudo cargar el live.');
       return;
     }
+    if (!liveRow) { clearTimeout(watchdog); bail('Live no encontrado.'); return; }
+    if (liveRow.ended_at) { clearTimeout(watchdog); bail('Este live ya terminó.'); return; }
     live = liveRow;
+    if (typeof JitsiMeetExternalAPI === 'undefined') {
+      clearTimeout(watchdog);
+      bail('No se pudo cargar el motor de video (Jitsi). Revisá tu WiFi.');
+      return;
+    }
+    clearTimeout(watchdog);
     joinLive(live.broadcaster_user_id === me.id);
   }
 
@@ -422,6 +505,42 @@
       if (isBroadcaster) endLive();
       else location.href = '/';
     });
+
+    // Broadcaster-only mic/camera toggles en el header (encima del overlay)
+    if (isBroadcaster) {
+      const ctrls = $('liveCtrls');
+      ctrls.innerHTML = `
+        <button class="live-ctrl" id="micToggle" title="Silenciar micrófono" aria-label="Silenciar micrófono">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg>
+        </button>
+        <button class="live-ctrl" id="camToggle" title="Apagar cámara" aria-label="Apagar cámara">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+        </button>
+      `;
+      let micOff = false, camOff = false;
+      const micBtn = $('micToggle');
+      const camBtn = $('camToggle');
+      micBtn.addEventListener('click', () => { try { jitsi.executeCommand('toggleAudio'); } catch(e){} });
+      camBtn.addEventListener('click', () => { try { jitsi.executeCommand('toggleVideo'); } catch(e){} });
+      jitsi.addListener('audioMuteStatusChanged', (e) => {
+        micOff = !!e.muted;
+        micBtn.classList.toggle('off', micOff);
+        micBtn.title = micOff ? 'Activar micrófono' : 'Silenciar micrófono';
+        micBtn.setAttribute('aria-label', micBtn.title);
+        micBtn.innerHTML = micOff
+          ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l22 22"/><path d="M9 9v2a3 3 0 0 0 5.12 2.12M15 9.34V5a3 3 0 0 0-5.94-.6"/><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 2a7 7 0 0 1-.11 1.23M12 18v4"/></svg>`
+          : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg>`;
+      });
+      jitsi.addListener('videoMuteStatusChanged', (e) => {
+        camOff = !!e.muted;
+        camBtn.classList.toggle('off', camOff);
+        camBtn.title = camOff ? 'Encender cámara' : 'Apagar cámara';
+        camBtn.setAttribute('aria-label', camBtn.title);
+        camBtn.innerHTML = camOff
+          ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l22 22"/><path d="M16 16v3a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h3M9 5h5a2 2 0 0 1 2 2v3l4-3v10"/></svg>`
+          : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>`;
+      });
+    }
     setTimeout(updateViewerCount, 1500);
   }
 
