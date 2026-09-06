@@ -603,21 +603,82 @@
   }
 
   // ============ COMPOSER modal ============
-  let cmpType = 'opinion', cmpFile = null;
+  // Comprime/normaliza una imagen a JPEG. Sirve para que fotos gigantes de celular
+  // quepan en el límite y para que formatos como HEIC (que el navegador no muestra)
+  // se conviertan a algo que sí se ve. Lanza si no puede decodificar.
+  async function compressImage(file) {
+    const srcUrl = URL.createObjectURL(file);
+    try {
+      const img = await new Promise((resolve, reject) => {
+        const i = new Image();
+        i.onload = () => resolve(i);
+        i.onerror = () => reject(new Error('decode'));
+        i.src = srcUrl;
+      });
+      const maxDim = 1600;
+      let { width, height } = img;
+      if (!width || !height) throw new Error('empty');
+      if (Math.max(width, height) > maxDim) {
+        const s = maxDim / Math.max(width, height);
+        width = Math.round(width * s);
+        height = Math.round(height * s);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.85));
+      if (!blob) throw new Error('toBlob');
+      return { blob, ext: 'jpg', type: 'image/jpeg', sizeKB: blob.size / 1024 };
+    } finally {
+      URL.revokeObjectURL(srcUrl);
+    }
+  }
+
+  // Prepara un archivo para subir: comprime si es imagen, valida tamaño si es video.
+  // Devuelve { blob, ext, type, sizeKB } o lanza con mensaje al usuario.
+  async function preparePostMedia(file, kind) {
+    if (kind === 'reel') {
+      if (file.size > 40 * 1024 * 1024) throw new Error('Video muy pesado (máx 40 MB).');
+      const rawExt = (file.name && file.name.includes('.')) ? file.name.split('.').pop().toLowerCase().slice(0, 5) : 'mp4';
+      return { blob: file, ext: rawExt || 'mp4', type: file.type || 'video/mp4', sizeKB: file.size / 1024 };
+    }
+    // imagen
+    if (file.size > 25 * 1024 * 1024) throw new Error('Esa foto es demasiado grande (máx 25 MB).');
+    try {
+      return await compressImage(file);
+    } catch (err) {
+      if (file.size > 8 * 1024 * 1024) throw new Error('No pudimos procesar esa foto. Probá con otra o una más liviana.');
+      const rawExt = (file.name && file.name.includes('.')) ? file.name.split('.').pop().toLowerCase().slice(0, 5) : 'jpg';
+      return { blob: file, ext: rawExt || 'jpg', type: file.type || 'application/octet-stream', sizeKB: file.size / 1024 };
+    }
+  }
+
+  let cmpType = 'opinion', cmpMedia = null, cmpPreviewUrl = null;
+  function clearCmpMedia() {
+    if (cmpPreviewUrl) { URL.revokeObjectURL(cmpPreviewUrl); cmpPreviewUrl = null; }
+    cmpMedia = null;
+    const input = document.getElementById('cmpFile');
+    if (input) input.value = '';
+  }
   function openComposer(type) {
     if (!myProfile) { alert('Reclamá tu nombre primero'); return; }
-    cmpType = type || 'opinion'; cmpFile = null;
+    cmpType = type || 'opinion'; clearCmpMedia();
     document.getElementById('cmpDesc').value = document.getElementById('quickInput')?.value || '';
     document.querySelectorAll('.ct').forEach(t => t.classList.toggle('is-active', t.dataset.type === cmpType));
     updateCmpMedia();
     document.getElementById('composerModal').hidden = false;
     document.getElementById('composerModal').classList.add('open');
   }
-  function closeComposer() { document.getElementById('composerModal').classList.remove('open'); document.getElementById('composerModal').hidden = true; }
+  function closeComposer() {
+    document.getElementById('composerModal').classList.remove('open');
+    document.getElementById('composerModal').hidden = true;
+    clearCmpMedia();
+  }
   document.getElementById('cmpClose').addEventListener('click', closeComposer);
   document.getElementById('cmpCancel').addEventListener('click', closeComposer);
   document.querySelectorAll('.ct').forEach(t => t.addEventListener('click', () => {
-    cmpType = t.dataset.type; cmpFile = null;
+    cmpType = t.dataset.type; clearCmpMedia();
     document.querySelectorAll('.ct').forEach(x => x.classList.remove('is-active'));
     t.classList.add('is-active');
     updateCmpMedia();
@@ -629,36 +690,44 @@
     if (cmpType === 'opinion') { wrap.hidden = true; return; }
     wrap.hidden = false;
     input.accept = cmpType === 'reel' ? 'video/*' : 'image/*';
-    if (!cmpFile) {
+    if (!cmpMedia) {
       content.innerHTML = `<button type="button" class="picker-btn" id="pickBtn">${cmpType === 'reel' ? '🎬 Elegir video' : '📷 Elegir foto'}</button>`;
       document.getElementById('pickBtn').addEventListener('click', () => input.click());
     } else {
-      const url = URL.createObjectURL(cmpFile);
+      if (cmpPreviewUrl) URL.revokeObjectURL(cmpPreviewUrl);
+      cmpPreviewUrl = URL.createObjectURL(cmpMedia.blob);
+      const info = `<div style="font-size:12px;opacity:.7;margin-top:6px">Listo (${cmpMedia.sizeKB.toFixed(0)} KB)</div>`;
       content.innerHTML = cmpType === 'reel'
-        ? `<video src="${url}" controls muted playsinline></video><br><button type="button" class="picker-btn" id="clrBtn" style="margin-top:8px">Cambiar</button>`
-        : `<img src="${url}"><br><button type="button" class="picker-btn" id="clrBtn" style="margin-top:8px">Cambiar</button>`;
-      document.getElementById('clrBtn').addEventListener('click', () => { cmpFile = null; updateCmpMedia(); });
+        ? `<video src="${cmpPreviewUrl}" controls muted playsinline></video>${info}<button type="button" class="picker-btn" id="clrBtn" style="margin-top:8px">Cambiar</button>`
+        : `<img src="${cmpPreviewUrl}">${info}<button type="button" class="picker-btn" id="clrBtn" style="margin-top:8px">Cambiar</button>`;
+      document.getElementById('clrBtn').addEventListener('click', () => { clearCmpMedia(); updateCmpMedia(); });
     }
   }
-  document.getElementById('cmpFile').addEventListener('change', (e) => {
+  document.getElementById('cmpFile').addEventListener('change', async (e) => {
     const f = e.target.files[0]; if (!f) return;
-    const maxMB = cmpType === 'reel' ? 40 : 8;
-    if (f.size > maxMB * 1024 * 1024) { alert(`Muy pesado (máx ${maxMB} MB)`); return; }
-    cmpFile = f; updateCmpMedia();
+    const content = document.getElementById('cmpMediaContent');
+    content.innerHTML = `<div style="padding:16px;opacity:.7">Procesando…</div>`;
+    try {
+      cmpMedia = await preparePostMedia(f, cmpType);
+      updateCmpMedia();
+    } catch (err) {
+      alert(err.message || 'No pudimos procesar el archivo.');
+      clearCmpMedia();
+      updateCmpMedia();
+    }
   });
   document.getElementById('cmpSubmit').addEventListener('click', async () => {
     const desc = document.getElementById('cmpDesc').value.trim();
     if (cmpType === 'opinion' && !desc) { alert('Escribí algo'); return; }
-    if (cmpType !== 'opinion' && !cmpFile) { alert('Elegí un archivo'); return; }
+    if (cmpType !== 'opinion' && !cmpMedia) { alert('Elegí un archivo'); return; }
     const btn = document.getElementById('cmpSubmit'); btn.disabled = true; btn.textContent = 'Subiendo…';
     let media_url = null, media_type = null;
-    if (cmpFile) {
-      const ext = (cmpFile.name.split('.').pop() || 'bin').toLowerCase().slice(0, 5);
-      const path = `${me.id}/${cmpType}-${Date.now()}-${Math.random().toString(36).slice(2,6)}.${ext}`;
-      const { error: upErr } = await sb.storage.from('posts').upload(path, cmpFile, { contentType: cmpFile.type, upsert: false });
+    if (cmpMedia) {
+      const path = `${me.id}/${cmpType}-${Date.now()}-${Math.random().toString(36).slice(2,6)}.${cmpMedia.ext}`;
+      const { error: upErr } = await sb.storage.from('posts').upload(path, cmpMedia.blob, { contentType: cmpMedia.type, cacheControl: '3600', upsert: false });
       if (upErr) { alert('Error: ' + upErr.message); btn.disabled = false; btn.textContent = 'Publicar'; return; }
       media_url = sb.storage.from('posts').getPublicUrl(path).data.publicUrl;
-      media_type = cmpFile.type;
+      media_type = cmpMedia.type;
     }
     const { error } = await sb.from('posts').insert({ author_user_id: me.id, type: cmpType, description: desc || null, media_url, media_type });
     btn.disabled = false; btn.textContent = 'Publicar';
@@ -954,22 +1023,27 @@
   const stCancel = document.getElementById('stCancel');
   const stCloseBtn = document.getElementById('stClose');
   let stType = 'opinion';
-  let stPending = null;
+  let stMedia = null, stPreviewUrl = null;
+  function clearStMedia() {
+    if (stPreviewUrl) { URL.revokeObjectURL(stPreviewUrl); stPreviewUrl = null; }
+    stMedia = null;
+    if (stFile) stFile.value = '';
+  }
 
   function openStoryComposer() {
     if (!myProfile) { alert('Reclamá tu nombre primero'); return; }
-    stType = 'opinion'; stPending = null;
+    stType = 'opinion'; clearStMedia();
     stContent.value = '';
     stTabs.querySelectorAll('.ct').forEach(t => t.classList.toggle('is-active', t.dataset.type === stType));
     updateStMedia();
     stModal.hidden = false; stModal.classList.add('open');
   }
-  function closeStoryComposer() { stModal.classList.remove('open'); stModal.hidden = true; }
+  function closeStoryComposer() { stModal.classList.remove('open'); stModal.hidden = true; clearStMedia(); }
   stCloseBtn.addEventListener('click', closeStoryComposer);
   stCancel.addEventListener('click', closeStoryComposer);
   stModal.addEventListener('click', e => { if (e.target === stModal) closeStoryComposer(); });
   stTabs.querySelectorAll('.ct').forEach(t => t.addEventListener('click', () => {
-    stType = t.dataset.type; stPending = null;
+    stType = t.dataset.type; clearStMedia();
     stTabs.querySelectorAll('.ct').forEach(x => x.classList.remove('is-active'));
     t.classList.add('is-active');
     updateStMedia();
@@ -978,36 +1052,43 @@
     if (stType === 'opinion') { stMediaWrap.hidden = true; return; }
     stMediaWrap.hidden = false;
     stFile.accept = stType === 'reel' ? 'video/*' : 'image/*';
-    if (!stPending) {
+    if (!stMedia) {
       stMediaContent.innerHTML = `<button type="button" class="picker-btn" id="stPickBtn">${stType === 'reel' ? '🎬 Elegir video' : '📷 Elegir foto'}</button>`;
       document.getElementById('stPickBtn').addEventListener('click', () => stFile.click());
     } else {
-      const url = URL.createObjectURL(stPending);
+      if (stPreviewUrl) URL.revokeObjectURL(stPreviewUrl);
+      stPreviewUrl = URL.createObjectURL(stMedia.blob);
+      const info = `<div style="font-size:12px;opacity:.7;margin-top:6px">Listo (${stMedia.sizeKB.toFixed(0)} KB)</div>`;
       stMediaContent.innerHTML = stType === 'reel'
-        ? `<video src="${url}" controls muted playsinline></video><br><button type="button" class="picker-btn" id="stClrBtn" style="margin-top:8px">Cambiar</button>`
-        : `<img src="${url}"><br><button type="button" class="picker-btn" id="stClrBtn" style="margin-top:8px">Cambiar</button>`;
-      document.getElementById('stClrBtn').addEventListener('click', () => { stPending = null; updateStMedia(); });
+        ? `<video src="${stPreviewUrl}" controls muted playsinline></video>${info}<button type="button" class="picker-btn" id="stClrBtn" style="margin-top:8px">Cambiar</button>`
+        : `<img src="${stPreviewUrl}">${info}<button type="button" class="picker-btn" id="stClrBtn" style="margin-top:8px">Cambiar</button>`;
+      document.getElementById('stClrBtn').addEventListener('click', () => { clearStMedia(); updateStMedia(); });
     }
   }
-  stFile.addEventListener('change', (e) => {
+  stFile.addEventListener('change', async (e) => {
     const f = e.target.files[0]; if (!f) return;
-    const maxMB = stType === 'reel' ? 40 : 8;
-    if (f.size > maxMB * 1024 * 1024) { alert(`Muy pesado (máx ${maxMB} MB)`); return; }
-    stPending = f; updateStMedia();
+    stMediaContent.innerHTML = `<div style="padding:16px;opacity:.7">Procesando…</div>`;
+    try {
+      stMedia = await preparePostMedia(f, stType);
+      updateStMedia();
+    } catch (err) {
+      alert(err.message || 'No pudimos procesar el archivo.');
+      clearStMedia();
+      updateStMedia();
+    }
   });
   stSubmit.addEventListener('click', async () => {
     const content = stContent.value.trim();
     if (stType === 'opinion' && !content) { alert('Escribí algo'); return; }
-    if (stType !== 'opinion' && !stPending) { alert('Elegí un archivo'); return; }
+    if (stType !== 'opinion' && !stMedia) { alert('Elegí un archivo'); return; }
     stSubmit.disabled = true; stSubmit.textContent = 'Subiendo…';
     let media_url = null, media_type = null;
-    if (stPending) {
-      const ext = (stPending.name.split('.').pop() || 'bin').toLowerCase().slice(0, 5);
-      const path = `${me.id}/story-${Date.now()}-${Math.random().toString(36).slice(2,6)}.${ext}`;
-      const { error: upErr } = await sb.storage.from('posts').upload(path, stPending, { contentType: stPending.type, upsert: false });
+    if (stMedia) {
+      const path = `${me.id}/story-${Date.now()}-${Math.random().toString(36).slice(2,6)}.${stMedia.ext}`;
+      const { error: upErr } = await sb.storage.from('posts').upload(path, stMedia.blob, { contentType: stMedia.type, cacheControl: '3600', upsert: false });
       if (upErr) { alert('Error subiendo: ' + upErr.message); stSubmit.disabled = false; stSubmit.textContent = 'Publicar historia'; return; }
       media_url = sb.storage.from('posts').getPublicUrl(path).data.publicUrl;
-      media_type = stPending.type;
+      media_type = stMedia.type;
     }
     const { error } = await sb.from('stories').insert({
       author_user_id: me.id, type: stType, content: content || null, media_url, media_type
