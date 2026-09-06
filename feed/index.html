@@ -635,22 +635,49 @@
     }
   }
 
-  // Prepara un archivo para subir: comprime si es imagen, valida tamaño si es video.
+  // Chequea que un blob de video pueda reproducirse en este navegador (mide metadata).
+  async function verifyVideoPlayable(blob) {
+    const url = URL.createObjectURL(blob);
+    try {
+      await new Promise((resolve, reject) => {
+        const v = document.createElement('video');
+        v.preload = 'metadata';
+        v.muted = true;
+        const done = (ok) => { v.onloadedmetadata = v.onerror = null; ok ? resolve() : reject(new Error('video')); };
+        v.onloadedmetadata = () => done(true);
+        v.onerror = () => done(false);
+        v.src = url;
+        setTimeout(() => done(false), 4000);
+      });
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+
+  // Prepara un archivo para subir: comprime si es imagen, valida tamaño+decodificación si es video.
   // Devuelve { blob, ext, type, sizeKB } o lanza con mensaje al usuario.
   async function preparePostMedia(file, kind) {
     if (kind === 'reel') {
       if (file.size > 40 * 1024 * 1024) throw new Error('Video muy pesado (máx 40 MB).');
+      if (file.type && !file.type.startsWith('video/')) {
+        throw new Error('Ese archivo no parece un video. Elegí un MP4, MOV o WebM.');
+      }
+      try { await verifyVideoPlayable(file); }
+      catch (err) { throw new Error('No pudimos leer ese video. Convertilo a MP4 y probá de nuevo.'); }
       const rawExt = (file.name && file.name.includes('.')) ? file.name.split('.').pop().toLowerCase().slice(0, 5) : 'mp4';
       return { blob: file, ext: rawExt || 'mp4', type: file.type || 'video/mp4', sizeKB: file.size / 1024 };
     }
-    // imagen
+    // imagen: SIEMPRE re-codificar con canvas. Si el navegador no puede decodificar
+    // (HEIC/HEIF, RAW, TIFF, archivo corrupto, PDF disfrazado), rechazamos con mensaje
+    // claro — sin fallback silencioso, porque el post se verá roto para todos.
     if (file.size > 25 * 1024 * 1024) throw new Error('Esa foto es demasiado grande (máx 25 MB).');
+    if (file.type && !file.type.startsWith('image/')) {
+      throw new Error('Ese archivo no es una imagen. Elegí un JPG, PNG o WebP.');
+    }
     try {
       return await compressImage(file);
     } catch (err) {
-      if (file.size > 8 * 1024 * 1024) throw new Error('No pudimos procesar esa foto. Probá con otra o una más liviana.');
-      const rawExt = (file.name && file.name.includes('.')) ? file.name.split('.').pop().toLowerCase().slice(0, 5) : 'jpg';
-      return { blob: file, ext: rawExt || 'jpg', type: file.type || 'application/octet-stream', sizeKB: file.size / 1024 };
+      throw new Error('No pudimos leer esa foto (¿HEIC del iPhone o formato raro?). Convertila a JPG o PNG y probá de nuevo.');
     }
   }
 
