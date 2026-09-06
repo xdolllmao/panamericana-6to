@@ -1931,6 +1931,7 @@
   </div>
 
   <div class="partidos reveal" id="partidosGrid"></div>
+  <nav class="pager reveal" id="partidosPager" hidden aria-label="Paginación de partidos"></nav>
 
   <div class="standings reveal">
     <div class="standings-head">
@@ -2407,31 +2408,74 @@
     </article>
   `).join('');
 
-  // ---------- render partidos ----------
+  // ---------- render partidos (paginado, más recientes primero) ----------
   const partidosGrid = document.getElementById('partidosGrid');
-  partidosGrid.innerHTML = PARTIDOS.map(m => {
-    const chip = m.res === 'won' ? 'Ganó Equipo 1' : m.res === 'lost' ? 'Ganó Equipo 2' : 'Empate';
-    return `
-      <article class="match ${m.res}">
-        <div class="match-head">
-          <span>${m.fecha} · ${m.tipo}</span>
-          <span class="result-chip ${m.res}">${chip}</span>
-        </div>
-        <div class="match-body">
-          <div class="team">
-            <div class="crest-mini" style="background: var(--lipton-yb); color: #1F1808">1</div>
-            <div class="team-name">${m.a}</div>
+  const partidosPagerEl = document.getElementById('partidosPager');
+  const PARTIDOS_PER_PAGE = 6;
+  const PARTIDOS_ORDERED = [...PARTIDOS].reverse();
+  let partidosPage = 1;
+
+  function renderPartidos() {
+    const total = PARTIDOS_ORDERED.length;
+    const totalPages = Math.max(1, Math.ceil(total / PARTIDOS_PER_PAGE));
+    if (partidosPage > totalPages) partidosPage = totalPages;
+    if (partidosPage < 1) partidosPage = 1;
+    const start = (partidosPage - 1) * PARTIDOS_PER_PAGE;
+    const slice = PARTIDOS_ORDERED.slice(start, start + PARTIDOS_PER_PAGE);
+    partidosGrid.innerHTML = slice.map(m => {
+      const chip = m.res === 'won' ? 'Ganó Equipo 1' : m.res === 'lost' ? 'Ganó Equipo 2' : 'Empate';
+      return `
+        <article class="match ${m.res}">
+          <div class="match-head">
+            <span>${m.fecha} · ${m.tipo}</span>
+            <span class="result-chip ${m.res}">${chip}</span>
           </div>
-          <div class="score">${m.ga} <span style="color:var(--ink-mute)">·</span> ${m.gb}</div>
-          <div class="team">
-            <div class="crest-mini" style="background: var(--lipton-r); color: #fff">2</div>
-            <div class="team-name">${m.b}</div>
+          <div class="match-body">
+            <div class="team">
+              <div class="crest-mini" style="background: var(--lipton-yb); color: #1F1808">1</div>
+              <div class="team-name">${m.a}</div>
+            </div>
+            <div class="score">${m.ga} <span style="color:var(--ink-mute)">·</span> ${m.gb}</div>
+            <div class="team">
+              <div class="crest-mini" style="background: var(--lipton-r); color: #fff">2</div>
+              <div class="team-name">${m.b}</div>
+            </div>
           </div>
-        </div>
-        <div class="match-note">${m.note}</div>
-      </article>
+          <div class="match-note">${m.note}</div>
+        </article>
+      `;
+    }).join('');
+    renderPartidosPager(totalPages);
+  }
+  function renderPartidosPager(totalPages) {
+    if (totalPages <= 1) { partidosPagerEl.hidden = true; return; }
+    partidosPagerEl.hidden = false;
+    const shown = new Set([1, totalPages, partidosPage - 1, partidosPage, partidosPage + 1]);
+    const numbers = [...shown].filter(n => n >= 1 && n <= totalPages).sort((a, b) => a - b);
+    const pageBtns = [];
+    let last = 0;
+    for (const n of numbers) {
+      if (n - last > 1) pageBtns.push('<span class="dots">…</span>');
+      pageBtns.push(`<button type="button" class="${n === partidosPage ? 'is-active' : ''}" data-page="${n}">${n}</button>`);
+      last = n;
+    }
+    partidosPagerEl.innerHTML = `
+      <span class="pager-count">Pág ${partidosPage} de ${totalPages}</span>
+      <button type="button" data-page="${partidosPage - 1}" ${partidosPage === 1 ? 'disabled' : ''} aria-label="Anterior">‹</button>
+      ${pageBtns.join('')}
+      <button type="button" data-page="${partidosPage + 1}" ${partidosPage === totalPages ? 'disabled' : ''} aria-label="Siguiente">›</button>
     `;
-  }).join('');
+    partidosPagerEl.querySelectorAll('button[data-page]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const n = parseInt(btn.dataset.page, 10);
+        if (isNaN(n) || n < 1 || n > totalPages || n === partidosPage) return;
+        partidosPage = n;
+        renderPartidos();
+        document.getElementById('partidos').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+  }
+  renderPartidos();
 
   const standingsBody = document.getElementById('standingsBody');
   standingsBody.innerHTML = STANDINGS.map((t, i) => `
