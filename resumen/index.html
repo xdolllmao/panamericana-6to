@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1E3AAB" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#070D24" media="(prefers-color-scheme: dark)">
+<title>Resumen del Weekly · Clase de 6to</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%231E3AAB'/%3E%3Crect x='10' y='11' width='20' height='2' rx='1' fill='white'/%3E%3Crect x='10' y='19' width='20' height='2' rx='1' fill='white'/%3E%3Crect x='10' y='27' width='14' height='2' rx='1' fill='white'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+
+<style>
+  :root {
+    --ground: #EEF1FA; --ground-2: #E4EAF7; --paper: #FFFFFF; --paper-soft: #F7F9FE;
+    --ink: #0C1846; --ink-soft: #2C3866; --ink-mute: #556388;
+    --line: #DBE1F2; --line-strong: #B9C3E1;
+    --school: #1E3AAB; --school-2: #3B5EF0; --school-tint: #DDE4FF;
+    --coral: #D91F26; --mint: #35C89A; --lemon: #F5DE3A;
+    --shadow-sm: 0 1px 2px rgba(12,24,70,.06), 0 4px 14px rgba(12,24,70,.06);
+    --shadow-lg: 0 4px 12px rgba(12,24,70,.08), 0 22px 44px rgba(12,24,70,.10);
+    --radius: 14px; --radius-lg: 22px;
+    --f-display: 'Bricolage Grotesque', system-ui, sans-serif;
+    --f-body: 'Manrope', system-ui, sans-serif;
+    --f-mono: 'JetBrains Mono', ui-monospace, monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #070D24; --ground-2: #0D163B; --paper: #121E4A; --paper-soft: #0F1940;
+      --ink: #F5F8FF; --ink-soft: #CBD5F5; --ink-mute: #9CACD9;
+      --line: #2C3D75; --line-strong: #364785;
+      --school: #7091FF; --school-2: #9DB3FF; --school-tint: #1A2A6B;
+      --coral: #FF6B72; --mint: #52D9AE; --lemon: #FFE85B;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,.5), 0 4px 14px rgba(0,0,0,.35);
+      --shadow-lg: 0 4px 12px rgba(0,0,0,.55), 0 22px 44px rgba(0,0,0,.45);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #070D24; --ground-2: #0D163B; --paper: #121E4A; --paper-soft: #0F1940;
+    --ink: #F5F8FF; --ink-soft: #CBD5F5; --ink-mute: #9CACD9;
+    --line: #2C3D75; --line-strong: #364785;
+    --school: #7091FF; --school-2: #9DB3FF; --school-tint: #1A2A6B;
+    --coral: #FF6B72; --mint: #52D9AE; --lemon: #FFE85B;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.5), 0 4px 14px rgba(0,0,0,.35);
+    --shadow-lg: 0 4px 12px rgba(0,0,0,.55), 0 22px 44px rgba(0,0,0,.45);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; font-family: var(--f-body); color: var(--ink); background: var(--ground); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+  .mobile-tabs { display: none; }
+  @media (max-width: 780px) {
+    .mobile-tabs { display: flex; position: fixed; left: 0; right: 0; bottom: 0; padding: 6px 6px calc(6px + env(safe-area-inset-bottom)); background: color-mix(in oklab, var(--paper) 94%, transparent); backdrop-filter: saturate(140%) blur(16px); border-top: 1px solid var(--line); z-index: 50; }
+    .mtab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 4px 4px; color: var(--ink-mute); font-size: 10px; font-weight: 700; text-decoration: none; border-radius: 10px; }
+    .mtab svg { width: 22px; height: 22px; }
+    .mtab.is-active { color: var(--school); }
+    body { padding-bottom: 68px; }
+  }
+
+  .nav { position: sticky; top: 0; z-index: 40; backdrop-filter: saturate(140%) blur(14px); background: color-mix(in oklab, var(--ground) 78%, transparent); border-bottom: 1px solid var(--line); }
+  .nav-inner { display: flex; align-items: center; gap: 10px; padding: 12px 20px; max-width: 980px; margin: 0 auto; }
+  .brand { display: flex; align-items: center; gap: 10px; font-family: var(--f-display); font-weight: 800; font-size: 16px; }
+  .brand-mark { width: 36px; height: 36px; border-radius: 7px; background: #fff; object-fit: contain; padding: 2px; box-shadow: 0 1px 3px rgba(12,24,70,.15); flex-shrink: 0; }
+  .brand em { font-style: normal; color: var(--school); }
+  .nav-links { margin-left: auto; display: flex; gap: 4px; }
+  .nav-link { padding: 7px 12px; border-radius: 999px; font-weight: 600; font-size: 13px; color: var(--ink-soft); }
+  .nav-link:hover, .nav-link.is-active { background: var(--paper); color: var(--ink); }
+
+  .wrap { max-width: 980px; margin: 0 auto; padding: 24px 20px 60px; }
+
+  .page-head { margin-bottom: 24px; }
+  .page-tag { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--school); font-weight: 700; }
+  .page-tag em { font-style: normal; color: var(--coral); }
+  .page-head h1 { font-family: var(--f-display); font-weight: 800; font-size: clamp(32px, 5vw, 48px); line-height: 1; letter-spacing: -0.03em; margin: 10px 0 6px; }
+  .page-head p { color: var(--ink-soft); font-size: 15px; margin: 0; max-width: 60ch; }
+
+  .globals { background: linear-gradient(135deg, var(--school), var(--school-2)); color: #fff; padding: 16px 20px; border-radius: var(--radius-lg); margin-bottom: 22px; display: flex; align-items: center; gap: 14px; }
+  .globals .g-ico { font-size: 28px; flex-shrink: 0; }
+  .globals strong { display: block; font-family: var(--f-display); font-size: 18px; }
+  .globals span { font-size: 13px; opacity: .9; }
+
+  .subj-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+  .subj-card { text-align: left; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; cursor: pointer; transition: transform .18s, box-shadow .18s, border-color .18s; display: flex; flex-direction: column; gap: 6px; position: relative; overflow: hidden; }
+  .subj-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: var(--line-strong); }
+  .subj-card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--subj-color, var(--school)); }
+  .subj-ico { width: 44px; height: 44px; border-radius: 12px; background: color-mix(in oklab, var(--subj-color, var(--school)) 12%, var(--paper)); color: var(--subj-color, var(--school)); display: grid; place-items: center; font-size: 22px; }
+  .subj-name { font-family: var(--f-display); font-weight: 700; font-size: 17px; letter-spacing: -0.02em; line-height: 1.1; }
+  .subj-teacher { font-family: var(--f-mono); font-size: 10px; color: var(--ink-mute); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; }
+  .subj-tags { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+  .subj-tag { font-family: var(--f-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; padding: 3px 8px; border-radius: 999px; }
+  .subj-tag.eval { background: color-mix(in oklab, var(--coral) 15%, var(--paper)); color: var(--coral); }
+  .subj-tag.exp { background: color-mix(in oklab, var(--mint) 20%, var(--paper)); color: color-mix(in oklab, var(--mint) 60%, var(--ink)); }
+  .subj-tag.hands { background: color-mix(in oklab, var(--lemon) 40%, var(--paper)); color: #7a5f00; }
+
+  /* Modal */
+  .modal-backdrop { position: fixed; inset: 0; z-index: 100; background: rgba(12,24,70,.6); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; padding: 20px; }
+  .modal-backdrop.open { display: flex; }
+  .modal { background: var(--paper); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); max-width: 640px; width: 100%; max-height: 92vh; overflow: hidden; display: flex; flex-direction: column; animation: slide .22s ease; }
+  @keyframes slide { from { transform: translateY(12px); opacity: 0 } to { transform: none; opacity: 1 } }
+  .modal-head { display: flex; align-items: start; gap: 12px; padding: 22px 24px 12px; border-bottom: 1px solid var(--line); }
+  .modal-head .m-ico { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; font-size: 22px; flex-shrink: 0; background: color-mix(in oklab, var(--subj-color, var(--school)) 14%, var(--paper)); color: var(--subj-color, var(--school)); }
+  .modal-head .m-info { flex: 1; min-width: 0; }
+  .modal-head h3 { font-family: var(--f-display); font-weight: 800; font-size: 22px; margin: 0; letter-spacing: -0.02em; }
+  .modal-head p { color: var(--ink-mute); font-size: 12px; margin: 3px 0 0; font-family: var(--f-mono); letter-spacing: 0.08em; }
+  .modal-close { width: 32px; height: 32px; border-radius: 999px; background: var(--paper-soft); border: 1px solid var(--line); display: grid; place-items: center; color: var(--ink-soft); flex-shrink: 0; }
+  .modal-tabs { display: flex; padding: 12px 24px 0; gap: 4px; border-bottom: 1px solid var(--line); }
+  .modal-tab { padding: 8px 16px; border-radius: 10px 10px 0 0; font-weight: 700; font-size: 13px; color: var(--ink-soft); border-bottom: 3px solid transparent; margin-bottom: -1px; cursor: pointer; }
+  .modal-tab.is-active { color: var(--subj-color, var(--school)); border-bottom-color: var(--subj-color, var(--school)); }
+  .modal-body { padding: 18px 24px 22px; overflow-y: auto; flex: 1; }
+
+  .info-block { margin-bottom: 16px; }
+  .info-block:last-child { margin-bottom: 0; }
+  .info-label { display: flex; align-items: center; gap: 8px; font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-mute); font-weight: 700; margin-bottom: 6px; }
+  .info-label .il-ico { font-size: 14px; }
+  .info-item { padding: 10px 14px; margin-bottom: 6px; border-radius: 10px; background: var(--paper-soft); border-left: 3px solid var(--line-strong); font-size: 14px; line-height: 1.45; }
+  .info-item strong { display: block; font-weight: 700; color: var(--ink); font-size: 13.5px; margin-bottom: 2px; }
+  .info-item .date-chip { display: inline-block; font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; margin-right: 6px; font-weight: 700; }
+  .info-block.eval .info-item { border-left-color: var(--coral); background: color-mix(in oklab, var(--coral) 6%, var(--paper-soft)); }
+  .info-block.eval .date-chip { background: var(--coral); color: #fff; }
+  .info-block.exp .info-item { border-left-color: var(--mint); background: color-mix(in oklab, var(--mint) 8%, var(--paper-soft)); }
+  .info-block.exp .date-chip { background: var(--mint); color: #fff; }
+  .info-block.hands .info-item { border-left-color: var(--lemon); background: color-mix(in oklab, var(--lemon) 15%, var(--paper-soft)); }
+  .info-block.topic .info-item { border-left-color: var(--school-2); }
+  .info-block .empty { color: var(--ink-mute); font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.06em; padding: 6px 0; }
+  .info-item a { color: var(--school); text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="brand">
+      <img class="brand-mark" src="/logo-6to.jpg" alt="Logo Clase de 6to">
+      <span>Clase de <em>6to</em></span>
+    </a>
+    <div class="nav-links">
+      <a href="/" class="nav-link">Inicio</a>
+      <a href="/feed/" class="nav-link">Feed</a>
+      <a href="/chat/" class="nav-link">Chat</a>
+      <a href="/profile/" class="nav-link">Perfil</a>
+    </div>
+  </div>
+</nav>
+
+<main class="wrap">
+  <div class="page-head">
+    <div class="page-tag">Weekly Bulletin · <em>Semana 4</em></div>
+    <h1>Resumen del weekly.</h1>
+    <p>Lo importante de cada materia esta semana — evaluaciones, experimentos y entregas. Nada de relleno. Tocá una materia para el detalle de A y B.</p>
+  </div>
+
+  <div class="globals">
+    <div class="g-ico">👖🍩</div>
+    <div>
+      <strong>Viernes 11 septiembre</strong>
+      <span>Jeans Day + venta de donuts</span>
+    </div>
+  </div>
+
+  <div class="subj-grid" id="subjGrid"></div>
+</main>
+
+<div class="modal-backdrop" id="modal" hidden>
+  <div class="modal" id="modalCard">
+    <div class="modal-head">
+      <div class="m-ico" id="modalIco">📚</div>
+      <div class="m-info">
+        <h3 id="modalTitle">—</h3>
+        <p id="modalTeacher">—</p>
+      </div>
+      <button class="modal-close" id="modalClose" aria-label="Cerrar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="modal-tabs" id="modalTabs"></div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<nav class="mobile-tabs" aria-label="Navegación">
+  <a class="mtab" href="/">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9v10a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2V12z"/></svg>
+    Inicio
+  </a>
+  <a class="mtab" href="/feed/">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"/><rect x="3" y="12" width="18" height="8" rx="1"/></svg>
+    Feed
+  </a>
+  <a class="mtab" href="/chat/">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    Chat
+  </a>
+  <a class="mtab" href="/profile/">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 22c0-5 4-8 8-8s8 3 8 8"/></svg>
+    Perfil
+  </a>
+</nav>
+
+<script>
+  const SUBJECTS = [
+    {
+      id: 'math', name: 'Math', teacher: 'Ms. Vásquez', icon: '🧮', color: '#D91F26',
+      content: {
+        both: {
+          topic: [{ t: 'Álgebra: Ecuaciones (Lesson 1-5)', p: 'Textbook pp. 22-27 · variables, ecuaciones de un paso, problem solving con guess-and-check' }],
+          hands: [{ t: 'Algebraic balance', p: 'Actividad con balanza física y contadores para resolver variables desconocidas' }],
+          eval:  [{ date: 'Jue 11 sept', t: 'Daily activity Nº 2', p: 'Ejercicios asignados del textbook' }],
+          notes: [{ t: 'Lesson extra: Variables and Expressions', p: 'Pages 18-21' }],
+        }
+      }
+    },
+    {
+      id: 'lang', name: 'Language Arts', teacher: 'Ms. Verónica Castillo', icon: '🔤', color: '#3B5EF0',
+      content: {
+        A: {
+          topic: [
+            { t: 'Spelling · List 3', p: 'Vocales /ou/ /o-o/ /o/ /oi/ (mound, gloomy, caution, annoy, dawdle, counter, haughty, moisten, devour, thoughtful, flawless, maroon, droop, doubt, bamboo, hoist, oyster, exhausted, pronounce, boundary, annoyance, applaud, council, disappoint)' },
+            { t: 'Grammar', p: 'The verb phrase, compound subjects and compound verbs · Workbook pp. 11-16' },
+            { t: 'Reading', p: 'Play: "Upside-Down and Backward" · Vocab: overcome, fleeting, miserable, demeaning, elope, conspiring, garland, outraged' },
+          ],
+          eval: [
+            { date: 'Lun 7 sept', t: 'Spelling Dictation 2', p: 'La miss dicta 24 palabras 3 veces, se escriben en hoja aparte (scene, bracelets, mute, strive, faithful, devote, rhyme, succeed, coax, rely, conceal, forgave, lonesome, delete, confine, exceed, terrain, reproach, abuse, defeat, profile, conclude, scientific, podium)' },
+            { t: 'Speaking in English', p: 'Se evalúa toda la semana' },
+          ],
+          notes: [{ t: '⚠️ Traer siempre', p: 'Device en cada clase. Material extra en Google Classroom.' }],
+        },
+        B: {
+          topic: [
+            { t: 'Spelling · List 3', p: 'Mismas 24 palabras que A · /ou/ /o-o/ /o/ /oi/' },
+            { t: 'Grammar', p: 'The verb phrase, compound subjects and compound verbs · Workbook pp. 11-16' },
+            { t: 'Reading', p: 'Play: "Upside-Down and Backward" · mismo vocab' },
+          ],
+          eval: [
+            { date: 'Mar 8 sept', t: 'Spelling Dictation 2', p: '24 palabras dictadas 3 veces (scene, bracelets, mute, strive, faithful, devote, rhyme, succeed, coax, rely, conceal, forgave, lonesome, delete, confine, exceed, terrain, reproach, abuse, defeat, profile, conclude, scientific, podium)' },
+            { t: 'Speaking in English', p: 'Se evalúa toda la semana' },
+          ],
+          notes: [{ t: '⚠️ Traer siempre', p: 'Device en cada clase. Material extra en Google Classroom.' }],
+        },
+      }
+    },
+    {
+      id: 'social', name: 'Social Studies', teacher: 'Ms. Claudia Vásquez', icon: '🌎', color: '#0891B2',
+      content: {
+        both: {
+          topic: [{ t: 'Chapter 9 · Lesson 3: Life During the Civil War', p: 'Leer pp. 322-329 y responder preguntas en el libro. Escribir definiciones en el cuaderno.' }],
+          eval:  [{ date: 'Mié', t: 'Lesson 3 OPEN BOOK quiz', p: 'A libro abierto' }],
+          hands: [{ t: 'Mapa de EE.UU.', p: 'Etiquetar los 50 estados y colorearlos según "Slave free states and territories, 1820-1854"' }],
+          notes: [{ t: '⚠️ Traer siempre', p: 'Diccionario de inglés + device en cada clase' }],
+        }
+      }
+    },
+    {
+      id: 'sci', name: 'Science / Discovery', teacher: 'Ms. Claudia Vásquez', icon: '🔬', color: '#22B573',
+      content: {
+        both: {
+          topic: [{ t: 'Chapter 1 · Lesson 3: Gravity and Motion', p: 'Día 1: leer pp. 18-21 y responder. Día 2: Review and Reinforce (open book). Día 3: quiz.' }],
+          eval:  [{ date: 'Día 3', t: 'Open book Lesson 3 quiz', p: 'Sobre gravedad y movimiento' }],
+          exp:   [{ date: 'Mié 10 sept', t: 'Balloon Rocket Race 🎈', p: 'Explorar cómo el aire empuja el globo (3ra Ley de Newton). Sin materiales que traer. <a href="https://youtu.be/TfZsGy_q9zA" target="_blank" rel="noopener">Ver referencia</a>' }],
+          notes: [{ t: '⚠️ Traer siempre', p: 'Diccionario de inglés + device' }],
+        }
+      }
+    },
+    {
+      id: 'cyv', name: 'Ciudadanía y Valores', teacher: 'Ms. Dolores Hernández', icon: '🏛️', color: '#DB2777',
+      content: {
+        A: {
+          topic: [{ t: 'Semana 4 · Formas de vida urbanas vs. rurales', p: 'Interdependencia campo-ciudad · libro pp. 38-41 · desmitificar estereotipos' }],
+          eval:  [{ date: 'Vie 11 sept', t: 'Evaluación cotidiana 4', p: 'Actividad "La maleta de las palabras", debate + trabajo del libro' }],
+          hands: [{ t: 'Taller creativo', p: '"Pacto de Convivencia Territorial" · en grupos, diseñar una Campaña de Concientización' }],
+        },
+        B: {
+          topic: [{ t: 'Semana 4 · Formas de vida urbanas vs. rurales', p: 'Interdependencia campo-ciudad · libro pp. 38-41' }],
+          eval:  [{ date: 'Jue 10 sept', t: 'Evaluación cotidiana 4', p: 'Actividad + debate + trabajo del libro' }],
+          hands: [{ t: 'Taller creativo', p: '"Pacto de Convivencia Territorial" · Campaña de Concientización en grupos' }],
+        }
+      }
+    },
+    {
+      id: 'cyt', name: 'Ciencia y Tecnología', teacher: 'Ms. Dolores Hernández', icon: '⚗️', color: '#10B981',
+      content: {
+        both: {
+          topic: [{ t: 'Semana 4 · Caudal y principio de Bernoulli', p: 'Libro pp. 23-28 · velocidad + presión de fluidos · por qué vuelan los aviones' }],
+          exp:   [{ date: 'Mié 9 sept', t: '🧪 "El papel mágico"', p: 'Evaluación formativa y práctica. <strong>Traer una tira de papel bond de 15 × 5 cm ya cortada.</strong>' }],
+        }
+      }
+    },
+    {
+      id: 'com', name: 'Comunicación', teacher: 'Ms. Iris Zaldaña', icon: '💬', color: '#7C3AED',
+      content: {
+        A: {
+          topic: [
+            { t: 'Lunes', p: 'La coma en vocativos y frases explicativas · libro p. 33' },
+            { t: 'Martes', p: 'Determinantes numerales · libro Ortotrazos pp. 19-24' },
+            { t: 'Miércoles', p: 'Libreta de caligrafía' },
+            { t: 'Jueves', p: 'La historieta · libro p. 35' },
+          ],
+          eval: [{ date: 'Vie 11 sept', t: 'Actividad evaluada · Historieta', p: '4 viñetas con título, personajes, inicio/desarrollo/final, globos de diálogo y al menos una onomatopeya. Debe promover una acción positiva.' }],
+        },
+        B: {
+          topic: [
+            { t: 'Lunes', p: 'La coma en vocativos y frases explicativas · libro p. 33' },
+            { t: 'Martes', p: 'La historieta · libro p. 35' },
+            { t: 'Miércoles', p: 'Libreta de caligrafía' },
+            { t: 'Jueves', p: 'Determinantes numerales · libro Ortotrazos pp. 19-24' },
+          ],
+          eval: [{ date: 'Vie 11 sept', t: 'Actividad evaluada · Historieta', p: '4 viñetas con título, personajes, inicio/desarrollo/final, globos de diálogo y al menos una onomatopeya. Debe promover una acción positiva.' }],
+        }
+      }
+    },
+    {
+      id: 'arte', name: 'Arte', teacher: 'Ms. Clancy de Fuentes', icon: '🎨', color: '#F5DE3A',
+      content: {
+        A: {
+          topic: [{ t: 'Henri Matisse · Papiers découpés', p: 'Reproducción libre de una obra: pintura acrílica/témpera o collage' }],
+          hands: [
+            { date: 'Mar 8 sept', t: 'Actividad cotidiana · Planificación', p: 'Conocer a Matisse, elegir obra y bocetar en la libreta' },
+            { date: 'Vie 11 sept', t: 'Actividad cotidiana · Creación', p: 'Realizar la reproducción cuidando composición, contraste y armonía de colores' },
+          ],
+        },
+        B: {
+          topic: [{ t: 'Henri Matisse · Papiers découpés', p: 'Reproducción libre de una obra: pintura acrílica/témpera o collage' }],
+          hands: [
+            { date: 'Lun 7 sept', t: 'Actividad cotidiana · Planificación', p: 'Conocer a Matisse, elegir obra y bocetar en la libreta' },
+            { date: 'Mié 9 sept', t: 'Actividad cotidiana · Creación', p: 'Realizar la reproducción cuidando composición, contraste y armonía de colores' },
+          ],
+        }
+      }
+    },
+    {
+      id: 'lec', name: 'Lectura y Escritura', teacher: 'Ms. Dolores Hernández', icon: '📖', color: '#EA580C',
+      content: {
+        both: {
+          topic: [{ t: '"Sonetos de octubre y vientos de octubre"', p: 'Libro pp. 15-18 · comprensión literal, crítica, inferencial y creativa · lectura conjunta y por versos' }],
+          notes: [{ t: 'Reglas de hoja de trabajo', p: 'Con tinta · sin manchones · letra legible · aplicar reglas ortográficas' }],
+        }
+      }
+    },
+    {
+      id: 'mus', name: 'Música', teacher: 'Mr. Pablo Díaz', icon: '🎵', color: '#F59E0B',
+      content: {
+        A: {
+          topic: [{ t: '"Greensleeves" en ukelele', p: 'Trabajo por frases · precisión, coordinación, fluidez y expresividad' }],
+          eval: [{ date: 'Esta semana', t: 'Evaluación individual', p: 'Ejecución de la canción por cada estudiante' }],
+          notes: [{ t: 'Classroom', p: 'Código para el grupo: <strong>azg7rump</strong>' }],
+        },
+        B: {
+          topic: [{ t: '"Greensleeves" en ukelele', p: 'Trabajo por frases · precisión, coordinación, fluidez y expresividad' }],
+          eval: [{ date: 'Esta semana', t: 'Evaluación individual', p: 'Ejecución de la canción por cada estudiante' }],
+          notes: [{ t: 'Classroom', p: 'Código para el grupo: <strong>aoarrrkk</strong>' }],
+        }
+      }
+    },
+    {
+      id: 'val', name: 'Valores', teacher: 'Mr. José Rodas', icon: '❤️', color: '#DB2777',
+      content: {
+        both: {
+          topic: [{ t: 'El autoconocimiento II', p: 'Definir el concepto, reflexionar su importancia en decisiones y relaciones, identificar propias fortalezas, debilidades, intereses y emociones' }],
+        }
+      }
+    },
+    {
+      id: 'tec', name: 'Technology', teacher: 'Mr. Francisco Sánchez', icon: '💻', color: '#0EA5A5',
+      content: {
+        both: {
+          topic: [{ t: 'Proyecto 1: Números del entretenimiento', p: 'Hojas de cálculo · Microsoft Excel · industria del entretenimiento' }],
+          notes: [{ t: 'Identidad digital', p: 'Qué es y consejos prácticos para cuidarla' }],
+        }
+      }
+    },
+    {
+      id: 'efi', name: 'Educación Física', teacher: 'Mr. Ernesto Argumedo', icon: '🏀', color: '#6366F1',
+      content: {
+        both: {
+          topic: [{ t: 'Baloncesto · Tiros a canasta', p: 'Calentamiento (coordinación + estiramientos), tiros de media distancia, tiros en movimiento' }],
+          hands: [{ t: 'Juegos y competencias', p: 'Competencias de tiros libres · juego "alrededor del mundo"' }],
+        }
+      }
+    },
+  ];
+
+  function escapeHtml(s) { return String(s || ''); /* trust dev-authored content */ }
+  function countTags(content) {
+    const secs = Object.values(content);
+    let eval_ = 0, exp = 0, hands = 0;
+    secs.forEach(s => {
+      eval_ += (s.eval || []).length;
+      exp   += (s.exp || []).length;
+      hands += (s.hands || []).length;
+    });
+    return { eval: eval_, exp, hands };
+  }
+
+  const grid = document.getElementById('subjGrid');
+  grid.innerHTML = SUBJECTS.map(s => {
+    const c = countTags(s.content);
+    const tags = [];
+    if (c.eval)  tags.push(`<span class="subj-tag eval">${c.eval} eval</span>`);
+    if (c.exp)   tags.push(`<span class="subj-tag exp">${c.exp} exp</span>`);
+    if (c.hands) tags.push(`<span class="subj-tag hands">${c.hands} hands-on</span>`);
+    return `<button class="subj-card" data-id="${s.id}" style="--subj-color:${s.color}">
+      <div class="subj-ico">${s.icon}</div>
+      <div class="subj-name">${s.name}</div>
+      <div class="subj-teacher">${s.teacher}</div>
+      ${tags.length ? `<div class="subj-tags">${tags.join('')}</div>` : ''}
+    </button>`;
+  }).join('');
+
+  const modal = document.getElementById('modal');
+  const modalCard = document.getElementById('modalCard');
+  const modalIco = document.getElementById('modalIco');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalTeacher = document.getElementById('modalTeacher');
+  const modalTabs = document.getElementById('modalTabs');
+  const modalBody = document.getElementById('modalBody');
+
+  function renderSection(s, key) {
+    let html = '';
+    const c = s.content[key];
+    if (!c) return '<div class="empty">Sin info para esta sección.</div>';
+    const block = (kind, label, ico, items) => {
+      if (!items || !items.length) return '';
+      return `<div class="info-block ${kind}">
+        <div class="info-label"><span class="il-ico">${ico}</span>${label}</div>
+        ${items.map(i => `<div class="info-item">${i.date ? `<span class="date-chip">${i.date}</span>` : ''}${i.t ? `<strong>${i.t}</strong>` : ''}${i.p || ''}</div>`).join('')}
+      </div>`;
+    };
+    html += block('topic', 'Tema', '📚', c.topic);
+    html += block('eval', 'Evaluaciones', '📝', c.eval);
+    html += block('exp', 'Experimentos', '🧪', c.exp);
+    html += block('hands', 'Hands-on / Actividades', '✋', c.hands);
+    html += block('notes', 'Notas', '💡', c.notes);
+    return html || '<div class="empty">Sin actividades importantes esta semana.</div>';
+  }
+
+  function openModal(id) {
+    const s = SUBJECTS.find(x => x.id === id);
+    if (!s) return;
+    modalCard.style.setProperty('--subj-color', s.color);
+    modalIco.textContent = s.icon;
+    modalTitle.textContent = s.name;
+    modalTeacher.textContent = s.teacher;
+    const hasBoth = !!s.content.both;
+    const keys = hasBoth ? ['both'] : ['A', 'B'];
+    const labels = { both: '6° A + B', A: '6° A', B: '6° B' };
+    modalTabs.innerHTML = keys.map((k, i) => `<button class="modal-tab ${i===0?'is-active':''}" data-k="${k}">${labels[k]}</button>`).join('');
+    let currentKey = keys[0];
+    const paint = () => { modalBody.innerHTML = renderSection(s, currentKey); };
+    paint();
+    modalTabs.querySelectorAll('.modal-tab').forEach(b => b.addEventListener('click', () => {
+      modalTabs.querySelectorAll('.modal-tab').forEach(x => x.classList.remove('is-active'));
+      b.classList.add('is-active');
+      currentKey = b.dataset.k;
+      paint();
+    }));
+    modal.hidden = false;
+    modal.classList.add('open');
+  }
+  function closeModal() { modal.classList.remove('open'); modal.hidden = true; }
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hidden) closeModal(); });
+  grid.querySelectorAll('.subj-card').forEach(b => b.addEventListener('click', () => openModal(b.dataset.id)));
+
+  // Theme sync from other pages
+  try {
+    const t = localStorage.getItem('sixth-theme');
+    if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+  } catch(e){}
+</script>
+</body>
+</html>
