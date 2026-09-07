@@ -1112,26 +1112,12 @@
     if (!loginModal.hidden) renderLoginNames();
   }
 
-  // Si nos topamos con UIDs desconocidos durante el render, re-cargamos perfiles
-  // y re-renderizamos — evita que un mensaje quede pegado con nombre placeholder
-  // cuando el perfil del autor todavia no estaba en el cache.
-  const _missingUidSeen = new Set();
-  let _refreshingForMissing = false;
-  function noteMissingProfile(uid) {
-    if (!uid || profilesById.has(uid) || _missingUidSeen.has(uid)) return;
-    _missingUidSeen.add(uid);
-    if (_refreshingForMissing) return;
-    _refreshingForMissing = true;
-    setTimeout(async () => {
-      await refreshProfiles();
-      _refreshingForMissing = false;
-      // Si al recargar aparecio algo nuevo, re-renderizamos las vistas visibles
-      renderChatList();
-      if (activeChatId) {
-        const chat = chats.find(c => c.id === activeChatId);
-        if (chat) renderChatMain(chat);
-      }
-    }, 250);
+  // Antes de renderizar cualquier vista, asegura que todos los UIDs citados
+  // tengan su perfil cargado. Si falta alguno (perfil recien creado en otro
+  // dispositivo, race en carga inicial), recarga los perfiles antes de pintar.
+  async function ensureProfilesFor(uids) {
+    const need = uids.some(uid => uid && !profilesById.has(uid));
+    if (need) await refreshProfiles();
   }
 
   // ================ NEW CHAT flow ================
@@ -1436,14 +1422,13 @@
     // dm — display the other person
     const otherUid = chat.members.find(uid => uid !== currentUser.id);
     const other = profilesById.get(otherUid);
-    if (!other) { noteMissingProfile(otherUid); return '…'; }
-    return other.name;
+    return other ? other.name : 'Alguien del salón';
   }
   function chatDisplayMeta(chat) {
     if (chat.type === 'group') return `${chat.members.length} miembros`;
     const otherUid = chat.members.find(uid => uid !== currentUser.id);
     const other = profilesById.get(otherUid);
-    if (!other) { noteMissingProfile(otherUid); return 'Cargando…'; }
+    if (!other) return 'Usuario';
     return `Sección ${other.section}${other.role ? ' · ' + other.role : ''}`;
   }
   function chatLastTs(chat) {
@@ -1502,7 +1487,6 @@
         else if (isGroup) {
           const from = profilesById.get(last.author_user_id);
           if (from) fromLabel = `${escapeHtml(from.name)}: `;
-          else noteMissingProfile(last.author_user_id);
         }
       }
       return `<button class="chat-item ${c.id===activeChatId?'is-active':''}" data-id="${c.id}">
@@ -1548,6 +1532,7 @@
       .eq('chat_id', chatId).order('created_at', { ascending: true }).limit(500);
     if (error) { console.error(error); return; }
     messagesByChat.set(chatId, data || []);
+    await ensureProfilesFor((data || []).map(m => m.author_user_id));
   }
 
   function subscribeToChat(chatId) {
@@ -1557,6 +1542,9 @@
         const arr = messagesByChat.get(chatId) || [];
         arr.push(payload.new);
         messagesByChat.set(chatId, arr);
+        // Si el autor no esta en cache (mensaje de un usuario recien creado
+        // desde otro dispositivo), traemos perfiles antes de pintar la burbuja
+        await ensureProfilesFor([payload.new.author_user_id]);
         if (activeChatId === chatId) {
           const chat = chats.find(c => c.id === chatId);
           const now = new Date().toISOString();
@@ -1698,8 +1686,7 @@
     const isMe = m.author_user_id === currentUser.id;
     const showAvatar = !isMe && isGroup;
     const from = profilesById.get(m.author_user_id);
-    if (!from) noteMissingProfile(m.author_user_id);
-    const fromName = from ? from.name : '…';
+    const fromName = from ? from.name : 'Alguien del salón';
     const profileHref = from ? `/profile/?u=${keyOf(from.name, from.section)}` : '';
     const avatarInner = (from && from.avatar_url) ? `<img src="${escapeHtml(from.avatar_url)}" alt="">` : fromName[0].toUpperCase();
     const avatarEl = showAvatar
@@ -1715,8 +1702,7 @@
       const orig = arr.find(x => x.id === m.reply_to);
       if (orig) {
         const origFrom = profilesById.get(orig.author_user_id);
-        if (!origFrom) noteMissingProfile(orig.author_user_id);
-        const origName = origFrom ? origFrom.name : '…';
+        const origName = origFrom ? origFrom.name : 'Alguien del salón';
         const snippet = orig.photo_url ? '📷 Foto' : (orig.text || '').slice(0, 60);
         quoteEl = `<a class="msg-quote" href="#msg-${orig.id}" data-jump="${orig.id}"><strong>${escapeHtml(origName)}</strong><span>${escapeHtml(snippet)}</span></a>`;
       } else {
@@ -1871,8 +1857,7 @@
   let replyingTo = null; // { id, name, snippet }
   function setReply(msg) {
     const from = profilesById.get(msg.author_user_id);
-    if (!from) noteMissingProfile(msg.author_user_id);
-    const name = from ? from.name : '…';
+    const name = from ? from.name : 'Alguien del salón';
     const snippet = msg.photo_url ? '📷 Foto' : (msg.text || '').slice(0, 80);
     replyingTo = { id: msg.id, name, snippet };
     renderReplyBar();
@@ -2088,13 +2073,18 @@
     });
     // merge
     messagesByChat = groupedMsgs;
+    // Asegura perfiles de todos los miembros y autores de mensajes antes de pintar
+    const allUids = new Set();
+    chats.forEach(c => c.members.forEach(uid => allUids.add(uid)));
+    (allMsgs || []).forEach(m => allUids.add(m.author_user_id));
+    await ensureProfilesFor([...allUids]);
     renderChatList();
   }
 
   function subscribeGlobal() {
     if (messagesGlobalChannel) sb.removeChannel(messagesGlobalChannel);
     messagesGlobalChannel = sb.channel('global-updates')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async (payload) => {
         // Only care if it's a chat we're in
         const m = payload.new;
         if (!messagesByChat.has(m.chat_id)) return;
@@ -2104,6 +2094,7 @@
         // Avoid duplicate if already added
         if (arr.find(x => x.id === m.id)) return;
         arr.push(m);
+        await ensureProfilesFor([m.author_user_id]);
         renderChatList();
         updateNotifBadge();
       })
