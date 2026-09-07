@@ -416,12 +416,21 @@
     (data || []).forEach(p => profilesById.set(p.user_id, p));
   }
 
-  // Garantiza que TODOS los UIDs de la lista tengan su perfil cargado.
-  // Se llama antes de cada render — asi los nombres siempre aparecen reales
-  // en el primer paint, sin placeholder.
-  async function ensureProfilesFor(uids) {
-    const need = uids.some(uid => uid && !profilesById.has(uid));
-    if (need) await loadProfiles();
+  // Cuando un post/comment/story cita a un UID que aun no esta en cache,
+  // recargamos perfiles y re-renderizamos. Evita nombres pegados en placeholder.
+  const _missingUidSeen = new Set();
+  let _refreshingForMissing = false;
+  function noteMissingProfile(uid) {
+    if (!uid || profilesById.has(uid) || _missingUidSeen.has(uid)) return;
+    _missingUidSeen.add(uid);
+    if (_refreshingForMissing) return;
+    _refreshingForMissing = true;
+    setTimeout(async () => {
+      await loadProfiles();
+      _refreshingForMissing = false;
+      renderFeed();
+      renderStoriesBar();
+    }, 250);
   }
 
   async function loadFeed() {
@@ -445,12 +454,6 @@
         commentsByPost.get(c.post_id).push(c);
       });
     }
-    // Antes de renderizar, garantizar que todos los autores tengan perfil cargado
-    const uids = [
-      ...posts.map(p => p.author_user_id),
-      ...[...commentsByPost.values()].flat().map(c => c.author_user_id),
-    ];
-    await ensureProfilesFor(uids);
     renderFeed();
   }
 
@@ -502,7 +505,8 @@
 
   function renderPost(post) {
     const author = profilesById.get(post.author_user_id);
-    const authorName = author ? author.name : 'Alguien del salón';
+    if (!author) noteMissingProfile(post.author_user_id);
+    const authorName = author ? author.name : '…';
     const authorSection = author ? author.section : '';
     const authorKey = author ? keyOf(author.name, author.section) : '';
     const av = author && author.avatar_url ? `<img src="${escapeHtml(author.avatar_url)}">` : authorName[0].toUpperCase();
@@ -556,7 +560,8 @@
   function renderCommentsSection(post, comments) {
     const list = comments.map(c => {
       const author = profilesById.get(c.author_user_id);
-      const name = author ? author.name : 'Alguien del salón';
+      if (!author) noteMissingProfile(c.author_user_id);
+      const name = author ? author.name : '…';
       const av = author && author.avatar_url ? `<img src="${escapeHtml(author.avatar_url)}">` : name[0].toUpperCase();
       const key = author ? keyOf(author.name, author.section) : '';
       return `<div class="comment">
@@ -830,7 +835,6 @@
       arr.push(s);
       storiesByAuthor.set(s.author_user_id, arr);
     });
-    await ensureProfilesFor(stories.map(s => s.author_user_id));
     renderStoriesBar();
   }
 
@@ -861,7 +865,8 @@
     });
     others.forEach(([uid, arr]) => {
       const p = profilesById.get(uid);
-      const name = p ? p.name : 'Alguien del salón';
+      if (!p) noteMissingProfile(uid);
+      const name = p ? p.name : '…';
       const av = p && p.avatar_url ? `<img src="${escapeHtml(p.avatar_url)}" alt="">` : name[0].toUpperCase();
       const allSeen = arr.every(s => seenStories.has(s.id));
       items.push(`<a href="#" class="story-item" data-author="${uid}">
@@ -931,7 +936,8 @@
 
     // Header
     const p = profilesById.get(s.author_user_id);
-    const name = p ? p.name : 'Alguien del salón';
+    if (!p) noteMissingProfile(s.author_user_id);
+    const name = p ? p.name : '…';
     const isMine = me && s.author_user_id === me.id;
     const key = p ? keyOf(p.name, p.section) : '';
     const av = p && p.avatar_url ? `<img src="${escapeHtml(p.avatar_url)}" alt="">` : name[0].toUpperCase();
