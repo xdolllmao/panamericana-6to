@@ -1120,6 +1120,20 @@
     if (need) await refreshProfiles();
   }
 
+  // Resuelve autor de una fila con esta prioridad:
+  //   1) nombre denormalizado en la fila (author_name/author_section)
+  //   2) perfil vivo en profilesById (por si el nombre cambio)
+  //   3) fallback vacio SOLO si la fila viejisima no trae nada
+  // NUNCA devuelve "Anonimo" ni placeholder.
+  function authorInfo(row) {
+    const prof = row && row.author_user_id ? profilesById.get(row.author_user_id) : null;
+    const name    = (prof && prof.name) || (row && row.author_name) || '';
+    const section = (prof && prof.section) || (row && row.author_section) || '';
+    const role      = prof ? prof.role : null;
+    const avatarUrl = prof ? prof.avatar_url : null;
+    return { name, section, role, avatarUrl, profile: prof };
+  }
+
   // ================ NEW CHAT flow ================
   const newModal = document.getElementById('newModal');
   const newClose = document.getElementById('newClose');
@@ -1422,7 +1436,14 @@
     // dm — display the other person
     const otherUid = chat.members.find(uid => uid !== currentUser.id);
     const other = profilesById.get(otherUid);
-    return other ? other.name : 'Alguien del salón';
+    if (other) return other.name;
+    // Fallback: mirar el ultimo mensaje del otro y usar su author_name denormalizado
+    const msgs = messagesByChat.get(chat.id) || [];
+    for (let i = msgs.length - 1; i >= 0; i--) {
+      const m = msgs[i];
+      if (m.author_user_id === otherUid && m.author_name) return m.author_name;
+    }
+    return '';
   }
   function chatDisplayMeta(chat) {
     if (chat.type === 'group') return `${chat.members.length} miembros`;
@@ -1485,8 +1506,8 @@
         preview = last.photo_url ? '📷 Foto' : escapeHtml((last.text || '').slice(0, 44));
         if (last.author_user_id === currentUser.id) fromLabel = 'Vos: ';
         else if (isGroup) {
-          const from = profilesById.get(last.author_user_id);
-          if (from) fromLabel = `${escapeHtml(from.name)}: `;
+          const info = authorInfo(last);
+          if (info.name) fromLabel = `${escapeHtml(info.name)}: `;
         }
       }
       return `<button class="chat-item ${c.id===activeChatId?'is-active':''}" data-id="${c.id}">
@@ -1528,7 +1549,7 @@
 
   async function loadMessages(chatId) {
     const { data, error } = await sb.from('messages')
-      .select('id, chat_id, author_user_id, text, photo_url, created_at, reply_to')
+      .select('id, chat_id, author_user_id, author_name, author_section, text, photo_url, created_at, reply_to')
       .eq('chat_id', chatId).order('created_at', { ascending: true }).limit(500);
     if (error) { console.error(error); return; }
     messagesByChat.set(chatId, data || []);
@@ -1685,24 +1706,25 @@
   function renderBubble(m, isGroup) {
     const isMe = m.author_user_id === currentUser.id;
     const showAvatar = !isMe && isGroup;
-    const from = profilesById.get(m.author_user_id);
-    const fromName = from ? from.name : 'Alguien del salón';
-    const profileHref = from ? `/profile/?u=${keyOf(from.name, from.section)}` : '';
-    const avatarInner = (from && from.avatar_url) ? `<img src="${escapeHtml(from.avatar_url)}" alt="">` : fromName[0].toUpperCase();
+    const info = authorInfo(m);
+    const fromName = info.name || (m.text ? m.text[0].toUpperCase() : '?');
+    const hasProfile = !!info.profile;
+    const profileHref = hasProfile ? `/profile/?u=${keyOf(info.name, info.section)}` : '';
+    const avatarInner = info.avatarUrl ? `<img src="${escapeHtml(info.avatarUrl)}" alt="">` : fromName[0].toUpperCase();
     const avatarEl = showAvatar
-      ? (from ? `<a class="msg-avatar" href="${profileHref}" style="background:${colorFor(fromName)}; color:#fff; text-decoration:none" title="Ver perfil de ${escapeHtml(fromName)}">${avatarInner}</a>`
-              : `<div class="msg-avatar" style="background:${colorFor(fromName)}" title="${escapeHtml(fromName)}">${fromName[0].toUpperCase()}</div>`)
+      ? (hasProfile ? `<a class="msg-avatar" href="${profileHref}" style="background:${colorFor(fromName)}; color:#fff; text-decoration:none" title="Ver perfil de ${escapeHtml(fromName)}">${avatarInner}</a>`
+                    : `<div class="msg-avatar" style="background:${colorFor(fromName)}" title="${escapeHtml(fromName)}">${fromName[0].toUpperCase()}</div>`)
       : '';
     const nameEl = showAvatar
-      ? (from ? `<div class="msg-from"><a href="${profileHref}" style="color:inherit">${escapeHtml(fromName)}</a></div>` : `<div class="msg-from">${escapeHtml(fromName)}</div>`)
+      ? (hasProfile ? `<div class="msg-from"><a href="${profileHref}" style="color:inherit">${escapeHtml(fromName)}</a></div>` : `<div class="msg-from">${escapeHtml(fromName)}</div>`)
       : '';
     let quoteEl = '';
     if (m.reply_to && activeChatId) {
       const arr = messagesByChat.get(activeChatId) || [];
       const orig = arr.find(x => x.id === m.reply_to);
       if (orig) {
-        const origFrom = profilesById.get(orig.author_user_id);
-        const origName = origFrom ? origFrom.name : 'Alguien del salón';
+        const origInfo = authorInfo(orig);
+        const origName = origInfo.name || (orig.text ? orig.text[0].toUpperCase() : '?');
         const snippet = orig.photo_url ? '📷 Foto' : (orig.text || '').slice(0, 60);
         quoteEl = `<a class="msg-quote" href="#msg-${orig.id}" data-jump="${orig.id}"><strong>${escapeHtml(origName)}</strong><span>${escapeHtml(snippet)}</span></a>`;
       } else {
@@ -1836,7 +1858,10 @@
         photoUrl = sb.storage.from('photos').getPublicUrl(path).data.publicUrl;
       }
       const payload = {
-        chat_id: chat.id, author_user_id: currentUser.id,
+        chat_id: chat.id,
+        author_user_id: currentUser.id,
+        author_name: account ? account.name : null,
+        author_section: account ? account.section : null,
         ...(text && { text }),
         ...(photoUrl && { photo_url: photoUrl }),
         ...(replyingTo && { reply_to: replyingTo.id })
@@ -1856,8 +1881,8 @@
   // ============ REPLY + CONTEXT MENU ============
   let replyingTo = null; // { id, name, snippet }
   function setReply(msg) {
-    const from = profilesById.get(msg.author_user_id);
-    const name = from ? from.name : 'Alguien del salón';
+    const info = authorInfo(msg);
+    const name = info.name || (msg.text ? msg.text[0].toUpperCase() : '?');
     const snippet = msg.photo_url ? '📷 Foto' : (msg.text || '').slice(0, 80);
     replyingTo = { id: msg.id, name, snippet };
     renderReplyBar();
@@ -2062,7 +2087,7 @@
     }));
     // 4. Load last message for each (for preview/sort). Batch: get messages for all chats ordered.
     const { data: allMsgs } = await sb.from('messages')
-      .select('id, chat_id, author_user_id, text, photo_url, created_at, reply_to')
+      .select('id, chat_id, author_user_id, author_name, author_section, text, photo_url, created_at, reply_to')
       .in('chat_id', chatIds)
       .order('created_at', { ascending: true });
     const groupedMsgs = new Map();

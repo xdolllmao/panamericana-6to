@@ -417,22 +417,33 @@
   }
 
   // Garantiza que TODOS los UIDs de la lista tengan su perfil cargado.
-  // Se llama antes de cada render — asi los nombres siempre aparecen reales
-  // en el primer paint, sin placeholder.
   async function ensureProfilesFor(uids) {
     const need = uids.some(uid => uid && !profilesById.has(uid));
     if (need) await loadProfiles();
   }
 
+  // Resuelve autor de un post/comment/story:
+  //   1) columnas denormalizadas author_name/author_section (nunca desaparecen)
+  //   2) perfil vivo (por si cambio el nombre desde entonces)
+  //   3) fallback muy suave — inicial del texto, jamas "Anonimo"
+  function authorInfo(row) {
+    const prof = row && row.author_user_id ? profilesById.get(row.author_user_id) : null;
+    const name    = (prof && prof.name)    || (row && row.author_name)    || '';
+    const section = (prof && prof.section) || (row && row.author_section) || '';
+    const role      = prof ? prof.role : null;
+    const avatarUrl = prof ? prof.avatar_url : null;
+    return { name, section, role, avatarUrl, profile: prof };
+  }
+
   async function loadFeed() {
-    const { data: postsData } = await sb.from('posts').select('id, author_user_id, type, description, media_url, media_type, created_at').order('created_at', { ascending: false }).limit(80);
+    const { data: postsData } = await sb.from('posts').select('id, author_user_id, author_name, author_section, type, description, media_url, media_type, created_at').order('created_at', { ascending: false }).limit(80);
     posts = postsData || [];
     // Load likes + comments for these posts
     const ids = posts.map(p => p.id);
     if (ids.length) {
       const [likesR, commentsR] = await Promise.all([
         sb.from('post_likes').select('post_id, user_id').in('post_id', ids),
-        sb.from('post_comments').select('id, post_id, author_user_id, text, created_at').in('post_id', ids).order('created_at', { ascending: true }),
+        sb.from('post_comments').select('id, post_id, author_user_id, author_name, author_section, text, created_at').in('post_id', ids).order('created_at', { ascending: true }),
       ]);
       likesByPost.clear();
       (likesR.data || []).forEach(l => {
@@ -486,7 +497,13 @@
 
   async function publishQuick(text) {
     if (!me || !myProfile) return;
-    const { error } = await sb.from('posts').insert({ author_user_id: me.id, type: 'opinion', description: text });
+    const { error } = await sb.from('posts').insert({
+      author_user_id: me.id,
+      author_name: myProfile ? myProfile.name : null,
+      author_section: myProfile ? myProfile.section : null,
+      type: 'opinion',
+      description: text,
+    });
     if (error) { alert(error.message); return; }
     document.getElementById('quickInput').value = '';
     // Realtime will refresh
@@ -501,10 +518,11 @@
   }
 
   function renderPost(post) {
-    const author = profilesById.get(post.author_user_id);
-    const authorName = author ? author.name : 'Alguien del salón';
-    const authorSection = author ? author.section : '';
-    const authorKey = author ? keyOf(author.name, author.section) : '';
+    const info = authorInfo(post);
+    const author = info.profile;
+    const authorName = info.name || (post.description ? post.description[0].toUpperCase() : '?');
+    const authorSection = info.section || '';
+    const authorKey = (info.name && info.section) ? keyOf(info.name, info.section) : '';
     const av = author && author.avatar_url ? `<img src="${escapeHtml(author.avatar_url)}">` : authorName[0].toUpperCase();
     const likes = likesByPost.get(post.id) || new Set();
     const nLikes = likes.size;
@@ -555,10 +573,11 @@
 
   function renderCommentsSection(post, comments) {
     const list = comments.map(c => {
-      const author = profilesById.get(c.author_user_id);
-      const name = author ? author.name : 'Alguien del salón';
+      const info = authorInfo(c);
+      const author = info.profile;
+      const name = info.name || (c.text ? c.text[0].toUpperCase() : '?');
       const av = author && author.avatar_url ? `<img src="${escapeHtml(author.avatar_url)}">` : name[0].toUpperCase();
-      const key = author ? keyOf(author.name, author.section) : '';
+      const key = (info.name && info.section) ? keyOf(info.name, info.section) : '';
       return `<div class="comment">
         <a class="c-avatar" style="background:${colorFor(name)}" href="/profile/?u=${key}">${av}</a>
         <div class="c-body"><a class="c-name" href="/profile/?u=${key}">${escapeHtml(name)}</a>${escapeHtml(c.text)}<span class="c-time">${timeAgo(c.created_at)}</span></div>
@@ -590,7 +609,13 @@
         const text = input.value.trim();
         if (!text) return;
         const btn = form.querySelector('button'); btn.disabled = true;
-        const { error } = await sb.from('post_comments').insert({ post_id: form.dataset.post, author_user_id: me.id, text });
+        const { error } = await sb.from('post_comments').insert({
+          post_id: form.dataset.post,
+          author_user_id: me.id,
+          author_name: myProfile ? myProfile.name : null,
+          author_section: myProfile ? myProfile.section : null,
+          text,
+        });
         btn.disabled = false;
         if (error) { alert(error.message); return; }
         input.value = '';
@@ -771,7 +796,14 @@
       media_url = sb.storage.from('posts').getPublicUrl(path).data.publicUrl;
       media_type = cmpMedia.type;
     }
-    const { error } = await sb.from('posts').insert({ author_user_id: me.id, type: cmpType, description: desc || null, media_url, media_type });
+    const { error } = await sb.from('posts').insert({
+      author_user_id: me.id,
+      author_name: myProfile ? myProfile.name : null,
+      author_section: myProfile ? myProfile.section : null,
+      type: cmpType,
+      description: desc || null,
+      media_url, media_type,
+    });
     btn.disabled = false; btn.textContent = 'Publicar';
     if (error) { alert(error.message); return; }
     closeComposer();
@@ -819,7 +851,7 @@
   async function loadStories() {
     const cutoff = new Date(Date.now() - STORY_TTL).toISOString();
     const { data, error } = await sb.from('stories')
-      .select('id, author_user_id, type, content, media_url, media_type, created_at')
+      .select('id, author_user_id, author_name, author_section, type, content, media_url, media_type, created_at')
       .gt('created_at', cutoff)
       .order('created_at', { ascending: true });
     if (error) return;
@@ -861,7 +893,10 @@
     });
     others.forEach(([uid, arr]) => {
       const p = profilesById.get(uid);
-      const name = p ? p.name : 'Alguien del salón';
+      // Nombre desde perfil o desde la primera historia del autor (que trae author_name)
+      const firstStory = arr[0];
+      const denormName = firstStory && firstStory.author_name;
+      const name = (p && p.name) || denormName || '?';
       const av = p && p.avatar_url ? `<img src="${escapeHtml(p.avatar_url)}" alt="">` : name[0].toUpperCase();
       const allSeen = arr.every(s => seenStories.has(s.id));
       items.push(`<a href="#" class="story-item" data-author="${uid}">
@@ -930,10 +965,11 @@
     storyProgressBar.innerHTML = arr.map((_, i) => `<div class="story-progress ${i < viewerIdx ? 'done' : ''}"><span class="bar"></span></div>`).join('');
 
     // Header
-    const p = profilesById.get(s.author_user_id);
-    const name = p ? p.name : 'Alguien del salón';
+    const info = authorInfo(s);
+    const p = info.profile;
+    const name = info.name || '?';
     const isMine = me && s.author_user_id === me.id;
-    const key = p ? keyOf(p.name, p.section) : '';
+    const key = (info.name && info.section) ? keyOf(info.name, info.section) : '';
     const av = p && p.avatar_url ? `<img src="${escapeHtml(p.avatar_url)}" alt="">` : name[0].toUpperCase();
     storyHeader.innerHTML = `
       <a href="/profile/?u=${key}"><div class="avatar-mini" style="background:${colorFor(name)}">${av}</div><div><div class="who">${escapeHtml(name)}</div><div class="when">${timeAgo(s.created_at)}</div></div></a>
@@ -1134,7 +1170,12 @@
       media_type = stMedia.type;
     }
     const { error } = await sb.from('stories').insert({
-      author_user_id: me.id, type: stType, content: content || null, media_url, media_type
+      author_user_id: me.id,
+      author_name: myProfile ? myProfile.name : null,
+      author_section: myProfile ? myProfile.section : null,
+      type: stType,
+      content: content || null,
+      media_url, media_type,
     });
     stSubmit.disabled = false; stSubmit.textContent = 'Publicar historia';
     if (error) { alert(error.message); return; }
