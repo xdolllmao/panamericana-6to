@@ -1,3 +1,5 @@
 node_modules/
 .vercel
 .DS_Store
+remotion-periodico/node_modules/
+remotion-periodico/out/

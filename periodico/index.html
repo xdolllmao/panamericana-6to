@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Periódico Panamericano · Clase de 6to</title>
+<meta name="description" content="El diario del salón — chismes, deportes y todo lo que pasa en 6to.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%231E3AAB'/%3E%3Ctext x='20' y='30' font-family='system-ui,sans-serif' font-size='24' font-weight='800' fill='white' text-anchor='middle'%3E6%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+  :root {
+    --ground:      #EEF1FA;
+    --ground-2:    #E4EAF7;
+    --paper:       #FFFFFF;
+    --paper-soft:  #F7F9FE;
+    --ink:         #0C1846;
+    --ink-soft:    #3A4675;
+    --ink-mute:    #6E79A6;
+    --line:        #DBE1F2;
+    --line-strong: #B9C3E1;
+    --school:      #1E3AAB;
+    --school-2:    #3B5EF0;
+    --school-tint: #DDE4FF;
+    --lemon:       #F5DE3A;
+    --coral:       #D91F26;
+    --mint:        #35C89A;
+    --shadow-sm:   0 1px 2px rgba(12,24,70,.06), 0 4px 14px rgba(12,24,70,.06);
+    --shadow-lg:   0 4px 12px rgba(12,24,70,.08), 0 22px 44px rgba(12,24,70,.10);
+    --radius:      14px;
+    --f-display: 'Bricolage Grotesque', system-ui, -apple-system, sans-serif;
+    --f-body:    'Manrope', system-ui, -apple-system, sans-serif;
+    --f-mono:    'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #070D24; --ground-2: #0D163B; --paper: #121E4A; --paper-soft: #0F1940;
+      --ink: #EAEEFC; --ink-soft: #B0BADE; --ink-mute: #7A87B6;
+      --line: #223163; --line-strong: #364785;
+      --school: #7091FF; --school-2: #9DB3FF; --school-tint: #1A2A6B;
+      --lemon: #FFE85B; --coral: #FF6B72; --mint: #52D9AE;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,.5), 0 4px 14px rgba(0,0,0,.35);
+      --shadow-lg: 0 4px 12px rgba(0,0,0,.55), 0 22px 44px rgba(0,0,0,.45);
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--f-body);
+    color: var(--ink);
+    background: var(--ground);
+    background-image:
+      radial-gradient(1100px 700px at 88% -10%, rgba(59,94,240,.18), transparent 60%),
+      radial-gradient(900px 600px at -10% 20%, rgba(217,31,38,.08), transparent 65%),
+      repeating-linear-gradient(0deg, transparent 0 31px, var(--line) 31px 32px),
+      linear-gradient(180deg, var(--ground) 0%, var(--ground-2) 100%);
+    background-attachment: fixed;
+    line-height: 1.5;
+    min-height: 100dvh;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+  /* ==== Top bar ==== */
+  .topbar {
+    padding: 18px 24px;
+    display: flex; align-items: center; gap: 14px; justify-content: space-between;
+    max-width: 1180px; margin: 0 auto;
+  }
+  .back-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 14px; border-radius: 999px;
+    background: var(--paper); border: 1px solid var(--line);
+    font-family: var(--f-mono); font-size: 12px; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft);
+    transition: transform .15s, box-shadow .15s, border-color .15s;
+  }
+  .back-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); border-color: var(--line-strong); }
+  .brand-tag {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--f-mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--ink-mute);
+  }
+  .brand-tag .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--coral); box-shadow: 0 0 0 3px color-mix(in oklab, var(--coral) 20%, transparent); }
+
+  /* ==== Header block ==== */
+  .header {
+    max-width: 1180px; margin: 0 auto; padding: 0 24px 20px;
+    text-align: center;
+  }
+  .kicker {
+    display: inline-block;
+    padding: 6px 14px; border-radius: 999px;
+    background: var(--school); color: #fff;
+    font-family: var(--f-mono); font-size: 11px; font-weight: 700;
+    letter-spacing: .22em; text-transform: uppercase;
+    box-shadow: 0 8px 22px rgba(30,58,171,.28);
+  }
+  .title {
+    margin: 14px 0 6px;
+    font-family: var(--f-display); font-weight: 800;
+    font-size: clamp(38px, 6vw, 68px);
+    letter-spacing: -0.02em; line-height: 1;
+    background: linear-gradient(120deg, var(--school), var(--school-2) 55%, var(--coral));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .subtitle {
+    color: var(--ink-soft); font-size: 15px; max-width: 620px; margin: 6px auto 0;
+  }
+  .subtitle b { color: var(--ink); }
+
+  /* ==== Book stage ==== */
+  .stage {
+    padding: 16px 12px 40px;
+    display: flex; flex-direction: column; align-items: center; gap: 18px;
+    perspective: 2200px;
+  }
+  .book {
+    position: relative;
+    /* Aspect ratio de las paginas cropeadas: 1592x2246 ≈ 0.71:1 (portrait).
+       Ancho limitado para que la altura (=width / 0.71) no pase 82vh. */
+    width: min(94vw, calc(82vh * 0.71), 620px);
+    aspect-ratio: 1592 / 2246;
+    filter: drop-shadow(0 30px 60px rgba(12,24,70,.22)) drop-shadow(0 8px 18px rgba(12,24,70,.14));
+  }
+  .page {
+    position: absolute; inset: 0;
+    background: var(--paper);
+    border-radius: 6px;
+    overflow: hidden;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+  .page img {
+    width: 100%; height: 100%; object-fit: contain;
+    background: #fff;
+    display: block;
+    user-select: none; -webkit-user-drag: none;
+  }
+  /* Sombra interior en el pliegue izquierdo, disimula el borde y sugiere lomo */
+  .page::before {
+    content: "";
+    position: absolute; top: 0; bottom: 0; left: 0;
+    width: 40px;
+    background: linear-gradient(90deg, rgba(12,24,70,.16), rgba(12,24,70,0));
+    pointer-events: none;
+  }
+
+  /* Base: la pagina actual y la siguiente estan quietas.
+     La que "vuela" tiene .flipping y hace su rotateY -180 */
+  .page.behind { z-index: 1; transform: none; }
+  .page.current { z-index: 3; transform-origin: left center; transition: none; }
+  .page.flipping {
+    z-index: 4;
+    transform-origin: left center;
+    animation: flipToLeft var(--flip-dur, 850ms) cubic-bezier(.55,.08,.35,1) forwards;
+    box-shadow: 0 20px 50px rgba(12,24,70,.35);
+  }
+  .page.flipping-back {
+    z-index: 4;
+    transform-origin: left center;
+    animation: flipFromLeft var(--flip-dur, 850ms) cubic-bezier(.55,.08,.35,1) forwards;
+    box-shadow: 0 20px 50px rgba(12,24,70,.35);
+  }
+  @keyframes flipToLeft {
+    0%   { transform: rotateY(0deg); }
+    100% { transform: rotateY(-180deg); }
+  }
+  @keyframes flipFromLeft {
+    0%   { transform: rotateY(-180deg); }
+    100% { transform: rotateY(0deg); }
+  }
+
+  /* Sombra dinamica que oscurece la pagina de abajo mientras la otra se levanta */
+  .page.dim::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: rgba(12,24,70,.28);
+    opacity: 0;
+    animation: dimFlash var(--flip-dur, 850ms) ease-out forwards;
+    pointer-events: none;
+  }
+  @keyframes dimFlash {
+    0%   { opacity: 0; }
+    45%  { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  /* Reverso de la hoja que vuela: no queremos la imagen espejada, mostramos
+     un papel con textura sutil que tape la vista de la imagen al voltearse */
+  .page.flipping::after,
+  .page.flipping-back::after {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(180deg, rgba(0,0,0,.04), rgba(0,0,0,0) 20%, rgba(0,0,0,0) 80%, rgba(0,0,0,.06)),
+      linear-gradient(90deg,  rgba(0,0,0,.10), rgba(0,0,0,0) 25%),
+      repeating-linear-gradient(0deg, rgba(12,24,70,.04) 0 2px, transparent 2px 6px),
+      #fafafa;
+    transform: rotateY(180deg);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    pointer-events: none;
+  }
+
+  /* ==== Controls ==== */
+  .controls {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: 999px; padding: 6px 10px;
+    box-shadow: var(--shadow-sm);
+  }
+  .ctrl-btn {
+    width: 44px; height: 44px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--paper-soft); border: 1px solid var(--line);
+    transition: transform .12s, background .12s, border-color .12s;
+  }
+  .ctrl-btn:hover:not(:disabled) { background: var(--school-tint); border-color: var(--school); color: var(--school); transform: translateY(-1px); }
+  .ctrl-btn:disabled { opacity: .38; cursor: not-allowed; }
+  .ctrl-btn svg { width: 20px; height: 20px; }
+  .page-indicator {
+    font-family: var(--f-mono); font-size: 13px; font-weight: 600;
+    color: var(--ink-soft); min-width: 60px; text-align: center;
+    letter-spacing: .04em;
+  }
+  .page-indicator b { color: var(--ink); }
+
+  /* ==== Hint ==== */
+  .hint {
+    font-family: var(--f-mono); font-size: 11px; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--ink-mute);
+    display: inline-flex; gap: 10px; align-items: center;
+  }
+  .hint kbd {
+    padding: 2px 7px; border-radius: 5px; background: var(--paper);
+    border: 1px solid var(--line-strong); color: var(--ink-soft);
+    font-family: var(--f-mono); font-size: 10px;
+  }
+
+  /* Cursor grab hint on the book */
+  .book { cursor: grab; }
+  .book:active { cursor: grabbing; }
+
+  @media (max-width: 640px) {
+    .header { padding-bottom: 12px; }
+    .topbar { padding: 12px 14px; }
+    .stage { padding: 8px 6px 30px; gap: 12px; }
+    .hint { display: none; }
+    .book { width: min(98vw, 820px); }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="back-btn" href="/">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    Volver
+  </a>
+  <div class="brand-tag"><span class="dot"></span> Edición #1 · Sep 2026</div>
+</header>
+
+<section class="header">
+  <span class="kicker">★ PRIMERA EDICIÓN</span>
+  <h1 class="title">Periódico Panamericano</h1>
+  <p class="subtitle">
+    El diario del salón. <b>Chismes, deportes y todo lo que pasa en 6to</b> —
+    pasa las páginas con los botones o deslizando.
+  </p>
+</section>
+
+<main class="stage">
+  <div class="book" id="book" aria-label="Periódico Panamericano" tabindex="0">
+    <!-- Las pages se inyectan por JS -->
+  </div>
+
+  <div class="controls">
+    <button class="ctrl-btn" id="prevBtn" aria-label="Página anterior" title="Anterior">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="page-indicator"><b id="pageNow">1</b> / <span id="pageTotal">5</span></div>
+    <button class="ctrl-btn" id="nextBtn" aria-label="Página siguiente" title="Siguiente">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+    </button>
+  </div>
+
+  <div class="hint">
+    <span>Deslizá o usá</span>
+    <kbd>←</kbd><kbd>→</kbd>
+  </div>
+</main>
+
+<script>
+  const PAGES = ['/periodico/pages/1.png', '/periodico/pages/2.png', '/periodico/pages/3.png', '/periodico/pages/4.png', '/periodico/pages/5.png'];
+  const book = document.getElementById('book');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const pageNow = document.getElementById('pageNow');
+  const pageTotal = document.getElementById('pageTotal');
+  pageTotal.textContent = PAGES.length;
+
+  let current = 0;      // indice de la pagina visible
+  let flipping = false; // guard contra flips concurrentes
+
+  function makePage(idx, cls) {
+    const el = document.createElement('div');
+    el.className = 'page ' + cls;
+    el.dataset.idx = idx;
+    const img = document.createElement('img');
+    img.src = PAGES[idx];
+    img.alt = `Página ${idx + 1}`;
+    img.draggable = false;
+    el.appendChild(img);
+    return el;
+  }
+
+  function render() {
+    book.innerHTML = '';
+    // Pagina "de abajo" = la SIGUIENTE (para flip forward) o la anterior (para back).
+    // La pintamos siempre para que asome cuando la de arriba se voltea.
+    const nextIdx = Math.min(current + 1, PAGES.length - 1);
+    const behindIdx = current === PAGES.length - 1 ? current : nextIdx;
+    if (behindIdx !== current) {
+      const behind = makePage(behindIdx, 'behind');
+      book.appendChild(behind);
+    }
+    const cur = makePage(current, 'current');
+    book.appendChild(cur);
+    pageNow.textContent = current + 1;
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === PAGES.length - 1;
+  }
+
+  function goNext() {
+    if (flipping || current >= PAGES.length - 1) return;
+    flipping = true;
+    // Nueva pagina de abajo = la que sera destino
+    const nextIdx = current + 1;
+    // Pintamos la siguiente como behind
+    book.innerHTML = '';
+    const behind = makePage(nextIdx, 'behind');
+    behind.classList.add('dim');
+    book.appendChild(behind);
+    const flying = makePage(current, 'flipping');
+    book.appendChild(flying);
+    flying.addEventListener('animationend', () => {
+      current = nextIdx;
+      flipping = false;
+      render();
+    }, { once: true });
+  }
+
+  function goPrev() {
+    if (flipping || current === 0) return;
+    flipping = true;
+    const prevIdx = current - 1;
+    // La pagina que vuelve viene del lomo -180 y aterriza a 0
+    book.innerHTML = '';
+    // La actual queda debajo mientras
+    const behind = makePage(current, 'behind');
+    behind.classList.add('dim');
+    book.appendChild(behind);
+    const flying = makePage(prevIdx, 'flipping-back');
+    book.appendChild(flying);
+    flying.addEventListener('animationend', () => {
+      current = prevIdx;
+      flipping = false;
+      render();
+    }, { once: true });
+  }
+
+  prevBtn.addEventListener('click', goPrev);
+  nextBtn.addEventListener('click', goNext);
+
+  // Keyboard
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); goNext(); }
+    else if (e.key === 'ArrowLeft')              { e.preventDefault(); goPrev(); }
+  });
+
+  // Touch swipe
+  let touchStartX = null;
+  book.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
+  book.addEventListener('touchend', (e) => {
+    if (touchStartX == null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    touchStartX = null;
+    if (Math.abs(dx) < 40) return;
+    if (dx < 0) goNext(); else goPrev();
+  });
+
+  // Click en el lado derecho del libro = next, izquierdo = prev
+  book.addEventListener('click', (e) => {
+    // Ignorar cuando ya se disparo por swipe (touchend) porque en desktop no hay conflicto
+    const rect = book.getBoundingClientRect();
+    const rel = (e.clientX - rect.left) / rect.width;
+    if (rel > 0.62) goNext();
+    else if (rel < 0.38) goPrev();
+  });
+
+  // Precarga imagenes para que el flip no muestre placeholders
+  PAGES.forEach(src => { const im = new Image(); im.src = src; });
+
+  render();
+</script>
+
+</body>
+</html>
