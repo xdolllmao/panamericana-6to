@@ -2005,7 +2005,7 @@
           <div class="team-tag">Equipo</div>
           <h4>Equipo 1</h4>
         </div>
-        <div class="team-count">6</div>
+        <div class="team-count">7</div>
       </div>
       <ul class="roster-list">
         <li>Mateo</li>
@@ -2014,6 +2014,7 @@
         <li>Javier</li>
         <li>Alejandro</li>
         <li>Josué</li>
+        <li>Lucas</li>
       </ul>
     </div>
     <div class="team-card">
@@ -2410,26 +2411,28 @@
     { fecha: 'Jornada 14', tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 5, gb: 4, res: 'won',  note: 'Partidazo. <b>Magaña</b> ×2, <b>Mateo</b> ×2 y <b>Javier</b> para Equipo 1; <b>Suil</b> ×2, <b>Gerardo</b> y <b>Deleón</b> para Equipo 2.' },
     { fecha: 'Jornada 15', tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 1, gb: 0, res: 'won',  note: 'Gol único de <b>Javier</b>. Triunfo mínimo.' },
     { fecha: 'Jornada 16', tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 2, gb: 2, res: 'tie',  note: '<b>Javier</b> y <b>Magaña</b> para Equipo 1; <b>Deleón</b> y un autogol de <b>Javier</b> para Equipo 2.' },
+    { fecha: 'Jornada 17', tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 3, gb: 1, res: 'won',  note: '<b>Alejandro</b> ×2 y <b>Lucas</b> para Equipo 1; <b>Deleón</b> para Equipo 2.' },
   ];
 
   const STANDINGS = [
-    { name: 'Equipo 1', pj: 16, g: 6, e: 5, p: 5, gf: 27, gc: 26 },
-    { name: 'Equipo 2', pj: 16, g: 5, e: 5, p: 6, gf: 26, gc: 27 },
+    { name: 'Equipo 1', pj: 17, g: 7, e: 5, p: 5, gf: 30, gc: 27 },
+    { name: 'Equipo 2', pj: 17, g: 5, e: 5, p: 7, gf: 27, gc: 30 },
   ].map(t => ({ ...t, pts: t.g * 3 + t.e }))
    .sort((a,b) => b.pts - a.pts || (b.gf - b.gc) - (a.gf - a.gc));
 
   const GOLEADORES = [
-    { name: 'Deleón',   goles: 13 },
-    { name: 'Mateo',    goles: 8 },
-    { name: 'Gerardo',  goles: 7 },
-    { name: 'Magaña',   goles: 7 },
-    { name: 'Javier',   goles: 6 },
-    { name: 'Lucas',    goles: 4 },
-    { name: 'Iglesias', goles: 3 },
-    { name: 'Osegueda', goles: 3 },
-    { name: 'Josué',    goles: 2 },
-    { name: 'Suil',     goles: 2 },
-    { name: 'Fabricio', goles: 1 },
+    { name: 'Deleón',    goles: 14 },
+    { name: 'Mateo',     goles: 8 },
+    { name: 'Gerardo',   goles: 7 },
+    { name: 'Magaña',    goles: 7 },
+    { name: 'Javier',    goles: 6 },
+    { name: 'Lucas',     goles: 5 },
+    { name: 'Iglesias',  goles: 3 },
+    { name: 'Osegueda',  goles: 3 },
+    { name: 'Alejandro', goles: 2 },
+    { name: 'Josué',     goles: 2 },
+    { name: 'Suil',      goles: 2 },
+    { name: 'Fabricio',  goles: 1 },
   ].sort((a, b) => b.goles - a.goles);
 
   // ---------- render students ----------
