@@ -1112,6 +1112,28 @@
     if (!loginModal.hidden) renderLoginNames();
   }
 
+  // Si nos topamos con UIDs desconocidos durante el render, re-cargamos perfiles
+  // y re-renderizamos — evita que un mensaje quede pegado con nombre placeholder
+  // cuando el perfil del autor todavia no estaba en el cache.
+  const _missingUidSeen = new Set();
+  let _refreshingForMissing = false;
+  function noteMissingProfile(uid) {
+    if (!uid || profilesById.has(uid) || _missingUidSeen.has(uid)) return;
+    _missingUidSeen.add(uid);
+    if (_refreshingForMissing) return;
+    _refreshingForMissing = true;
+    setTimeout(async () => {
+      await refreshProfiles();
+      _refreshingForMissing = false;
+      // Si al recargar aparecio algo nuevo, re-renderizamos las vistas visibles
+      renderChatList();
+      if (activeChatId) {
+        const chat = chats.find(c => c.id === activeChatId);
+        if (chat) renderChatMain(chat);
+      }
+    }, 250);
+  }
+
   // ================ NEW CHAT flow ================
   const newModal = document.getElementById('newModal');
   const newClose = document.getElementById('newClose');
@@ -1414,13 +1436,14 @@
     // dm — display the other person
     const otherUid = chat.members.find(uid => uid !== currentUser.id);
     const other = profilesById.get(otherUid);
-    return other ? other.name : 'Anónimo';
+    if (!other) { noteMissingProfile(otherUid); return '…'; }
+    return other.name;
   }
   function chatDisplayMeta(chat) {
     if (chat.type === 'group') return `${chat.members.length} miembros`;
     const otherUid = chat.members.find(uid => uid !== currentUser.id);
     const other = profilesById.get(otherUid);
-    if (!other) return 'Usuario';
+    if (!other) { noteMissingProfile(otherUid); return 'Cargando…'; }
     return `Sección ${other.section}${other.role ? ' · ' + other.role : ''}`;
   }
   function chatLastTs(chat) {
@@ -1479,6 +1502,7 @@
         else if (isGroup) {
           const from = profilesById.get(last.author_user_id);
           if (from) fromLabel = `${escapeHtml(from.name)}: `;
+          else noteMissingProfile(last.author_user_id);
         }
       }
       return `<button class="chat-item ${c.id===activeChatId?'is-active':''}" data-id="${c.id}">
@@ -1674,7 +1698,8 @@
     const isMe = m.author_user_id === currentUser.id;
     const showAvatar = !isMe && isGroup;
     const from = profilesById.get(m.author_user_id);
-    const fromName = from ? from.name : 'Anónimo';
+    if (!from) noteMissingProfile(m.author_user_id);
+    const fromName = from ? from.name : '…';
     const profileHref = from ? `/profile/?u=${keyOf(from.name, from.section)}` : '';
     const avatarInner = (from && from.avatar_url) ? `<img src="${escapeHtml(from.avatar_url)}" alt="">` : fromName[0].toUpperCase();
     const avatarEl = showAvatar
@@ -1690,7 +1715,8 @@
       const orig = arr.find(x => x.id === m.reply_to);
       if (orig) {
         const origFrom = profilesById.get(orig.author_user_id);
-        const origName = origFrom ? origFrom.name : 'Anónimo';
+        if (!origFrom) noteMissingProfile(orig.author_user_id);
+        const origName = origFrom ? origFrom.name : '…';
         const snippet = orig.photo_url ? '📷 Foto' : (orig.text || '').slice(0, 60);
         quoteEl = `<a class="msg-quote" href="#msg-${orig.id}" data-jump="${orig.id}"><strong>${escapeHtml(origName)}</strong><span>${escapeHtml(snippet)}</span></a>`;
       } else {
@@ -1845,7 +1871,8 @@
   let replyingTo = null; // { id, name, snippet }
   function setReply(msg) {
     const from = profilesById.get(msg.author_user_id);
-    const name = from ? from.name : 'Anónimo';
+    if (!from) noteMissingProfile(msg.author_user_id);
+    const name = from ? from.name : '…';
     const snippet = msg.photo_url ? '📷 Foto' : (msg.text || '').slice(0, 80);
     replyingTo = { id: msg.id, name, snippet };
     renderReplyBar();
