@@ -1663,6 +1663,101 @@
   @media (prefers-reduced-motion: reduce) {
     .reveal { opacity: 1; transform: none; transition: none; }
   }
+
+  /* ============ PERIÓDICO · libro con flip 3D ============ */
+  .perio-stage {
+    display: flex; flex-direction: column; align-items: center; gap: 18px;
+    padding: 8px 0 12px;
+    perspective: 2200px;
+  }
+  .perio-book {
+    position: relative;
+    /* Paginas cropeadas 1592x2246 (portrait). Width limitada para que
+       height (=width/0.71) no pase 78vh. */
+    width: min(94vw, calc(78vh * 0.71), 600px);
+    aspect-ratio: 1592 / 2246;
+    filter: drop-shadow(0 30px 60px rgba(12,24,70,.22)) drop-shadow(0 8px 18px rgba(12,24,70,.14));
+    cursor: grab;
+    outline: none;
+  }
+  .perio-book:active { cursor: grabbing; }
+  .perio-page {
+    position: absolute; inset: 0;
+    background: var(--paper);
+    border-radius: 6px;
+    overflow: hidden;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+  .perio-page img {
+    width: 100%; height: 100%; object-fit: contain;
+    background: #fff;
+    display: block;
+    user-select: none; -webkit-user-drag: none;
+  }
+  .perio-page::before {
+    content: "";
+    position: absolute; top: 0; bottom: 0; left: 0;
+    width: 34px;
+    background: linear-gradient(90deg, rgba(12,24,70,.16), rgba(12,24,70,0));
+    pointer-events: none;
+  }
+  .perio-page.behind  { z-index: 1; transform: none; }
+  .perio-page.current { z-index: 3; transform-origin: left center; transition: none; }
+  .perio-page.flipping {
+    z-index: 4; transform-origin: left center;
+    animation: perioFlipL var(--perio-flip, 850ms) cubic-bezier(.55,.08,.35,1) forwards;
+    box-shadow: 0 20px 50px rgba(12,24,70,.35);
+  }
+  .perio-page.flipping-back {
+    z-index: 4; transform-origin: left center;
+    animation: perioFlipR var(--perio-flip, 850ms) cubic-bezier(.55,.08,.35,1) forwards;
+    box-shadow: 0 20px 50px rgba(12,24,70,.35);
+  }
+  @keyframes perioFlipL { 0% { transform: rotateY(0deg); } 100% { transform: rotateY(-180deg); } }
+  @keyframes perioFlipR { 0% { transform: rotateY(-180deg); } 100% { transform: rotateY(0deg); } }
+  .perio-page.dim::after {
+    content: ""; position: absolute; inset: 0;
+    background: rgba(12,24,70,.28); opacity: 0;
+    animation: perioDim var(--perio-flip, 850ms) ease-out forwards;
+    pointer-events: none;
+  }
+  @keyframes perioDim { 0%,100% { opacity: 0; } 45% { opacity: 1; } }
+  /* Reverso de la hoja al voltearse: papel texturado sutil, no la imagen espejada */
+  .perio-page.flipping::after,
+  .perio-page.flipping-back::after {
+    content: ""; position: absolute; inset: 0;
+    background:
+      linear-gradient(180deg, rgba(0,0,0,.04), rgba(0,0,0,0) 20%, rgba(0,0,0,0) 80%, rgba(0,0,0,.06)),
+      linear-gradient(90deg,  rgba(0,0,0,.10), rgba(0,0,0,0) 25%),
+      repeating-linear-gradient(0deg, rgba(12,24,70,.04) 0 2px, transparent 2px 6px),
+      #fafafa;
+    transform: rotateY(180deg);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    pointer-events: none;
+  }
+  .perio-controls {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: 999px; padding: 6px 10px;
+    box-shadow: var(--shadow-sm);
+  }
+  .perio-btn {
+    width: 42px; height: 42px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--paper-soft); border: 1px solid var(--line);
+    transition: transform .12s, background .12s, border-color .12s, color .12s;
+  }
+  .perio-btn:hover:not(:disabled) { background: var(--school-tint); border-color: var(--school); color: var(--school); transform: translateY(-1px); }
+  .perio-btn:disabled { opacity: .38; cursor: not-allowed; }
+  .perio-btn svg { width: 18px; height: 18px; }
+  .perio-indicator {
+    font-family: var(--f-mono); font-size: 13px; font-weight: 600;
+    color: var(--ink-soft); min-width: 56px; text-align: center; letter-spacing: .04em;
+  }
+  .perio-indicator b { color: var(--ink); }
 </style>
 
 </head>
@@ -1683,7 +1778,7 @@
       <a class="nav-link" href="#chismes">Chismes</a>
       <a class="nav-link" href="#records">Récords</a>
       <a class="nav-link" href="/resumen/">Weekly</a>
-      <a class="nav-link" href="/periodico/">Periódico</a>
+      <a class="nav-link" href="#periodico">Periódico</a>
       <a class="nav-link" href="/feed/">Feed</a>
       <a class="nav-link" href="/chat/">Chat</a>
       <a class="nav-link" href="/profile/">Perfil</a>
@@ -1845,16 +1940,27 @@
   </div>
 </section>
 
-<!-- =================== PERIÓDICO (coming soon) =================== -->
+<!-- =================== PERIÓDICO =================== -->
 <section id="periodico" class="wrap block">
-  <div class="soon-card reveal">
-    <div class="soon-lock" aria-hidden="true">
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+  <div class="section-head reveal">
+    <div>
+      <div class="section-tag">★ Edición #1 · Sep 2026</div>
+      <h2>Periódico Panamericano.</h2>
     </div>
-    <div class="soon-body">
-      <div class="section-tag">Nueva página</div>
-      <h2>Periódico Panamericano</h2>
-      <p>Pronto…</p>
+    <p>El diario del salón. Pasa las páginas con los botones, con las flechas del teclado o deslizando.</p>
+  </div>
+
+  <div class="perio-stage reveal">
+    <div class="perio-book" id="perioBook" aria-label="Periódico Panamericano" tabindex="0"></div>
+
+    <div class="perio-controls">
+      <button class="perio-btn" id="perioPrev" aria-label="Página anterior" title="Anterior">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="perio-indicator"><b id="perioNow">1</b> / <span id="perioTotal">5</span></div>
+      <button class="perio-btn" id="perioNext" aria-label="Página siguiente" title="Siguiente">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
     </div>
   </div>
 </section>
@@ -3464,6 +3570,112 @@
   profileClose.addEventListener('click', closeProfile);
   profileModal.addEventListener('click', (e) => { if (e.target === profileModal) closeProfile(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !profileModal.hidden) closeProfile(); });
+
+  // =================== PERIÓDICO · libro embebido ===================
+  (function() {
+    const PAGES = [
+      '/periodico/pages/1.png',
+      '/periodico/pages/2.png',
+      '/periodico/pages/3.png',
+      '/periodico/pages/4.png',
+      '/periodico/pages/5.png',
+    ];
+    const book = document.getElementById('perioBook');
+    const prevBtn = document.getElementById('perioPrev');
+    const nextBtn = document.getElementById('perioNext');
+    const nowEl = document.getElementById('perioNow');
+    const totalEl = document.getElementById('perioTotal');
+    if (!book) return;
+    totalEl.textContent = PAGES.length;
+
+    let current = 0;
+    let flipping = false;
+
+    function makePage(idx, cls) {
+      const el = document.createElement('div');
+      el.className = 'perio-page ' + cls;
+      const img = document.createElement('img');
+      img.src = PAGES[idx];
+      img.alt = 'Página ' + (idx + 1);
+      img.draggable = false;
+      el.appendChild(img);
+      return el;
+    }
+    function render() {
+      book.innerHTML = '';
+      const nextIdx = Math.min(current + 1, PAGES.length - 1);
+      if (nextIdx !== current) book.appendChild(makePage(nextIdx, 'behind'));
+      book.appendChild(makePage(current, 'current'));
+      nowEl.textContent = current + 1;
+      prevBtn.disabled = current === 0;
+      nextBtn.disabled = current === PAGES.length - 1;
+    }
+    function goNext() {
+      if (flipping || current >= PAGES.length - 1) return;
+      flipping = true;
+      const nextIdx = current + 1;
+      book.innerHTML = '';
+      const behind = makePage(nextIdx, 'behind');
+      behind.classList.add('dim');
+      book.appendChild(behind);
+      const flying = makePage(current, 'flipping');
+      book.appendChild(flying);
+      flying.addEventListener('animationend', () => {
+        current = nextIdx;
+        flipping = false;
+        render();
+      }, { once: true });
+    }
+    function goPrev() {
+      if (flipping || current === 0) return;
+      flipping = true;
+      const prevIdx = current - 1;
+      book.innerHTML = '';
+      const behind = makePage(current, 'behind');
+      behind.classList.add('dim');
+      book.appendChild(behind);
+      const flying = makePage(prevIdx, 'flipping-back');
+      book.appendChild(flying);
+      flying.addEventListener('animationend', () => {
+        current = prevIdx;
+        flipping = false;
+        render();
+      }, { once: true });
+    }
+    prevBtn.addEventListener('click', goPrev);
+    nextBtn.addEventListener('click', goNext);
+    // Teclado solo cuando el libro esta cerca de la vista (scroll intersect)
+    const io = new IntersectionObserver((entries) => {
+      book.dataset.visible = entries[0].isIntersecting ? '1' : '';
+    }, { threshold: 0.35 });
+    io.observe(book);
+    document.addEventListener('keydown', (e) => {
+      if (book.dataset.visible !== '1') return;
+      const tag = (e.target && e.target.tagName) || '';
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (e.key === 'ArrowRight') { e.preventDefault(); goNext(); }
+      else if (e.key === 'ArrowLeft')  { e.preventDefault(); goPrev(); }
+    });
+    // Swipe tactil
+    let tsx = null;
+    book.addEventListener('touchstart', (e) => { tsx = e.touches[0].clientX; }, { passive: true });
+    book.addEventListener('touchend', (e) => {
+      if (tsx == null) return;
+      const dx = e.changedTouches[0].clientX - tsx; tsx = null;
+      if (Math.abs(dx) < 40) return;
+      if (dx < 0) goNext(); else goPrev();
+    });
+    // Click mitad derecha/izquierda del libro
+    book.addEventListener('click', (e) => {
+      const r = book.getBoundingClientRect();
+      const rel = (e.clientX - r.left) / r.width;
+      if (rel > 0.62) goNext();
+      else if (rel < 0.38) goPrev();
+    });
+    // Precarga
+    PAGES.forEach(src => { const im = new Image(); im.src = src; });
+    render();
+  })();
 </script>
 
 </body>
