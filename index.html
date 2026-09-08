@@ -1657,20 +1657,30 @@
     z-index: 2;
   }
 
-  /* Aviso solo en celular */
-  .mobile-notice { display: none; }
-  @media (max-width: 780px) {
-    .mobile-notice {
-      display: flex; align-items: flex-start; gap: 10px;
-      padding: 12px 14px; margin: 0 0 18px;
-      background: color-mix(in oklab, var(--lemon) 26%, var(--paper));
-      border: 1px solid color-mix(in oklab, var(--plum) 24%, var(--line));
-      border-radius: 12px;
-      color: var(--ink);
-      font-size: 13px; line-height: 1.4;
-    }
-    .mobile-notice svg { flex: none; color: var(--plum); margin-top: 1px; }
-    .mobile-notice b { display: block; font-weight: 700; margin-bottom: 2px; }
+  /* Aviso visible arriba del hero — hecho para saltar a la vista */
+  .mobile-notice {
+    display: flex; align-items: center; gap: 14px;
+    padding: 16px 20px; margin: 0 0 26px;
+    background: linear-gradient(135deg, var(--lemon), color-mix(in oklab, var(--lemon) 55%, var(--coral)));
+    color: #1B1200;
+    border: 2px solid #1B1200;
+    border-radius: 14px;
+    font-size: 15px; line-height: 1.4;
+    box-shadow: 6px 6px 0 var(--ink), 0 20px 40px rgba(12,24,70,.15);
+    animation: noticeWiggle 3.6s ease-in-out infinite;
+    transform-origin: center;
+  }
+  .mobile-notice svg { flex: none; width: 28px; height: 28px; color: #1B1200; }
+  .mobile-notice b { display: block; font-weight: 800; font-family: var(--f-display); font-size: 17px; margin-bottom: 2px; letter-spacing: -.01em; }
+  @keyframes noticeWiggle {
+    0%, 100% { transform: rotate(-.4deg); }
+    50%      { transform: rotate(.4deg); }
+  }
+  @media (prefers-reduced-motion: reduce) { .mobile-notice { animation: none; } }
+  @media (max-width: 520px) {
+    .mobile-notice { padding: 14px 16px; font-size: 14px; }
+    .mobile-notice b { font-size: 16px; }
+    .mobile-notice svg { width: 24px; height: 24px; }
   }
 
   /* Reveal */
@@ -1830,7 +1840,7 @@
       <p class="hero-sub">
         La página no oficial de la <strong>Escuela Panamericana</strong> — hecha por nosotros, para nosotros.
         Aquí están los estudiantes, el horario que casi nadie se sabe, los partidos, las visitas
-        a empresas y el chisme sano del salón. <em>Sin manches</em>.
+        a empresas y el chisme sano del salón.
       </p>
       <div class="cta-row">
         <a class="btn btn-primary" href="#estudiantes">
