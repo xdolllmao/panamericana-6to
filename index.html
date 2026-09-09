@@ -3241,7 +3241,7 @@
       if (!a || !b) { alert('Poné los dos nombres (Persona 1 + Persona 2).'); return; }
       if (a.length > 24 || b.length > 24) { alert('Cada nombre puede tener hasta 24 caracteres.'); return; }
       btn.disabled = true; inA.disabled = true; inB.disabled = true;
-      const { error } = await sb.from('ships').insert({ a: a.slice(0, 24), b: b.slice(0, 24) });
+      const { error } = await sb.from('ships').insert({ a: a.slice(0, 24), b: b.slice(0, 24), author_user_id: currentUser.id });
       btn.disabled = false; inA.disabled = false; inB.disabled = false;
       if (error) { alert('No se pudo publicar: ' + error.message); return; }
       inA.value = ''; inB.value = ''; inA.focus();
@@ -3270,6 +3270,10 @@
         ? '<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>'
         : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
       const likeDisabled = account ? '' : 'disabled title="Iniciá sesión para dar like"';
+      const isMine = currentUser && s.author_user_id === currentUser.id;
+      const delBtn = isMine
+        ? `<button class="ship-delete" type="button" data-del="${s.id}" title="Borrar tu ship">Borrar</button>`
+        : '';
       return `<article class="ship tint-${tint}" data-id="${s.id}" style="--r:${tilt}deg">
         <div class="ship-pair">
           <span class="ship-name">${escapeHtml(s.a)}</span>
@@ -3280,7 +3284,7 @@
           <span>Anónimo · ${timeAgo(s.created_at)}</span>
           <div class="ship-actions">
             <button class="ship-like ${liked ? 'liked' : ''}" type="button" data-like="${s.id}" aria-pressed="${liked}" ${likeDisabled}>${heart}<span>${nLikes}</span></button>
-            <button class="ship-delete" type="button" data-del="${s.id}" title="Borrar ship">Borrar</button>
+            ${delBtn}
           </div>
         </div>
       </article>`;
@@ -3351,7 +3355,7 @@
   }
   async function refreshShips() {
     const [{ data: sh, error: shErr }, { data: lk, error: lkErr }] = await Promise.all([
-      sb.from('ships').select('id, a, b, created_at').order('created_at', { ascending: false }).limit(500),
+      sb.from('ships').select('id, a, b, created_at, author_user_id').order('created_at', { ascending: false }).limit(500),
       sb.from('ship_likes').select('ship_id, user_id'),
     ]);
     if (!shErr) ships = sh || [];
