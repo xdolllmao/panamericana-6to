@@ -1683,6 +1683,44 @@
     .mobile-notice svg { width: 24px; height: 24px; }
   }
 
+  /* Boton Reglas del torneo (partidos section) */
+  .section-head-side { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
+  @media (max-width: 780px) { .section-head-side { align-items: flex-start; } }
+  .rules-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 16px; border-radius: 999px;
+    background: var(--school); color: #fff;
+    border: 2px solid var(--ink);
+    font-family: var(--f-mono); font-size: 12px; font-weight: 700;
+    letter-spacing: .12em; text-transform: uppercase;
+    box-shadow: 3px 3px 0 var(--ink);
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+  .rules-btn:hover { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--ink); }
+  .rules-btn:active { transform: translate(1px,1px); box-shadow: 1px 1px 0 var(--ink); }
+  /* Lista de reglas dentro del modal */
+  .rules-modal { max-width: 720px; }
+  .rules-list { counter-reset: rule; list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
+  .rules-list li {
+    counter-increment: rule;
+    position: relative;
+    background: var(--paper-soft);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--school);
+    border-radius: 10px;
+    padding: 12px 16px 12px 46px;
+    font-size: 14px; line-height: 1.5; color: var(--ink);
+  }
+  .rules-list li::before {
+    content: counter(rule, decimal-leading-zero);
+    position: absolute; left: 12px; top: 12px;
+    font-family: var(--f-mono); font-size: 11px; font-weight: 700;
+    color: var(--school); letter-spacing: .04em;
+    background: color-mix(in oklab, var(--school) 12%, var(--paper));
+    padding: 2px 6px; border-radius: 5px;
+  }
+  .rules-list li b { color: var(--ink); font-weight: 700; }
+
   /* Reveal */
   .reveal { opacity: 0; transform: translateY(12px); transition: opacity .6s ease, transform .6s ease; }
   .reveal.in { opacity: 1; transform: none; }
@@ -2017,7 +2055,13 @@
       <div class="section-tag">04 · <em>La Liga Lipton</em></div>
       <h2>Partidos de la Liga.</h2>
     </div>
-    <p>Partidos en el lunch todos los días.</p>
+    <div class="section-head-side">
+      <p>Partidos en el lunch todos los días.</p>
+      <button class="rules-btn" id="rulesBtn" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        Reglas del torneo
+      </button>
+    </div>
   </div>
 
   <div class="liga-header reveal">
@@ -2265,6 +2309,47 @@
     Perfil
   </a>
 </nav>
+
+<!-- =================== MODAL · reglas de la Liga =================== -->
+<div class="modal-backdrop" id="rulesModal" role="dialog" aria-modal="true" aria-labelledby="rulesTitle" hidden>
+  <div class="modal rules-modal">
+    <div class="modal-head">
+      <div>
+        <div class="section-tag" style="color: var(--school)">Reglamento oficial</div>
+        <h3 id="rulesTitle">Reglas de la Liga Lipton</h3>
+        <p>Cómo se juega, qué sanciones aplican y qué considera cada situación de partido.</p>
+      </div>
+      <button class="modal-close" id="rulesClose" aria-label="Cerrar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <ol class="rules-list">
+        <li><b>Balón fuera del área de juego.</b> Todo jugador que envíe la pelota fuera del área de juego de forma intencional será sancionado con la suspensión de un partido, sea de lunch o de break.</li>
+        <li><b>Reanudación tras un gol.</b> Anotado un gol, los jugadores podrán reanudar el juego cuando lo estimen conveniente, siempre y cuando el balón se encuentre en el círculo central. No es requisito que ambos equipos estén listos para reiniciar.</li>
+        <li><b>Saque de centro.</b> En el saque desde el círculo central posterior a un gol no se permite rematar el balón directamente hacia la portería contraria, ni con la intención evidente de hacerlo. Si se ejecuta dicha acción, se concederá saque de meta al equipo rival.</li>
+        <li><b>Saque de banda.</b> El saque de banda será concedido al equipo del jugador que recupere el balón primero una vez que éste haya salido del área de juego. Si nadie lo toma, el juego continúa con normalidad.</li>
+        <li><b>Ley de la ventaja.</b> Se aplica la ley de la ventaja en las jugadas que así lo permitan.</li>
+        <li><b>Sin barrera.</b> No se permite formar barrera en los tiros libres.</li>
+        <li><b>Interferencia externa.</b> Si una persona ajena al partido interviene el balón y su intervención altera significativamente la jugada (por ejemplo, provoca un gol), la jugada será anulada y el balón volverá a la posición previa a la interferencia.</li>
+        <li><b>Cambio de portero.</b> Todo cambio de portero debe ser notificado de manera clara al resto de los jugadores antes de efectuarse.</li>
+        <li><b>Mano.</b> Cuando se cometa una mano, la falta deberá pitarse de manera inmediata, sin que aplique la ley de la ventaja. Para el resto de las faltas, la ventaja sí podrá otorgarse cuando favorezca al equipo agredido.</li>
+        <li><b>Uso de manos del portero.</b> El portero no podrá hacer uso de las manos a partir de la mitad de la cancha.</li>
+        <li><b>Goles del portero.</b> Los goles anotados por el portero únicamente serán válidos si se ejecutan con el pie.</li>
+        <li><b>Goles con la mano.</b> No serán válidos los goles anotados con la mano, ya sea desde saque de banda o desde saque de portería.</li>
+        <li><b>Registros incompletos.</b> En caso de que no se haya llevado registro exacto de los goles o de los goleadores, se tomará como oficial el resultado más creíble y coherente aportado por quienes presenciaron o disputaron el partido. Dicho resultado será incorporado a la tabla y a la lista de partidos.</li>
+        <li><b>Altura de los conos.</b> El balón que pase por encima de la altura de los conos no será considerado gol válido.</li>
+        <li><b>Poste imaginario.</b> Si el balón toca un cono al ingresar a la portería pero resulta evidente que, en una portería reglamentaria, habría entrado tras rebotar en el poste, el tanto será concedido.</li>
+        <li><b>Autoridades del partido.</b> Los presidentes, capitanes y demás autoridades del partido tienen la facultad de retirar del juego a cualquier jugador cuando lo consideren necesario.</li>
+        <li><b>Altura de la portería imaginaria.</b> La portería (de conos o imaginaria) tiene la altura máxima que alcanza el portero con un salto adecuado. En consecuencia, si el balón ingresa por encima de esa altura, el gol no será válido. Si el portero se agacha y resulta evidente que, de no haberlo hecho, habría detenido el tiro, el gol sí será concedido.</li>
+        <li><b>Tiros libres en campo rival.</b> Los tiros libres cobrados desde más allá de la mitad de la cancha, en el campo del equipo contrario, no podrán ejecutarse con remate directo a portería; únicamente se permitirá dar pase. Cuando el tiro libre se cobre desde la mitad de la cancha del propio equipo, sí podrá ejecutarse con remate directo.</li>
+      </ol>
+    </div>
+    <div class="modal-foot">
+      <span style="font-family:var(--f-mono);font-size:11px;color:var(--ink-mute);letter-spacing:.08em">Última actualización: sep 2026</span>
+    </div>
+  </div>
+</div>
 
 <!-- =================== MODAL · calendario escolar =================== -->
 <div class="modal-backdrop" id="calModal" role="dialog" aria-modal="true" aria-labelledby="calTitle" hidden>
@@ -3609,6 +3694,17 @@
   profileClose.addEventListener('click', closeProfile);
   profileModal.addEventListener('click', (e) => { if (e.target === profileModal) closeProfile(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !profileModal.hidden) closeProfile(); });
+
+  // ---------- Reglas de la Liga ----------
+  const rulesModal = document.getElementById('rulesModal');
+  const rulesBtn = document.getElementById('rulesBtn');
+  const rulesClose = document.getElementById('rulesClose');
+  function openRules() { rulesModal.hidden = false; rulesModal.classList.add('open'); }
+  function closeRules() { rulesModal.classList.remove('open'); rulesModal.hidden = true; }
+  rulesBtn.addEventListener('click', openRules);
+  rulesClose.addEventListener('click', closeRules);
+  rulesModal.addEventListener('click', (e) => { if (e.target === rulesModal) closeRules(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !rulesModal.hidden) closeRules(); });
 
   // =================== PERIÓDICO · libro embebido ===================
   (function() {
