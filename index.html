@@ -1897,6 +1897,47 @@
   }
   .rules-list li b { color: var(--ink); font-weight: 700; }
 
+  /* Botones del login modal + password modales */
+  .login-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+  .btn-ghost-sm {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px; border-radius: 999px;
+    background: transparent; border: 1px solid var(--line);
+    font-family: var(--f-mono); font-size: 11px; font-weight: 700;
+    color: var(--ink-soft); letter-spacing: .06em;
+    transition: all .15s;
+  }
+  .btn-ghost-sm:hover { border-color: var(--school); color: var(--school); background: var(--school-tint); }
+  .btn-ghost-sm svg { width: 12px; height: 12px; }
+
+  .pw-modal { max-width: 460px; }
+  .pw-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .pw-field span { font-family: var(--f-mono); font-size: 11px; color: var(--ink-soft); letter-spacing: .06em; text-transform: uppercase; }
+  .pw-field input {
+    padding: 12px 14px; border: 1.5px solid var(--line);
+    border-radius: 10px; background: var(--paper-soft); color: var(--ink);
+    font-family: var(--f-body); font-size: 15px;
+    outline: none; transition: border-color .15s;
+  }
+  .pw-field input:focus { border-color: var(--school); background: var(--paper); }
+  .pw-actions { display: flex; justify-content: space-between; gap: 8px; align-items: center; margin-top: 6px; }
+  .pw-msg {
+    margin-top: 12px; padding: 10px 12px;
+    border-radius: 8px; font-size: 13px;
+    background: color-mix(in oklab, var(--coral) 12%, var(--paper));
+    border: 1px solid color-mix(in oklab, var(--coral) 30%, var(--line));
+    color: var(--ink);
+  }
+  .pw-msg.ok { background: color-mix(in oklab, var(--mint) 14%, var(--paper)); border-color: color-mix(in oklab, var(--mint) 34%, var(--line)); }
+
+  /* Nombres del login modal: los que tienen contraseña muestran candadito */
+  .name-chip .pw-badge {
+    display: inline-flex; align-items: center;
+    font-size: 10px; color: var(--school);
+    margin-left: 6px;
+  }
+  .name-chip .pw-badge svg { width: 10px; height: 10px; }
+
   /* Reveal */
   .reveal { opacity: 0; transform: translateY(12px); transition: opacity .6s ease, transform .6s ease; }
   .reveal.in { opacity: 1; transform: none; }
@@ -2597,7 +2638,74 @@
     </div>
     <div class="modal-foot">
       <span id="loginStatus">— / — disponibles</span>
-      <button id="loginLogout" hidden type="button">Cerrar sesión actual</button>
+      <div class="login-actions">
+        <button id="loginPassword" hidden type="button" class="btn-ghost-sm" title="Configurar contraseña para entrar en otros dispositivos">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          Contraseña
+        </button>
+        <button id="loginLogout" hidden type="button">Cerrar sesión actual</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =================== MODAL · configurar contraseña =================== -->
+<div class="modal-backdrop" id="pwSetModal" role="dialog" aria-modal="true" aria-labelledby="pwSetTitle" hidden>
+  <div class="modal pw-modal">
+    <div class="modal-head">
+      <div>
+        <div class="section-tag" style="color: var(--school)">Cuenta · contraseña</div>
+        <h3 id="pwSetTitle">Configurá una contraseña</h3>
+        <p id="pwSetDesc">Sirve para entrar con tu nombre en otro dispositivo. Guardala bien — si la perdés no podrás recuperar la cuenta desde afuera.</p>
+      </div>
+      <button class="modal-close" id="pwSetClose" aria-label="Cerrar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form id="pwSetForm">
+        <label class="pw-field">
+          <span>Nueva contraseña (mín. 4)</span>
+          <input id="pwSetInput" type="password" minlength="4" maxlength="60" autocomplete="new-password" required>
+        </label>
+        <label class="pw-field">
+          <span>Repetila</span>
+          <input id="pwSetInput2" type="password" minlength="4" maxlength="60" autocomplete="new-password" required>
+        </label>
+        <div class="pw-actions">
+          <button type="button" id="pwClearBtn" hidden class="btn-ghost-sm">Quitar contraseña</button>
+          <button type="submit" class="btn btn-primary" id="pwSaveBtn">Guardar</button>
+        </div>
+      </form>
+      <div id="pwSetMsg" class="pw-msg" hidden></div>
+    </div>
+  </div>
+</div>
+
+<!-- =================== MODAL · pedir contraseña al reclamar =================== -->
+<div class="modal-backdrop" id="pwAskModal" role="dialog" aria-modal="true" aria-labelledby="pwAskTitle" hidden>
+  <div class="modal pw-modal">
+    <div class="modal-head">
+      <div>
+        <div class="section-tag" style="color: var(--coral)">Cuenta protegida</div>
+        <h3 id="pwAskTitle">Contraseña para reclamar</h3>
+        <p id="pwAskDesc">Esta cuenta tiene contraseña. Ingresala para reclamarla en este dispositivo.</p>
+      </div>
+      <button class="modal-close" id="pwAskClose" aria-label="Cerrar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form id="pwAskForm">
+        <label class="pw-field">
+          <span>Contraseña de <b id="pwAskName">—</b></span>
+          <input id="pwAskInput" type="password" minlength="4" maxlength="60" autocomplete="current-password" required>
+        </label>
+        <div class="pw-actions">
+          <button type="submit" class="btn btn-primary" id="pwAskSubmit">Reclamar mi nombre</button>
+        </div>
+      </form>
+      <div id="pwAskMsg" class="pw-msg" hidden></div>
     </div>
   </div>
 </div>
@@ -3011,7 +3119,7 @@
   let seenStories = new Set();
   try { seenStories = new Set(JSON.parse(localStorage.getItem('sixth-seen-stories') || '[]')); } catch(e){}
 
-  function openModal() { renderNames(); loginModal.hidden = false; loginModal.classList.add('open'); }
+  function openModal() { renderNames(); refreshNamesWithPassword(); loginModal.hidden = false; loginModal.classList.add('open'); }
   function closeModal() { loginModal.classList.remove('open'); loginModal.hidden = true; }
   accountChip.addEventListener('click', openModal);
   loginClose.addEventListener('click', closeModal);
@@ -3029,6 +3137,23 @@
     }
   }
 
+  // Nombres con contraseña (Set de "SECTION-slug"), refrescado on-demand
+  let namesWithPassword = new Set();
+  const LOCK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+  async function refreshNamesWithPassword() {
+    // Ping por cada nombre reclamado (chico costo, se hace batched in parallel)
+    const claimed = [...profilesByKey.keys()];
+    const results = await Promise.all(claimed.map(async k => {
+      const p = profilesByKey.get(k);
+      if (!p) return null;
+      const { data, error } = await sb.rpc('name_has_password', { p_name: p.name, p_section: p.section });
+      if (error) return null;
+      return data ? k : null;
+    }));
+    namesWithPassword = new Set(results.filter(Boolean));
+    if (!loginModal.hidden) renderNames();
+  }
+
   function renderNames() {
     const bySection = { A: [], B: [] };
     STUDENTS.forEach(st => bySection[st.s].push(st));
@@ -3038,9 +3163,16 @@
         const claimed = profilesByKey.get(k);
         const isMe = account && account.name === st.n && account.section === st.s;
         const isTaken = !!claimed && !isMe;
-        return `<button class="name-chip" ${isTaken ? 'disabled' : ''} data-name="${escapeHtml(st.n)}" data-section="${st.s}" type="button">
-          <span class="who-name">${escapeHtml(st.n)}</span>
-          ${isMe ? '<span class="taken-tag" style="color:var(--mint)">Yo</span>' : (isTaken ? '<span class="taken-tag">tomado</span>' : '')}
+        const hasPw = namesWithPassword.has(k);
+        const badge = hasPw && !isMe ? `<span class="pw-badge" title="Tiene contraseña">${LOCK_SVG}</span>` : '';
+        // Deshabilitamos solo si esta tomado y NO tiene password (no hay forma de reclamarlo)
+        const disabled = isTaken && !hasPw ? 'disabled' : '';
+        const tag = isMe
+          ? '<span class="taken-tag" style="color:var(--mint)">Yo</span>'
+          : (isTaken ? `<span class="taken-tag">${hasPw ? 'con contraseña' : 'tomado'}</span>` : '');
+        return `<button class="name-chip" ${disabled} data-name="${escapeHtml(st.n)}" data-section="${st.s}" data-taken="${isTaken?'1':'0'}" data-haspw="${hasPw?'1':'0'}" type="button">
+          <span class="who-name">${escapeHtml(st.n)}${badge}</span>
+          ${tag}
         </button>`;
       }).join('');
     };
@@ -3051,9 +3183,18 @@
     const avail = total - takenCount;
     loginStatus.textContent = `${avail} disponibles · ${takenCount} tomados de ${total}`;
     loginLogout.hidden = !account;
+    const pwBtn = document.getElementById('loginPassword');
+    if (pwBtn) pwBtn.hidden = !account;
     document.querySelectorAll('.name-chip').forEach(btn => {
       if (btn.disabled) return;
-      btn.addEventListener('click', () => claimName(btn.dataset.name, btn.dataset.section));
+      btn.addEventListener('click', () => {
+        const name = btn.dataset.name;
+        const section = btn.dataset.section;
+        const taken = btn.dataset.taken === '1';
+        const hasPw = btn.dataset.haspw === '1';
+        if (taken && hasPw) return openPasswordAsk(name, section);
+        claimName(name, section);
+      });
     });
   }
 
@@ -3088,6 +3229,124 @@
     renderNames();
   }
   loginLogout.addEventListener('click', releaseAccount);
+
+  // -------- password modales --------
+  const pwSetModal   = document.getElementById('pwSetModal');
+  const pwSetForm    = document.getElementById('pwSetForm');
+  const pwSetInput   = document.getElementById('pwSetInput');
+  const pwSetInput2  = document.getElementById('pwSetInput2');
+  const pwSetMsg     = document.getElementById('pwSetMsg');
+  const pwSetClose   = document.getElementById('pwSetClose');
+  const pwClearBtn   = document.getElementById('pwClearBtn');
+  const pwSetDesc    = document.getElementById('pwSetDesc');
+  const pwSetTitle   = document.getElementById('pwSetTitle');
+
+  const pwAskModal   = document.getElementById('pwAskModal');
+  const pwAskForm    = document.getElementById('pwAskForm');
+  const pwAskInput   = document.getElementById('pwAskInput');
+  const pwAskMsg     = document.getElementById('pwAskMsg');
+  const pwAskName    = document.getElementById('pwAskName');
+  const pwAskClose   = document.getElementById('pwAskClose');
+  let pwAskTarget    = null;  // { name, section }
+
+  function showPwMsg(el, text, ok) {
+    el.hidden = false; el.textContent = text; el.classList.toggle('ok', !!ok);
+  }
+  function hidePwMsg(el) { el.hidden = true; el.textContent = ''; el.classList.remove('ok'); }
+
+  async function openPasswordSet() {
+    if (!account) { openModal(); return; }
+    hidePwMsg(pwSetMsg);
+    pwSetInput.value = ''; pwSetInput2.value = '';
+    // Ya tiene contraseña? cambiamos titulo + mostramos "Quitar"
+    const { data: hasPw } = await sb.rpc('name_has_password', { p_name: account.name, p_section: account.section });
+    if (hasPw) {
+      pwSetTitle.textContent = 'Cambiar contraseña';
+      pwSetDesc.textContent = 'Ya tenés una contraseña activa. Poné una nueva para reemplazarla.';
+      pwClearBtn.hidden = false;
+    } else {
+      pwSetTitle.textContent = 'Configurá una contraseña';
+      pwSetDesc.textContent = 'Sirve para entrar con tu nombre en otro dispositivo. Guardala bien, si la perdés no vas a poder recuperar la cuenta desde afuera.';
+      pwClearBtn.hidden = true;
+    }
+    pwSetModal.hidden = false; pwSetModal.classList.add('open');
+    setTimeout(() => pwSetInput.focus(), 40);
+  }
+  function closePasswordSet() { pwSetModal.classList.remove('open'); pwSetModal.hidden = true; }
+  pwSetClose.addEventListener('click', closePasswordSet);
+  pwSetModal.addEventListener('click', (e) => { if (e.target === pwSetModal) closePasswordSet(); });
+  document.getElementById('loginPassword').addEventListener('click', openPasswordSet);
+  pwSetForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hidePwMsg(pwSetMsg);
+    const p1 = pwSetInput.value; const p2 = pwSetInput2.value;
+    if (p1.length < 4) { showPwMsg(pwSetMsg, 'La contraseña necesita al menos 4 caracteres.'); return; }
+    if (p1 !== p2) { showPwMsg(pwSetMsg, 'Las dos contraseñas no coinciden.'); return; }
+    const btn = document.getElementById('pwSaveBtn'); btn.disabled = true;
+    const { error } = await sb.rpc('set_name_password', { p_password: p1 });
+    btn.disabled = false;
+    if (error) { showPwMsg(pwSetMsg, 'No se pudo guardar: ' + (error.message || 'error')); return; }
+    showPwMsg(pwSetMsg, '✓ Contraseña guardada. Ya podés entrar con este nombre en otros dispositivos.', true);
+    pwSetInput.value = ''; pwSetInput2.value = '';
+    refreshNamesWithPassword();
+    setTimeout(closePasswordSet, 1600);
+  });
+  pwClearBtn.addEventListener('click', async () => {
+    if (!confirm('¿Quitar la contraseña? El nombre queda sin protección en otros dispositivos.')) return;
+    pwClearBtn.disabled = true;
+    const { error } = await sb.rpc('clear_name_password');
+    pwClearBtn.disabled = false;
+    if (error) { showPwMsg(pwSetMsg, 'No se pudo quitar: ' + (error.message || 'error')); return; }
+    showPwMsg(pwSetMsg, '✓ Contraseña eliminada.', true);
+    refreshNamesWithPassword();
+    setTimeout(closePasswordSet, 1200);
+  });
+
+  function openPasswordAsk(name, section) {
+    pwAskTarget = { name, section };
+    pwAskName.textContent = name;
+    pwAskInput.value = '';
+    hidePwMsg(pwAskMsg);
+    pwAskModal.hidden = false; pwAskModal.classList.add('open');
+    setTimeout(() => pwAskInput.focus(), 40);
+  }
+  function closePasswordAsk() { pwAskModal.classList.remove('open'); pwAskModal.hidden = true; pwAskTarget = null; }
+  pwAskClose.addEventListener('click', closePasswordAsk);
+  pwAskModal.addEventListener('click', (e) => { if (e.target === pwAskModal) closePasswordAsk(); });
+  pwAskForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!pwAskTarget) return;
+    hidePwMsg(pwAskMsg);
+    const pw = pwAskInput.value;
+    if (!pw) return;
+    const btn = document.getElementById('pwAskSubmit'); btn.disabled = true;
+    const { error } = await sb.rpc('claim_with_password', {
+      p_name: pwAskTarget.name, p_section: pwAskTarget.section, p_password: pw,
+    });
+    btn.disabled = false;
+    if (error) {
+      const msg = (error.message || '').includes('bad_password')
+        ? 'Contraseña incorrecta.'
+        : ('No se pudo reclamar: ' + (error.message || 'error'));
+      showPwMsg(pwAskMsg, msg);
+      return;
+    }
+    // Éxito: recargamos perfiles y cerramos todo
+    account = { name: pwAskTarget.name, section: pwAskTarget.section, role: null };
+    await refreshProfiles();
+    refreshNamesWithPassword();
+    updateAccountChip();
+    renderComposer();
+    renderShipComposer();
+    closePasswordAsk();
+    closeModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (!pwSetModal.hidden) closePasswordSet();
+      else if (!pwAskModal.hidden) closePasswordAsk();
+    }
+  });
 
   async function refreshProfiles() {
     const { data, error } = await sb.from('profiles').select('user_id, name, section, role, avatar_url');
@@ -3781,6 +4040,7 @@
       return;
     }
     await refreshProfiles();
+    refreshNamesWithPassword();
     await refreshChismes();
     await refreshShips();
     await refreshNotifBadge();
