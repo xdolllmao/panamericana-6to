@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Sextogram · bridge</title>
+</head>
+<body>
+<!--
+  Puente cross-origin para compartir la sesion de Supabase entre
+  sextogram.vercel.app y panamericana-6to.vercel.app. La pagina padre
+  abre esta en un iframe invisible y le pide sus tokens sb-* del
+  localStorage via postMessage.
+
+  Solo respondemos si la ventana padre es uno de los orígenes conocidos
+  del proyecto — nadie externo puede leer los tokens.
+-->
+<script>
+(function () {
+  var ALLOWED = [
+    'https://sextogram.vercel.app',
+    'https://panamericana-6to.vercel.app',
+    'http://localhost:8765',
+  ];
+  function collect() {
+    var out = {};
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k && k.indexOf('sb-') === 0) out[k] = localStorage.getItem(k);
+      }
+    } catch (e) {}
+    return out;
+  }
+  window.addEventListener('message', function (e) {
+    if (ALLOWED.indexOf(e.origin) === -1) return;
+    var msg = e.data || {};
+    if (msg.type === 'sb-bridge-request') {
+      e.source.postMessage({ type: 'sb-bridge-response', payload: collect() }, e.origin);
+    }
+  });
+  // Auto-anuncio al padre para que sepa que el iframe cargo.
+  try {
+    if (parent && parent !== window) parent.postMessage({ type: 'sb-bridge-ready' }, '*');
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>

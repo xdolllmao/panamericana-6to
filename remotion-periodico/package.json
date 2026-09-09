@@ -1,0 +1,25 @@
+{
+  "name": "remotion-periodico",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "remotion studio",
+    "build": "remotion render PeriodicoAnuncio out/anuncio.mp4",
+    "build:webm": "remotion render PeriodicoAnuncio out/anuncio.webm --codec=vp8",
+    "still": "remotion still PeriodicoAnuncio out/anuncio.png"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.286",
+    "@remotion/google-fonts": "^4.0.286",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.286"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.11",
+    "typescript": "^5.6.3"
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true
+  }
+}
