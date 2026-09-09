@@ -1329,6 +1329,16 @@
   .ship-like.liked { color: var(--coral); border-color: var(--coral); background: color-mix(in oklab, var(--coral) 12%, var(--paper)); }
   .ship-like.liked svg { fill: var(--coral); }
   .ship-like:disabled { opacity: .5; cursor: not-allowed; }
+  .ship-comment-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 999px;
+    background: transparent; border: 1px solid var(--line);
+    color: var(--ink-mute); font-family: var(--f-mono); font-size: 11px;
+    cursor: pointer; transition: all .15s;
+    font-weight: 700;
+  }
+  .ship-comment-btn svg { width: 12px; height: 12px; }
+  .ship-comment-btn:hover { color: var(--school); border-color: var(--school); }
   .ship-delete {
     padding: 4px 8px; border-radius: 8px;
     background: transparent; border: 1px solid var(--line);
@@ -1336,6 +1346,54 @@
     cursor: pointer; transition: all .15s;
   }
   .ship-delete:hover { color: var(--coral); border-color: var(--coral); background: color-mix(in oklab, var(--coral) 8%, var(--paper)); }
+
+  /* Modal de comentarios de un ship */
+  .ship-comments-modal { max-width: 560px; }
+  .ship-comments-list { display: flex; flex-direction: column; gap: 10px; min-height: 60px; }
+  .ship-comments-empty {
+    padding: 22px 16px; text-align: center;
+    color: var(--ink-mute); font-family: var(--f-mono); font-size: 12px;
+    letter-spacing: .06em; text-transform: uppercase;
+    background: var(--paper-soft); border: 1px dashed var(--line-strong);
+    border-radius: 10px;
+  }
+  .ship-comment {
+    background: var(--paper-soft); border: 1px solid var(--line);
+    border-radius: 10px; padding: 10px 12px 8px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .ship-comment p { margin: 0; font-size: 14px; line-height: 1.4; color: var(--ink); word-break: break-word; }
+  .ship-comment-meta {
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--f-mono); font-size: 11px; color: var(--ink-mute);
+    letter-spacing: .06em;
+  }
+  .ship-comment-del {
+    background: transparent; border: 0; color: var(--ink-mute);
+    font-family: var(--f-mono); font-size: 11px; cursor: pointer;
+    padding: 2px 6px; border-radius: 6px;
+  }
+  .ship-comment-del:hover { color: var(--coral); background: color-mix(in oklab, var(--coral) 8%, var(--paper)); }
+  .ship-comments-foot {
+    flex-direction: column; align-items: stretch; gap: 8px;
+  }
+  .ship-comment-form {
+    display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center;
+  }
+  .ship-comment-form input {
+    padding: 10px 12px; border: 1.5px solid var(--line);
+    border-radius: 10px; background: var(--paper); color: var(--ink);
+    font-family: var(--f-body); font-size: 14px;
+    outline: none; transition: border-color .15s;
+  }
+  .ship-comment-form input:focus { border-color: var(--school); }
+  .ship-comment-form button { padding: 10px 14px; }
+  .ship-comment-locked {
+    padding: 12px; text-align: center; color: var(--ink-soft);
+    background: var(--paper-soft); border: 1px dashed var(--line-strong);
+    border-radius: 10px; font-size: 13px;
+  }
+  .ship-comment-locked a { color: var(--school); font-weight: 700; text-decoration: underline; cursor: pointer; }
   .ships-empty {
     background: var(--paper-soft); border: 1px dashed var(--line-strong);
     border-radius: 14px; padding: 30px 20px; text-align: center;
@@ -2444,6 +2502,26 @@
   </a>
 </nav>
 
+<!-- =================== MODAL · comentarios de un ship =================== -->
+<div class="modal-backdrop" id="shipCommentsModal" role="dialog" aria-modal="true" aria-labelledby="shipCommentsTitle" hidden>
+  <div class="modal ship-comments-modal">
+    <div class="modal-head">
+      <div>
+        <div class="section-tag" style="color: var(--coral)">Ship</div>
+        <h3 id="shipCommentsTitle">— + —</h3>
+        <p>Comentarios anónimos. Nadie sabe quién los escribió.</p>
+      </div>
+      <button class="modal-close" id="shipCommentsClose" aria-label="Cerrar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div id="shipCommentsList" class="ship-comments-list"></div>
+    </div>
+    <div class="modal-foot ship-comments-foot" id="shipCommentsFoot"></div>
+  </div>
+</div>
+
 <!-- =================== MODAL · reglas de la Liga =================== -->
 <div class="modal-backdrop" id="rulesModal" role="dialog" aria-modal="true" aria-labelledby="rulesTitle" hidden>
   <div class="modal rules-modal">
@@ -3209,6 +3287,10 @@
   let shipLikes = new Map();
   function likesFor(id) { return shipLikes.get(id) || new Set(); }
   function iLiked(id) { return !!(currentUser && likesFor(id).has(currentUser.id)); }
+  // Comentarios por ship: Map<ship_id, [{id, author_user_id, text, created_at}]>
+  let shipComments = new Map();
+  function commentsFor(id) { return shipComments.get(id) || []; }
+  function commentCount(id) { return commentsFor(id).length; }
 
   function renderShipComposer() {
     if (!account) {
@@ -3274,6 +3356,7 @@
       const delBtn = isMine
         ? `<button class="ship-delete" type="button" data-del="${s.id}" title="Borrar tu ship">Borrar</button>`
         : '';
+      const nComments = commentCount(s.id);
       return `<article class="ship tint-${tint}" data-id="${s.id}" style="--r:${tilt}deg">
         <div class="ship-pair">
           <span class="ship-name">${escapeHtml(s.a)}</span>
@@ -3284,6 +3367,10 @@
           <span>Anónimo · ${timeAgo(s.created_at)}</span>
           <div class="ship-actions">
             <button class="ship-like ${liked ? 'liked' : ''}" type="button" data-like="${s.id}" aria-pressed="${liked}" ${likeDisabled}>${heart}<span>${nLikes}</span></button>
+            <button class="ship-comment-btn" type="button" data-comment="${s.id}" title="Ver comentarios">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <span>${nComments}</span>
+            </button>
             ${delBtn}
           </div>
         </div>
@@ -3298,6 +3385,9 @@
         ships = ships.filter(x => x.id !== btn.dataset.del);
         renderShipsWall();
       });
+    });
+    shipsWall.querySelectorAll('button[data-comment]').forEach(btn => {
+      btn.addEventListener('click', () => openShipComments(btn.dataset.comment));
     });
     shipsWall.querySelectorAll('button[data-like]').forEach(btn => {
       btn.addEventListener('click', async () => {
@@ -3354,9 +3444,10 @@
     });
   }
   async function refreshShips() {
-    const [{ data: sh, error: shErr }, { data: lk, error: lkErr }] = await Promise.all([
+    const [{ data: sh, error: shErr }, { data: lk, error: lkErr }, { data: cm, error: cmErr }] = await Promise.all([
       sb.from('ships').select('id, a, b, created_at, author_user_id').order('created_at', { ascending: false }).limit(500),
       sb.from('ship_likes').select('ship_id, user_id'),
+      sb.from('ship_comments').select('id, ship_id, author_user_id, text, created_at').order('created_at', { ascending: true }),
     ]);
     if (!shErr) ships = sh || [];
     if (!lkErr) {
@@ -3367,8 +3458,106 @@
         shipLikes.set(l.ship_id, s);
       });
     }
+    if (!cmErr) {
+      shipComments = new Map();
+      (cm || []).forEach(c => {
+        const arr = shipComments.get(c.ship_id) || [];
+        arr.push(c);
+        shipComments.set(c.ship_id, arr);
+      });
+    }
     renderShipsWall();
+    if (openShipId) renderShipCommentsModal();
   }
+
+  // ---------- Modal de comentarios de un ship ----------
+  const shipCommentsModal = document.getElementById('shipCommentsModal');
+  const shipCommentsTitle = document.getElementById('shipCommentsTitle');
+  const shipCommentsList  = document.getElementById('shipCommentsList');
+  const shipCommentsFoot  = document.getElementById('shipCommentsFoot');
+  const shipCommentsClose = document.getElementById('shipCommentsClose');
+  let openShipId = null;
+
+  function openShipComments(id) {
+    openShipId = id;
+    renderShipCommentsModal();
+    shipCommentsModal.hidden = false;
+    shipCommentsModal.classList.add('open');
+  }
+  function closeShipComments() {
+    shipCommentsModal.classList.remove('open');
+    shipCommentsModal.hidden = true;
+    openShipId = null;
+  }
+  function renderShipCommentsModal() {
+    if (!openShipId) return;
+    const ship = ships.find(s => s.id === openShipId);
+    if (!ship) { closeShipComments(); return; }
+    shipCommentsTitle.textContent = `${ship.a} + ${ship.b}`;
+
+    const arr = commentsFor(openShipId);
+    shipCommentsList.innerHTML = arr.length
+      ? arr.map(c => {
+          const mine = currentUser && c.author_user_id === currentUser.id;
+          const del = mine ? `<button class="ship-comment-del" data-cdel="${c.id}" type="button">Borrar</button>` : '';
+          return `<div class="ship-comment">
+            <p>${escapeHtml(c.text)}</p>
+            <div class="ship-comment-meta">
+              <span>Anónimo · ${timeAgo(c.created_at)}</span>
+              ${del}
+            </div>
+          </div>`;
+        }).join('')
+      : '<div class="ship-comments-empty">Sé el primero en comentar</div>';
+
+    shipCommentsList.querySelectorAll('button[data-cdel]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('¿Borrar tu comentario?')) return;
+        btn.disabled = true;
+        const cid = btn.dataset.cdel;
+        const { error } = await sb.from('ship_comments').delete().eq('id', cid);
+        if (error) { alert('No se pudo borrar: ' + error.message); btn.disabled = false; return; }
+        const list = shipComments.get(openShipId) || [];
+        shipComments.set(openShipId, list.filter(x => x.id !== cid));
+        renderShipCommentsModal();
+        renderShipsWall();
+      });
+    });
+
+    if (!account) {
+      shipCommentsFoot.innerHTML = `<div class="ship-comment-locked">Iniciá sesión para comentar · <a id="shipCommentLoginLink">Elegí tu nombre</a></div>`;
+      document.getElementById('shipCommentLoginLink').addEventListener('click', () => { closeShipComments(); openModal(); });
+      return;
+    }
+    shipCommentsFoot.innerHTML = `
+      <form class="ship-comment-form" id="shipCommentForm">
+        <input id="shipCommentInput" type="text" maxlength="240" placeholder="Comentá anónimo…" autocomplete="off" required>
+        <button class="btn btn-primary" type="submit">Publicar</button>
+      </form>
+    `;
+    const form = document.getElementById('shipCommentForm');
+    const input = document.getElementById('shipCommentInput');
+    setTimeout(() => input.focus(), 30);
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (!text) return;
+      const btn = form.querySelector('button[type="submit"]');
+      btn.disabled = true; input.disabled = true;
+      const { error } = await sb.from('ship_comments').insert({
+        ship_id: openShipId,
+        author_user_id: currentUser.id,
+        text: text.slice(0, 240),
+      });
+      btn.disabled = false; input.disabled = false;
+      if (error) { alert('No se pudo comentar: ' + error.message); return; }
+      input.value = ''; input.focus();
+      // Realtime lo agrega solo, pero por si acaso rendereamos.
+    });
+  }
+  shipCommentsClose.addEventListener('click', closeShipComments);
+  shipCommentsModal.addEventListener('click', (e) => { if (e.target === shipCommentsModal) closeShipComments(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !shipCommentsModal.hidden) closeShipComments(); });
 
   async function refreshNotifBadge() {
     if (!currentUser) { setNotifBadge(0); return; }
@@ -3682,6 +3871,31 @@
         const s = shipLikes.get(ship_id);
         if (s) { s.delete(user_id); if (s.size === 0) shipLikes.delete(ship_id); else shipLikes.set(ship_id, s); }
         renderShipsWall();
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ship_comments' }, (payload) => {
+        const c = payload.new;
+        if (!c) return;
+        const arr = shipComments.get(c.ship_id) || [];
+        if (arr.find(x => x.id === c.id)) return;
+        arr.push(c);
+        shipComments.set(c.ship_id, arr);
+        renderShipsWall();
+        if (openShipId === c.ship_id) renderShipCommentsModal();
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'ship_comments' }, (payload) => {
+        const c = payload.old;
+        if (!c || !c.id) return;
+        // No siempre viene ship_id en DELETE — buscamos por id.
+        for (const [sid, arr] of shipComments.entries()) {
+          const i = arr.findIndex(x => x.id === c.id);
+          if (i >= 0) {
+            arr.splice(i, 1);
+            shipComments.set(sid, arr);
+            renderShipsWall();
+            if (openShipId === sid) renderShipCommentsModal();
+            break;
+          }
+        }
       })
       .subscribe();
 
