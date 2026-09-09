@@ -1230,6 +1230,108 @@
     letter-spacing: 0.06em;
   }
 
+  /* ============ SHIPS · muro anónimo con formato fijo ============ */
+  .ship-composer {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px;
+    box-shadow: var(--shadow-sm);
+    display: flex; flex-direction: column; gap: 12px;
+    max-width: 640px; margin: 0 auto 22px;
+  }
+  .ship-composer-locked {
+    background: var(--paper); border: 1px dashed var(--line-strong);
+    border-radius: var(--radius); padding: 22px; text-align: center;
+    color: var(--ink-soft); max-width: 640px; margin: 0 auto 22px;
+    font-size: 14px;
+  }
+  .ship-composer-locked a { color: var(--school); font-weight: 700; text-decoration: underline; }
+  .ship-fields {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 10px;
+  }
+  .ship-fields input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    background: var(--paper-soft);
+    color: var(--ink);
+    font-family: var(--f-body); font-size: 15px; font-weight: 600;
+    text-align: center;
+    outline: none;
+    transition: border-color .15s;
+  }
+  .ship-fields input:focus { border-color: var(--school); background: var(--paper); }
+  .ship-fields input::placeholder { color: var(--ink-mute); font-weight: 500; }
+  .ship-plus {
+    font-family: var(--f-display); font-weight: 800; font-size: 26px;
+    color: var(--coral); line-height: 1; user-select: none;
+  }
+  .ship-composer-foot {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    font-family: var(--f-mono); font-size: 11px; color: var(--ink-mute);
+    letter-spacing: .06em;
+  }
+  .ship-composer-foot .btn { padding: 10px 16px; }
+
+  .ships-wall {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 14px;
+  }
+  .ship {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 16px 18px 12px;
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    transform: rotate(var(--r, 0deg));
+    transition: transform .18s ease, box-shadow .18s ease;
+  }
+  .ship:hover { transform: rotate(0) translateY(-2px); box-shadow: var(--shadow-lg); }
+  .ship.tint-0 { background: color-mix(in oklab, var(--coral) 10%, var(--paper)); }
+  .ship.tint-1 { background: color-mix(in oklab, var(--lemon) 22%, var(--paper)); }
+  .ship.tint-2 { background: color-mix(in oklab, var(--school-2) 10%, var(--paper)); }
+  .ship.tint-3 { background: color-mix(in oklab, var(--mint) 14%, var(--paper)); }
+  .ship-pair {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    font-family: var(--f-display); font-weight: 800; font-size: 18px;
+    color: var(--ink); text-align: center;
+    line-height: 1.15; letter-spacing: -.01em;
+    min-height: 44px;
+  }
+  .ship-pair .ship-name { flex: 1; word-break: break-word; }
+  .ship-pair .ship-plus { flex: none; font-size: 22px; color: var(--coral); }
+  .ship-meta {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 10px; padding-top: 10px;
+    border-top: 1px dashed var(--line);
+    font-family: var(--f-mono); font-size: 11px; color: var(--ink-mute);
+    letter-spacing: .06em;
+  }
+  .ship-delete {
+    padding: 4px 8px; border-radius: 8px;
+    background: transparent; border: 1px solid var(--line);
+    color: var(--ink-mute); font-family: var(--f-mono); font-size: 11px;
+    cursor: pointer; transition: all .15s;
+  }
+  .ship-delete:hover { color: var(--coral); border-color: var(--coral); background: color-mix(in oklab, var(--coral) 8%, var(--paper)); }
+  .ships-empty {
+    background: var(--paper-soft); border: 1px dashed var(--line-strong);
+    border-radius: 14px; padding: 30px 20px; text-align: center;
+    color: var(--ink-mute); font-size: 14px;
+    grid-column: 1 / -1;
+  }
+  @media (max-width: 480px) {
+    .ship-fields { grid-template-columns: 1fr; }
+    .ship-fields .ship-plus { justify-self: center; }
+  }
+
   /* ============ CHISMES · muro anónimo ============ */
   .chismes-intro {
     display: grid; grid-template-columns: 1.3fr 1fr; gap: 20px;
@@ -1839,6 +1941,7 @@
       <a class="nav-link" href="#horario">Horario</a>
       <a class="nav-link" href="#empresas">Empresas</a>
       <a class="nav-link" href="#partidos">Partidos</a>
+      <a class="nav-link" href="#ships">Ships</a>
       <a class="nav-link" href="#chismes">Chismes</a>
       <a class="nav-link" href="#records">Récords</a>
       <a class="nav-link" href="/resumen/">Weekly</a>
@@ -2172,6 +2275,21 @@
       <div class="unit"><div class="val" data-clock="s">--</div><div class="lbl">Segundos</div></div>
     </div>
   </div>
+</section>
+
+<!-- =================== SHIPS =================== -->
+<section id="ships" class="wrap block">
+  <div class="section-head reveal">
+    <div>
+      <div class="section-tag">05 · <em>anda un rumor</em></div>
+      <h2>Ships anónimos.</h2>
+    </div>
+    <p>Formato fijo: <b>Nombre + Nombre</b>. Todos ven quién con quién, nadie sabe quién lo tiró.</p>
+  </div>
+
+  <div class="ship-composer-wrap reveal" id="shipComposerHost"></div>
+  <div class="ships-wall reveal" id="shipsWall"></div>
+  <nav class="pager reveal" id="shipsPager" hidden aria-label="Paginación de ships"></nav>
 </section>
 
 <!-- =================== CHISMES =================== -->
@@ -2910,6 +3028,7 @@
     await refreshProfiles();
     updateAccountChip();
     renderComposer();
+    renderShipComposer();
     closeModal();
   }
 
@@ -2920,6 +3039,7 @@
     await refreshProfiles();
     updateAccountChip();
     renderComposer();
+    renderShipComposer();
     renderNames();
   }
   loginLogout.addEventListener('click', releaseAccount);
@@ -3059,6 +3179,127 @@
     if (error) return;
     posts = data || [];
     renderWall();
+  }
+
+  // ---------- SHIPS · muro anónimo con formato "Nombre + Nombre" ----------
+  const shipComposerHost = document.getElementById('shipComposerHost');
+  const shipsWall        = document.getElementById('shipsWall');
+  const shipsPagerEl     = document.getElementById('shipsPager');
+  const SHIPS_PER_PAGE   = 12;
+  let ships = [];
+  let shipsPage = 1;
+
+  function renderShipComposer() {
+    if (!account) {
+      shipComposerHost.innerHTML = `<div class="ship-composer-locked">Elegí tu nombre para poder publicar un ship. <a id="shipsLoginLink" href="#" role="button">Iniciar sesión</a></div>`;
+      document.getElementById('shipsLoginLink').addEventListener('click', (e) => { e.preventDefault(); openModal(); });
+      return;
+    }
+    shipComposerHost.innerHTML = `
+      <div class="ship-composer">
+        <div class="ship-fields">
+          <input id="shipA" type="text" maxlength="24" placeholder="Persona 1" autocomplete="off">
+          <span class="ship-plus">+</span>
+          <input id="shipB" type="text" maxlength="24" placeholder="Persona 2" autocomplete="off">
+        </div>
+        <div class="ship-composer-foot">
+          <span>Publicás como <b>Anónimo</b>. Formato obligatorio: Nombre + Nombre.</span>
+          <button class="btn btn-primary" id="postShip" type="button">
+            Publicar
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+    `;
+    const inA = document.getElementById('shipA');
+    const inB = document.getElementById('shipB');
+    const btn = document.getElementById('postShip');
+    async function submit() {
+      const a = inA.value.trim();
+      const b = inB.value.trim();
+      if (!a || !b) { alert('Poné los dos nombres (Persona 1 + Persona 2).'); return; }
+      if (a.length > 24 || b.length > 24) { alert('Cada nombre puede tener hasta 24 caracteres.'); return; }
+      btn.disabled = true; inA.disabled = true; inB.disabled = true;
+      const { error } = await sb.from('ships').insert({ a: a.slice(0, 24), b: b.slice(0, 24) });
+      btn.disabled = false; inA.disabled = false; inB.disabled = false;
+      if (error) { alert('No se pudo publicar: ' + error.message); return; }
+      inA.value = ''; inB.value = ''; inA.focus();
+    }
+    btn.addEventListener('click', submit);
+    [inA, inB].forEach(el => el.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); submit(); } }));
+  }
+
+  function renderShipsWall() {
+    if (!ships.length) {
+      shipsWall.innerHTML = '<div class="ships-empty">Todavía nadie tiró un ship. Iniciá vos, todo es anónimo.</div>';
+      shipsPagerEl.hidden = true;
+      return;
+    }
+    const totalPages = Math.max(1, Math.ceil(ships.length / SHIPS_PER_PAGE));
+    if (shipsPage > totalPages) shipsPage = totalPages;
+    if (shipsPage < 1) shipsPage = 1;
+    const start = (shipsPage - 1) * SHIPS_PER_PAGE;
+    const slice = ships.slice(start, start + SHIPS_PER_PAGE);
+    shipsWall.innerHTML = slice.map((s, i) => {
+      const tilt = ((((start + i) * 37) % 5) - 2) * 0.6;
+      const tint = (start + i) % 4;
+      return `<article class="ship tint-${tint}" data-id="${s.id}" style="--r:${tilt}deg">
+        <div class="ship-pair">
+          <span class="ship-name">${escapeHtml(s.a)}</span>
+          <span class="ship-plus">+</span>
+          <span class="ship-name">${escapeHtml(s.b)}</span>
+        </div>
+        <div class="ship-meta">
+          <span>Anónimo · ${timeAgo(s.created_at)}</span>
+          <button class="ship-delete" type="button" data-del="${s.id}" title="Borrar ship">Borrar</button>
+        </div>
+      </article>`;
+    }).join('');
+    shipsWall.querySelectorAll('button[data-del]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('¿Borrar este ship?')) return;
+        btn.disabled = true;
+        const { error } = await sb.from('ships').delete().eq('id', btn.dataset.del);
+        if (error) { alert('No se pudo borrar: ' + error.message); btn.disabled = false; return; }
+        // El realtime va a refrescar; por si acaso, quitamos localmente ya.
+        ships = ships.filter(x => x.id !== btn.dataset.del);
+        renderShipsWall();
+      });
+    });
+    renderShipsPager(totalPages);
+  }
+  function renderShipsPager(totalPages) {
+    if (totalPages <= 1) { shipsPagerEl.hidden = true; return; }
+    shipsPagerEl.hidden = false;
+    const shown = new Set([1, totalPages, shipsPage - 1, shipsPage, shipsPage + 1]);
+    const numbers = [...shown].filter(n => n >= 1 && n <= totalPages).sort((a, b) => a - b);
+    const btns = [];
+    let last = 0;
+    for (const n of numbers) {
+      if (n - last > 1) btns.push('<span class="dots">…</span>');
+      btns.push(`<button type="button" class="${n === shipsPage ? 'is-active' : ''}" data-page="${n}">${n}</button>`);
+      last = n;
+    }
+    shipsPagerEl.innerHTML = `
+      <span class="pager-count">Pág ${shipsPage} de ${totalPages}</span>
+      <button type="button" data-page="${shipsPage - 1}" ${shipsPage === 1 ? 'disabled' : ''} aria-label="Anterior">‹</button>
+      ${btns.join('')}
+      <button type="button" data-page="${shipsPage + 1}" ${shipsPage === totalPages ? 'disabled' : ''} aria-label="Siguiente">›</button>
+    `;
+    shipsPagerEl.querySelectorAll('button[data-page]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const n = parseInt(btn.dataset.page, 10);
+        if (isNaN(n) || n < 1 || n > totalPages || n === shipsPage) return;
+        shipsPage = n;
+        renderShipsWall();
+        document.getElementById('ships').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+  }
+  async function refreshShips() {
+    const { data, error } = await sb.from('ships').select('id, a, b, created_at').order('created_at', { ascending: false }).limit(500);
+    if (!error) ships = data || [];
+    renderShipsWall();
   }
 
   async function refreshNotifBadge() {
@@ -3332,17 +3573,33 @@
     }
     await refreshProfiles();
     await refreshChismes();
+    await refreshShips();
     await refreshNotifBadge();
     await refreshVotes();
     await refreshStories();
     updateAccountChip();
     renderComposer();
+    renderShipComposer();
     dbNotice.textContent = 'Sincronizado en vivo · Supabase';
 
     sb.channel('chismes-live').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chismes' }, (payload) => {
       posts = [payload.new, ...posts].slice(0, 500);
       renderWall();
     }).subscribe();
+
+    sb.channel('ships-live')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ships' }, (payload) => {
+        if (ships.find(s => s.id === payload.new.id)) return;
+        ships = [payload.new, ...ships].slice(0, 500);
+        renderShipsWall();
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'ships' }, (payload) => {
+        const id = payload.old && payload.old.id;
+        if (!id) return;
+        ships = ships.filter(s => s.id !== id);
+        renderShipsWall();
+      })
+      .subscribe();
 
     sb.channel('profiles-live').on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
       refreshProfiles();
@@ -3367,6 +3624,7 @@
 
   updateAccountChip();
   renderComposer();
+  renderShipComposer();
   initSupabase();
 
   // ---------- calendario escolar ----------
