@@ -3352,9 +3352,16 @@
     const { data, error } = await sb.from('profiles').select('user_id, name, section, role, avatar_url');
     if (error) return;
     profilesByKey = new Map((data || []).map(p => [keyOf(p.name, p.section), p]));
+    const wasLogged = !!account;
     if (currentUser) {
       const mine = (data || []).find(p => p.user_id === currentUser.id);
       account = mine ? { name: mine.name, section: mine.section, role: mine.role } : null;
+    }
+    // Si me acabo de quedar sin perfil (borrado desde admin/realtime), refresco chip + composers
+    if (wasLogged && !account) {
+      try { updateAccountChip(); } catch (e) {}
+      try { renderComposer(); } catch (e) {}
+      try { renderShipComposer(); } catch (e) {}
     }
     if (!loginModal.hidden) renderNames();
     if (typeof renderStudents === 'function' && document.getElementById('roster')) renderStudents();
