@@ -1120,7 +1120,7 @@
     loginStatus.textContent = `${total - claimedCount} libres · ${claimedCount} tomados`;
     loginLogout.hidden = !account;
     const pwBtn = document.getElementById('loginPassword');
-    if (pwBtn) pwBtn.hidden = !account;
+    if (pwBtn) pwBtn.hidden = true; // contraseñas bloqueadas — no se pueden cambiar
   }
   loginSearch.addEventListener('input', renderLoginNames);
 

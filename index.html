@@ -3186,7 +3186,7 @@
     loginStatus.textContent = `${avail} disponibles · ${takenCount} tomados de ${total}`;
     loginLogout.hidden = !account;
     const pwBtn = document.getElementById('loginPassword');
-    if (pwBtn) pwBtn.hidden = !account;
+    if (pwBtn) pwBtn.hidden = true; // contraseñas bloqueadas — no se pueden cambiar
     document.querySelectorAll('.name-chip').forEach(btn => {
       if (btn.disabled) return;
       btn.addEventListener('click', () => {
