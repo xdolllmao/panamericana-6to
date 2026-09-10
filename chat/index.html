@@ -2211,19 +2211,33 @@
       members: membersByChat.get(c.id) || [],
       last_read_at: lastReadMap.get(c.id),
     }));
-    // 4. Load last message for each (for preview/sort). Batch: get messages for all chats ordered.
+    // 4. Traer los mensajes recientes de todos los chats (para preview/orden).
+    //    OJO: el bulk query tiene tope de filas de Supabase; si una cuenta tiene
+    //    muchos mensajes, este set puede venir incompleto. Por eso FUSIONAMOS con
+    //    lo que ya estaba cargado en vez de reemplazar — asi no desaparecen los
+    //    mensajes ya vistos al re-entrar a un chat.
     const { data: allMsgs } = await sb.from('messages')
       .select('id, chat_id, author_user_id, text, photo_url, created_at, reply_to')
       .in('chat_id', chatIds)
-      .order('created_at', { ascending: true });
+      .order('created_at', { ascending: false })
+      .limit(1000);
     const groupedMsgs = new Map();
     (allMsgs || []).forEach(m => {
       const arr = groupedMsgs.get(m.chat_id) || [];
       arr.push(m);
       groupedMsgs.set(m.chat_id, arr);
     });
-    // merge
-    messagesByChat = groupedMsgs;
+    // Merge: union por id de lo viejo + lo nuevo, reordenado por fecha.
+    const merged = new Map();
+    const allCids = new Set([...messagesByChat.keys(), ...groupedMsgs.keys()]);
+    for (const cid of allCids) {
+      const byId = new Map();
+      (messagesByChat.get(cid) || []).forEach(m => byId.set(m.id, m));
+      (groupedMsgs.get(cid) || []).forEach(m => byId.set(m.id, m));
+      const arr = [...byId.values()].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      merged.set(cid, arr);
+    }
+    messagesByChat = merged;
     renderChatList();
   }
 
