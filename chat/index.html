@@ -1659,16 +1659,23 @@
     if (!chat) { activeChatId = null; renderEmpty(); return; }
     activeChatId = id;
     document.body.classList.add('chat-open');
-    // Load messages if not loaded yet
-    if (!messagesByChat.has(id)) await loadMessages(id);
-    // Mark as read
-    const now = new Date().toISOString();
-    chat.last_read_at = now;
-    await sb.from('chat_members').update({ last_read_at: now }).eq('chat_id', id).eq('user_id', currentUser.id);
-    // Subscribe to this chat's messages
+    // Suscribir + render inmediato con lo que haya (aunque sea vacio)
     subscribeToChat(id);
     renderChatList();
     renderChatMain(chat);
+    // Cargar mensajes SIEMPRE que el cache este vacio/ausente (no solo cuando
+    // falta la key). Asi un load fallido previo se reintenta sin tener que
+    // salir y volver a entrar. Re-render al terminar.
+    const cached = messagesByChat.get(id);
+    if (!cached || !cached.length) {
+      const ok = await loadMessages(id);
+      if (ok && activeChatId === id) renderChatMain(chat);
+    }
+    // Mark as read
+    const now = new Date().toISOString();
+    chat.last_read_at = now;
+    try { await sb.from('chat_members').update({ last_read_at: now }).eq('chat_id', id).eq('user_id', currentUser.id); } catch (e) {}
+    renderChatList();
     updateNotifBadge();
     hideNotifPanel();
   }
@@ -1677,8 +1684,9 @@
     const { data, error } = await sb.from('messages')
       .select('id, chat_id, author_user_id, text, photo_url, created_at, reply_to')
       .eq('chat_id', chatId).order('created_at', { ascending: true }).limit(500);
-    if (error) { console.error(error); return; }
+    if (error) { console.error(error); return false; }
     messagesByChat.set(chatId, data || []);
+    return true;
   }
 
   function subscribeToChat(chatId) {
