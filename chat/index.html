@@ -1105,9 +1105,22 @@
     if (error) return;
     profilesById = new Map((data || []).map(p => [p.user_id, p]));
     profilesByKey = new Map((data || []).map(p => [keyOf(p.name, p.section), p]));
+    const wasLogged = !!account;
     if (currentUser) {
       const mine = profilesById.get(currentUser.id);
       account = mine || null;
+    }
+    // Si perdi mi perfil (borrado desde admin), fuerzo sign-out completo del
+    // JWT viejo y arranco una sesion anon nueva — estado limpio.
+    if (wasLogged && !account) {
+      try {
+        await sb.auth.signOut();
+        const { data: ns } = await sb.auth.signInAnonymously();
+        currentUser = ns && ns.user ? ns.user : null;
+      } catch (e) {}
+      // Recargar la pagina para que la UI del chat vuelva al estado inicial
+      try { location.reload(); } catch (e) {}
+      return;
     }
     if (!loginModal.hidden) renderLoginNames();
   }

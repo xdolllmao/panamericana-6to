@@ -3360,11 +3360,19 @@
       const mine = (data || []).find(p => p.user_id === currentUser.id);
       account = mine ? { name: mine.name, section: mine.section, role: mine.role } : null;
     }
-    // Si me acabo de quedar sin perfil (borrado desde admin/realtime), refresco chip + composers
+    // Si me acabo de quedar sin perfil (borrado desde admin/realtime), refresco
+    // chip + composers Y fuerzo sign-out completo del auth de Supabase para
+    // que el JWT viejo desaparezca del localStorage. Despues signInAnonymously
+    // arranca una sesion nueva con un uid nuevo — estado limpio.
     if (wasLogged && !account) {
       try { updateAccountChip(); } catch (e) {}
       try { renderComposer(); } catch (e) {}
       try { renderShipComposer(); } catch (e) {}
+      try {
+        await sb.auth.signOut();
+        const { data: ns } = await sb.auth.signInAnonymously();
+        currentUser = ns && ns.user ? ns.user : null;
+      } catch (e) {}
     }
     if (!loginModal.hidden) renderNames();
     if (typeof renderStudents === 'function' && document.getElementById('roster')) renderStudents();
@@ -4138,6 +4146,14 @@
     }).subscribe();
 
     setInterval(refreshStories, 60000);
+
+    // Heartbeat: cada vez que la pestaña vuelve al frente o cada 30s,
+    // re-chequeo profiles. Si mi profile fue borrado desde admin, esto
+    // dispara el force-signOut aunque no haya event realtime.
+    setInterval(refreshProfiles, 30000);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) refreshProfiles();
+    });
 
     window.addEventListener('focus', refreshNotifBadge);
   }
