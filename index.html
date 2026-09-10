@@ -2804,11 +2804,12 @@
     { fecha: 'Jornada 18', tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 4, gb: 5, res: 'lost', note: '<b>Javier</b>, <b>Iglesias</b>, <b>Lucas</b> y <b>Josué</b> para Equipo 1; <b>Deleón</b> ×2, <b>Eduardo</b> ×2 y un autogol de <b>Javier</b> para Equipo 2.' },
     { fecha: 'Jornada 19', tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 2, gb: 1, res: 'won',  note: '<b>Magaña</b> ×2 para Equipo 1; <b>Roberto</b> para Equipo 2.' },
     { fecha: 'Jornada 20', tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 6, gb: 5, res: 'won',  note: 'Partidazo. <b>Magaña</b> ×2, <b>Mateo</b> ×2, <b>Iglesias</b> y <b>Javier</b> para Equipo 1; <b>Gerardo</b> ×2, <b>Deleón</b> ×2 y <b>Eduardo</b> para Equipo 2.' },
+    { fecha: 'Jornada 21', tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 1, gb: 0, res: 'won',  note: 'Gol único de <b>Iglesias</b>. Triunfo mínimo.' },
   ];
 
   const STANDINGS = [
-    { name: 'Equipo 1', pj: 20, g: 9, e: 5, p: 6, gf: 42, gc: 38 },
-    { name: 'Equipo 2', pj: 20, g: 6, e: 5, p: 9, gf: 38, gc: 42 },
+    { name: 'Equipo 1', pj: 21, g: 10, e: 5, p: 6, gf: 43, gc: 38 },
+    { name: 'Equipo 2', pj: 21, g: 6, e: 5, p: 10, gf: 38, gc: 43 },
   ].map(t => ({ ...t, pts: t.g * 3 + t.e }))
    .sort((a,b) => b.pts - a.pts || (b.gf - b.gc) - (a.gf - a.gc));
 
@@ -2819,7 +2820,7 @@
     { name: 'Gerardo',   goles: 9 },
     { name: 'Javier',    goles: 8 },
     { name: 'Lucas',     goles: 6 },
-    { name: 'Iglesias',  goles: 5 },
+    { name: 'Iglesias',  goles: 6 },
     { name: 'Osegueda',  goles: 3 },
     { name: 'Josué',     goles: 3 },
     { name: 'Eduardo',   goles: 3 },
