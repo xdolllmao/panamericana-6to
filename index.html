@@ -3141,14 +3141,13 @@
   let namesWithPassword = new Set();
   const LOCK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
   async function refreshNamesWithPassword() {
-    // Ping por cada nombre reclamado (chico costo, se hace batched in parallel)
-    const claimed = [...profilesByKey.keys()];
-    const results = await Promise.all(claimed.map(async k => {
-      const p = profilesByKey.get(k);
-      if (!p) return null;
-      const { data, error } = await sb.rpc('name_has_password', { p_name: p.name, p_section: p.section });
+    // Chequeamos TODOS los nombres del salon, no solo los que tienen profile
+    // activo. Un nombre puede tener contraseña sin tener owner (perfil borrado
+    // desde admin), y aun asi debe pedir la password para reclamarse.
+    const results = await Promise.all(STUDENTS.map(async st => {
+      const { data, error } = await sb.rpc('name_has_password', { p_name: st.n, p_section: st.s });
       if (error) return null;
-      return data ? k : null;
+      return data ? keyOf(st.n, st.s) : null;
     }));
     namesWithPassword = new Set(results.filter(Boolean));
     if (!loginModal.hidden) renderNames();
@@ -3164,12 +3163,16 @@
         const isMe = account && account.name === st.n && account.section === st.s;
         const isTaken = !!claimed && !isMe;
         const hasPw = namesWithPassword.has(k);
+        // El candado aparece SIEMPRE que haya contraseña (aunque nadie tenga
+        // el profile activo ahora mismo — la password lo protege igual).
         const badge = hasPw && !isMe ? `<span class="pw-badge" title="Tiene contraseña">${LOCK_SVG}</span>` : '';
-        // Deshabilitamos solo si esta tomado y NO tiene password (no hay forma de reclamarlo)
+        // Solo bloqueamos (disabled) si esta tomado sin password Y no soy yo.
+        // Un nombre con password NUNCA queda disabled — click pide password.
         const disabled = isTaken && !hasPw ? 'disabled' : '';
         const tag = isMe
           ? '<span class="taken-tag" style="color:var(--mint)">Yo</span>'
-          : (isTaken ? `<span class="taken-tag">${hasPw ? 'con contraseña' : 'tomado'}</span>` : '');
+          : (hasPw ? '<span class="taken-tag">con contraseña</span>'
+                   : (isTaken ? '<span class="taken-tag">tomado</span>' : ''));
         return `<button class="name-chip" ${disabled} data-name="${escapeHtml(st.n)}" data-section="${st.s}" data-taken="${isTaken?'1':'0'}" data-haspw="${hasPw?'1':'0'}" type="button">
           <span class="who-name">${escapeHtml(st.n)}${badge}</span>
           ${tag}
@@ -3190,9 +3193,9 @@
       btn.addEventListener('click', () => {
         const name = btn.dataset.name;
         const section = btn.dataset.section;
-        const taken = btn.dataset.taken === '1';
         const hasPw = btn.dataset.haspw === '1';
-        if (taken && hasPw) return openPasswordAsk(name, section);
+        // Cualquier nombre con contraseña — este tomado o no — pide password.
+        if (hasPw) return openPasswordAsk(name, section);
         claimName(name, section);
       });
     });
