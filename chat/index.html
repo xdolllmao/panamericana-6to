@@ -1063,15 +1063,12 @@
     }
   }
 
-  // Nombres con contraseña (Set de "SECTION-slug")
+  // Nombres con contraseña (Set de "SECTION-slug"). UNA sola RPC, no 27.
   let namesWithPassword = new Set();
   async function refreshNamesWithPassword() {
-    const results = await Promise.all(STUDENTS.map(async st => {
-      const { data, error } = await sb.rpc('name_has_password', { p_name: st.n, p_section: st.s });
-      if (error) return null;
-      return data ? keyOf(st.n, st.s) : null;
-    }));
-    namesWithPassword = new Set(results.filter(Boolean));
+    const { data, error } = await sb.rpc('list_password_names');
+    if (error) return;
+    namesWithPassword = new Set((data || []).map(r => keyOf(r.name, r.section)));
     if (loginModal && !loginModal.hidden) renderLoginNames();
   }
 
@@ -1093,10 +1090,10 @@
         // tomado: bloqueado (line-through). Libre sin password: claim directo.
         const blocked = taken && !hasPw;
         const tag = isMe
-          ? '<span class="person-chip-check">Yo</span>'
+          ? '<span class="person-chip-check" style="opacity:1;color:var(--mint)">Yo</span>'
           : hasPw
-            ? '<span class="person-chip-check" style="color:var(--school)">🔒 con contraseña</span>'
-            : (taken ? '<span class="person-chip-check">tomado</span>' : '');
+            ? '<span class="person-chip-check" style="opacity:1;color:var(--school)">🔒</span>'
+            : (taken ? '<span class="person-chip-check" style="opacity:1;color:var(--ink-mute)">tomado</span>' : '');
         return `<button class="person-chip" ${blocked ? 'disabled style="opacity:.45;text-decoration:line-through"' : ''} data-name="${escapeHtml(st.n)}" data-section="${st.s}" data-taken="${taken ? 1 : 0}" data-haspw="${hasPw ? 1 : 0}" type="button">
           <span class="avatar-mini" style="background:${colorFor(st.n)}">${st.n[0].toUpperCase()}</span>
           <span class="person-chip-name">${escapeHtml(st.n)}</span>
@@ -1116,8 +1113,11 @@
     build(bySec.A, loginNamesA);
     build(bySec.B, loginNamesB);
     const total = STUDENTS.length;
-    const claimedCount = profilesByKey.size;
-    loginStatus.textContent = `${total - claimedCount} libres · ${claimedCount} tomados`;
+    // Contar solo perfiles de nombres que existen en el roster (evita negativos
+    // por perfiles huerfanos de nombres borrados)
+    let claimedCount = 0;
+    STUDENTS.forEach(st => { if (profilesByKey.get(keyOf(st.n, st.s))) claimedCount++; });
+    loginStatus.textContent = `${Math.max(0, total - claimedCount)} libres · ${claimedCount} tomados`;
     loginLogout.hidden = !account;
     const pwBtn = document.getElementById('loginPassword');
     if (pwBtn) pwBtn.hidden = true; // contraseñas bloqueadas — no se pueden cambiar
@@ -1243,22 +1243,24 @@
   async function refreshProfiles() {
     const { data, error } = await sb.from('profiles').select('user_id, name, section, role, last_seen, avatar_url');
     if (error) return;
-    profilesById = new Map((data || []).map(p => [p.user_id, p]));
-    profilesByKey = new Map((data || []).map(p => [keyOf(p.name, p.section), p]));
+    // Guarda contra respuestas vacias transitorias: si NO llegaron perfiles,
+    // no tocamos el estado (evita false-positives que deslogeaban de golpe).
+    if (!data || !data.length) return;
+    profilesById = new Map(data.map(p => [p.user_id, p]));
+    profilesByKey = new Map(data.map(p => [keyOf(p.name, p.section), p]));
     const wasLogged = !!account;
     if (currentUser) {
       const mine = profilesById.get(currentUser.id);
       account = mine || null;
     }
-    // Si perdi mi perfil (borrado desde admin), fuerzo sign-out completo del
-    // JWT viejo y arranco una sesion anon nueva — estado limpio.
+    // Solo forzamos sign-out si REALMENTE perdi mi perfil: la lista de perfiles
+    // llego con datos pero el mio no esta (borrado desde admin).
     if (wasLogged && !account) {
       try {
         await sb.auth.signOut();
         const { data: ns } = await sb.auth.signInAnonymously();
         currentUser = ns && ns.user ? ns.user : null;
       } catch (e) {}
-      // Recargar la pagina para que la UI del chat vuelva al estado inicial
       try { location.reload(); } catch (e) {}
       return;
     }
@@ -2238,7 +2240,6 @@
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
         refreshProfiles();
-        refreshNamesWithPassword();
       })
       .subscribe();
   }

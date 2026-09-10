@@ -3140,15 +3140,10 @@
   let namesWithPassword = new Set();
   const LOCK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
   async function refreshNamesWithPassword() {
-    // Chequeamos TODOS los nombres del salon, no solo los que tienen profile
-    // activo. Un nombre puede tener contraseña sin tener owner (perfil borrado
-    // desde admin), y aun asi debe pedir la password para reclamarse.
-    const results = await Promise.all(STUDENTS.map(async st => {
-      const { data, error } = await sb.rpc('name_has_password', { p_name: st.n, p_section: st.s });
-      if (error) return null;
-      return data ? keyOf(st.n, st.s) : null;
-    }));
-    namesWithPassword = new Set(results.filter(Boolean));
+    // UNA sola RPC devuelve todos los (section, name) con contraseña.
+    const { data, error } = await sb.rpc('list_password_names');
+    if (error) return;
+    namesWithPassword = new Set((data || []).map(r => keyOf(r.name, r.section)));
     if (!loginModal.hidden) renderNames();
   }
 
@@ -3353,10 +3348,11 @@
   async function refreshProfiles() {
     const { data, error } = await sb.from('profiles').select('user_id, name, section, role, avatar_url');
     if (error) return;
-    profilesByKey = new Map((data || []).map(p => [keyOf(p.name, p.section), p]));
+    if (!data || !data.length) return; // respuesta vacia transitoria — no tocar estado
+    profilesByKey = new Map(data.map(p => [keyOf(p.name, p.section), p]));
     const wasLogged = !!account;
     if (currentUser) {
-      const mine = (data || []).find(p => p.user_id === currentUser.id);
+      const mine = data.find(p => p.user_id === currentUser.id);
       account = mine ? { name: mine.name, section: mine.section, role: mine.role } : null;
     }
     // Si me acabo de quedar sin perfil (borrado desde admin/realtime), refresco
