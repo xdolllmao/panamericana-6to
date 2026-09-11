@@ -98,6 +98,7 @@
   .song-info { flex: 1; min-width: 0; }
   .song-name { font-weight: 700; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .song-artists { font-size: 13px; color: var(--ink-mute); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .song-by { font-size: 11px; color: var(--school); font-weight: 600; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .song-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
   .play-btn { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--spotify); color: #fff; flex-shrink: 0; transition: transform .12s; }
   .play-btn:hover { transform: scale(1.08); }
@@ -159,7 +160,7 @@
   <div class="head">
     <div class="head-tag">♪ Playlist colaborativa</div>
     <h1>La playlist de la semana</h1>
-    <p>Poné hasta 10 canciones (anónimas). La más likeada es la <b>canción de la semana</b>.</p>
+    <p>Poné hasta 10 canciones. La más likeada es la <b>canción de la semana</b>.</p>
     <div class="week" id="weekLabel">—</div>
   </div>
 
@@ -234,6 +235,12 @@
     }
     return seen.size;
   }
+  // Nombre de quien puso la cancion (a partir del author_user_id).
+  function authorName(uid) {
+    const key = profileByUid.get(uid);
+    if (!key) return 'alguien del salón';
+    return key.slice(key.indexOf('|') + 1); // "section|name" -> name
+  }
 
   const heartSvg = liked => `<svg viewBox="0 0 24 24" fill="${liked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
   const playSvg = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
@@ -259,6 +266,7 @@
             <div class="sotw-label">★ Canción de la semana</div>
             <div class="sotw-name">${escapeHtml(leader.name)}</div>
             <div class="sotw-artists">${escapeHtml(leader.artists)}</div>
+            <div class="song-by" style="color:#fff;opacity:.85;margin:2px 0 6px">🎵 puesta por ${escapeHtml(authorName(leader.author_user_id))}</div>
             <span class="sotw-likes">${heartSvg(true)} ${likeCount(leader.id)} likes</span>
           </div>
         </div>`;
@@ -287,6 +295,7 @@
         <div class="song-info">
           <div class="song-name">${escapeHtml(s.name)}</div>
           <div class="song-artists">${escapeHtml(s.artists)}</div>
+          <div class="song-by">🎵 puesta por ${escapeHtml(authorName(s.author_user_id))}</div>
         </div>
         <div class="song-actions">
           <button class="like-btn ${liked ? 'liked' : ''}" data-like="${s.id}" ${myProfile ? '' : 'disabled title="Reclamá tu nombre en la home para dar like"'}>${heartSvg(liked)}<span>${n}</span></button>
