@@ -2120,22 +2120,38 @@
       el.addEventListener('touchend', cancelLp);
       el.addEventListener('touchcancel', cancelLp);
     });
-    // Wire quote jump links
-    const quotes = [];
-    if (root.querySelectorAll) root.querySelectorAll('.msg-quote[data-jump]').forEach(a => quotes.push(a));
-    quotes.forEach(a => {
-      if (a.dataset.wired === '1') return;
-      a.dataset.wired = '1';
-      a.addEventListener('click', (e) => {
-        e.preventDefault();
-        const tgt = document.getElementById('msg-' + a.dataset.jump);
-        if (tgt) {
-          tgt.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          tgt.classList.add('jump-flash');
-          setTimeout(() => tgt.classList.remove('jump-flash'), 1500);
-        }
-      });
-    });
+    // El salto al mensaje citado se maneja por delegacion global (ver abajo),
+    // no por-ancla, para que funcione confiable en mobile.
+  }
+
+  // Delegacion global para el salto al mensaje citado. Se registra una sola vez
+  // y sobrevive a los re-render. Scroll manual dentro de #chatMessages porque el
+  // scroll nativo de anclas (#msg-...) no anda dentro de un contenedor scrolleable
+  // en mobile, y el handler por-ancla competia con el long-press tactil.
+  function jumpToQuoted(id) {
+    const tgt = document.getElementById('msg-' + id);
+    if (!tgt) return;
+    const scroller = document.getElementById('chatMessages');
+    if (scroller && scroller.contains(tgt)) {
+      const cRect = scroller.getBoundingClientRect();
+      const tRect = tgt.getBoundingClientRect();
+      const delta = (tRect.top - cRect.top) - (scroller.clientHeight / 2 - tRect.height / 2);
+      scroller.scrollTo({ top: Math.max(0, scroller.scrollTop + delta), behavior: 'smooth' });
+    } else {
+      tgt.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    tgt.classList.add('jump-flash');
+    setTimeout(() => tgt.classList.remove('jump-flash'), 1500);
+  }
+  if (!window.__quoteJumpWired) {
+    window.__quoteJumpWired = true;
+    const onQuoteTap = (e) => {
+      const a = e.target && e.target.closest && e.target.closest('.msg-quote[data-jump]');
+      if (!a) return;
+      e.preventDefault();
+      jumpToQuoted(a.dataset.jump);
+    };
+    document.addEventListener('click', onQuoteTap);
   }
 
   // ================ NOTIF PANEL ================
