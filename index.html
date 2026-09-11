@@ -3218,8 +3218,11 @@
     build(bySection.A, namesA);
     build(bySection.B, namesB);
     const total = STUDENTS.length;
-    const takenCount = profilesByKey.size;
-    const avail = total - takenCount;
+    // Contar solo perfiles de nombres que existen en el roster (evita conteos
+    // negativos por perfiles huerfanos de nombres borrados).
+    let takenCount = 0;
+    STUDENTS.forEach(st => { if (profilesByKey.get(keyOf(st.n, st.s))) takenCount++; });
+    const avail = Math.max(0, total - takenCount);
     loginStatus.textContent = `${avail} disponibles · ${takenCount} tomados de ${total}`;
     loginLogout.hidden = !account;
     const pwBtn = document.getElementById('loginPassword');
