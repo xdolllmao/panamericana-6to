@@ -206,6 +206,7 @@
   let me = null, myProfile = null;
   let songs = [];
   let likes = new Map();            // song_id -> Set(user_id)
+  let profileByUid = new Map();     // user_id -> "section-slug" (para dedup de likes por persona)
   const $ = id => document.getElementById(id);
 
   // ---- semana ISO (ej. 2026-W37) ----
@@ -222,13 +223,24 @@
   function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
   function likesFor(id) { return likes.get(id) || new Set(); }
   function iLiked(id) { return !!(me && likesFor(id).has(me.id)); }
+  // Cuenta likes por PERSONA, no por uid: dedup por perfil (name+section).
+  // Los likes de uids que ya no tienen perfil (sesiones viejas/otro dispositivo)
+  // se ignoran, así no se puede inflar el conteo dando like desde varias sesiones.
+  function likeCount(id) {
+    const seen = new Set();
+    for (const uid of likesFor(id)) {
+      const key = profileByUid.get(uid);
+      if (key) seen.add(key);      // solo cuenta likers con perfil vivo, 1 por persona
+    }
+    return seen.size;
+  }
 
   const heartSvg = liked => `<svg viewBox="0 0 24 24" fill="${liked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
   const playSvg = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
 
   function sortedSongs() {
     return [...songs].sort((a, b) => {
-      const d = likesFor(b.id).size - likesFor(a.id).size;
+      const d = likeCount(b.id) - likeCount(a.id);
       if (d !== 0) return d;
       return new Date(a.created_at) - new Date(b.created_at);
     });
@@ -239,7 +251,7 @@
     // canción de la semana
     const sotwHost = $('sotwHost');
     const leader = list[0];
-    if (leader && likesFor(leader.id).size > 0) {
+    if (leader && likeCount(leader.id) > 0) {
       sotwHost.innerHTML = `
         <div class="sotw">
           ${leader.cover_url ? `<img class="sotw-cover" src="${escapeHtml(leader.cover_url)}" alt="">` : '<div class="sotw-cover"></div>'}
@@ -247,7 +259,7 @@
             <div class="sotw-label">★ Canción de la semana</div>
             <div class="sotw-name">${escapeHtml(leader.name)}</div>
             <div class="sotw-artists">${escapeHtml(leader.artists)}</div>
-            <span class="sotw-likes">${heartSvg(true)} ${likesFor(leader.id).size} likes</span>
+            <span class="sotw-likes">${heartSvg(true)} ${likeCount(leader.id)} likes</span>
           </div>
         </div>`;
     } else {
@@ -266,7 +278,7 @@
       return;
     }
     el.innerHTML = list.map((s, i) => {
-      const n = likesFor(s.id).size;
+      const n = likeCount(s.id);
       const liked = iLiked(s.id);
       const mine = me && s.author_user_id === me.id;
       return `<div class="song" data-id="${s.id}">
@@ -289,11 +301,16 @@
   }
 
   async function loadAll() {
-    const [{ data: sg, error: se }, { data: lk, error: le }] = await Promise.all([
+    const [{ data: sg, error: se }, { data: lk, error: le }, { data: pf, error: pe }] = await Promise.all([
       sb.from('songs').select('id, spotify_id, name, artists, cover_url, spotify_url, author_user_id, created_at').eq('week', CURRENT_WEEK).order('created_at', { ascending: true }),
       sb.from('song_likes').select('song_id, user_id'),
+      sb.from('profiles').select('user_id, name, section'),
     ]);
     if (!se) songs = sg || [];
+    if (!pe) {
+      profileByUid = new Map();
+      (pf || []).forEach(p => profileByUid.set(p.user_id, p.section + '|' + p.name));
+    }
     if (!le) {
       likes = new Map();
       (lk || []).forEach(l => { const s = likes.get(l.song_id) || new Set(); s.add(l.user_id); likes.set(l.song_id, s); });
