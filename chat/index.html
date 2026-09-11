@@ -533,6 +533,7 @@
     display: flex; align-items: center; gap: 8px;
     padding: 12px 16px 14px;
     background: var(--paper); border-top: 1px solid var(--line);
+    position: relative;
   }
   .composer-btn {
     width: 40px; height: 40px; border-radius: 12px;
@@ -575,6 +576,33 @@
     touch-action: manipulation;
   }
   .composer-preview button:active { transform: scale(.96); }
+
+  /* ============ AUDIO (grabacion + player) ============ */
+  .rec-bar {
+    position: absolute; inset: 0; margin: 8px;
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 8px 0 6px;
+    background: var(--paper); border: 1.5px solid color-mix(in oklab, var(--coral) 40%, var(--line));
+    border-radius: 999px;
+  }
+  .rec-cancel { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; color: var(--ink-mute); flex-shrink: 0; }
+  .rec-cancel:hover { color: var(--coral); }
+  .rec-dot { width: 11px; height: 11px; border-radius: 50%; background: var(--coral); flex-shrink: 0; animation: recPulse 1.1s ease-in-out infinite; }
+  @keyframes recPulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.8); } }
+  .rec-time { font-family: var(--f-mono); font-size: 14px; font-weight: 600; color: var(--ink); min-width: 42px; }
+  .rec-label { flex: 1; font-size: 13px; color: var(--ink-mute); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  @media (max-width: 560px) { .rec-label { display: none; } }
+
+  .msg-audio { display: flex; align-items: center; gap: 10px; padding: 4px 2px; min-width: 180px; }
+  .msg-audio-btn { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0; background: var(--school); color: #fff; cursor: pointer; }
+  .msg.me .msg-audio-btn { background: rgba(255,255,255,.9); color: var(--school); }
+  .msg-audio-btn svg { width: 18px; height: 18px; }
+  .msg-audio-track { flex: 1; height: 5px; border-radius: 3px; background: color-mix(in oklab, var(--ink) 18%, transparent); position: relative; overflow: hidden; cursor: pointer; }
+  .msg.me .msg-audio-track { background: rgba(255,255,255,.35); }
+  .msg-audio-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; background: var(--school); border-radius: 3px; }
+  .msg.me .msg-audio-fill { background: #fff; }
+  .msg-audio-time { font-family: var(--f-mono); font-size: 11px; color: var(--ink-mute); min-width: 34px; text-align: right; flex-shrink: 0; }
+  .msg.me .msg-audio-time { color: rgba(255,255,255,.85); }
 
   /* ============ LOCKED / login ============ */
   .locked {
@@ -1630,7 +1658,7 @@
       let preview = 'Sin mensajes';
       let fromLabel = '';
       if (last) {
-        preview = last.photo_url ? '📷 Foto' : escapeHtml((last.text || '').slice(0, 44));
+        preview = last.audio_url ? '🎤 Audio' : last.photo_url ? '📷 Foto' : escapeHtml((last.text || '').slice(0, 44));
         if (last.author_user_id === currentUser.id) fromLabel = 'Vos: ';
         else if (isGroup) {
           const from = profilesById.get(last.author_user_id);
@@ -1683,7 +1711,7 @@
 
   async function loadMessages(chatId) {
     const { data, error } = await sb.from('messages')
-      .select('id, chat_id, author_user_id, text, photo_url, created_at, reply_to')
+      .select('id, chat_id, author_user_id, text, photo_url, audio_url, created_at, reply_to')
       .eq('chat_id', chatId).order('created_at', { ascending: true }).limit(500);
     if (error) { console.error(error); return false; }
     messagesByChat.set(chatId, data || []);
@@ -1793,9 +1821,23 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
         </button>
         <input type="text" class="composer-input" id="composerInput" placeholder="Escribí un mensaje…" autocomplete="off">
+        <button type="button" class="composer-btn" id="micBtn" title="Grabar audio" aria-label="Grabar audio">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>
+        </button>
         <button type="submit" class="composer-btn primary" title="Enviar" aria-label="Enviar">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
         </button>
+        <div class="rec-bar" id="recBar" hidden>
+          <button type="button" class="rec-cancel" id="recCancel" title="Cancelar" aria-label="Cancelar grabación">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
+          <span class="rec-dot"></span>
+          <span class="rec-time" id="recTime">0:00</span>
+          <span class="rec-label">Grabando… soltá para enviar</span>
+          <button type="button" class="composer-btn primary" id="recSend" title="Enviar audio" aria-label="Enviar audio">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+          </button>
+        </div>
       </form>
     `;
     const messagesEl = document.getElementById('chatMessages');
@@ -1855,7 +1897,7 @@
       if (orig) {
         const origFrom = profilesById.get(orig.author_user_id);
         const origName = origFrom ? origFrom.name : 'Anónimo';
-        const snippet = orig.photo_url ? '📷 Foto' : (orig.text || '').slice(0, 60);
+        const snippet = orig.audio_url ? '🎤 Audio' : orig.photo_url ? '📷 Foto' : (orig.text || '').slice(0, 60);
         quoteEl = `<a class="msg-quote" href="#msg-${orig.id}" data-jump="${orig.id}"><strong>${escapeHtml(origName)}</strong><span>${escapeHtml(snippet)}</span></a>`;
       } else {
         quoteEl = `<div class="msg-quote"><span style="opacity:.7">mensaje eliminado</span></div>`;
@@ -1868,6 +1910,11 @@
           ${nameEl}
           ${quoteEl}
           ${m.photo_url ? `<img class="msg-photo" src="${m.photo_url}" alt="Foto adjunta">` : ''}
+          ${m.audio_url ? `<div class="msg-audio" data-audio="${escapeHtml(m.audio_url)}">
+            <button type="button" class="msg-audio-btn" aria-label="Reproducir audio"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
+            <div class="msg-audio-track"><div class="msg-audio-fill"></div></div>
+            <span class="msg-audio-time">0:00</span>
+          </div>` : ''}
           ${m.text ? `<div class="msg-text">${escapeHtml(m.text)}</div>` : ''}
           <div class="msg-time">${timeShort(m.created_at)}</div>
         </div>
@@ -2002,6 +2049,76 @@
       clearReply();
       // Message will arrive via realtime and re-render
     });
+
+    // ---------- Audio (grabar + enviar) ----------
+    const micBtn = document.getElementById('micBtn');
+    const recBar = document.getElementById('recBar');
+    const recTime = document.getElementById('recTime');
+    const recCancel = document.getElementById('recCancel');
+    const recSend = document.getElementById('recSend');
+    let mediaRec = null, chunks = [], recStream = null, recTimer = null, recStart = 0, recCanceled = false;
+
+    function pickMime() {
+      const opts = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus'];
+      for (const m of opts) { try { if (window.MediaRecorder && MediaRecorder.isTypeSupported(m)) return m; } catch (e) {} }
+      return '';
+    }
+    function extForMime(m) { if (m.includes('mp4')) return 'm4a'; if (m.includes('ogg')) return 'ogg'; return 'webm'; }
+    function setRecUI(on) {
+      recBar.hidden = !on;
+      [micBtn, input, document.getElementById('attachBtn')].forEach(el => { if (el) el.style.visibility = on ? 'hidden' : ''; });
+      form.querySelector('button[type="submit"]').style.visibility = on ? 'hidden' : '';
+    }
+    function fmtT(s) { const m = Math.floor(s / 60); const ss = String(Math.floor(s % 60)).padStart(2, '0'); return `${m}:${ss}`; }
+
+    async function startRec() {
+      if (!navigator.mediaDevices || !window.MediaRecorder) { alert('Tu navegador no soporta grabar audio.'); return; }
+      try {
+        recStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      } catch (e) { alert('No pudimos acceder al micrófono. Dale permiso e intentá de nuevo.'); return; }
+      const mime = pickMime();
+      recCanceled = false; chunks = [];
+      mediaRec = new MediaRecorder(recStream, mime ? { mimeType: mime } : undefined);
+      mediaRec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+      mediaRec.onstop = async () => {
+        if (recStream) { recStream.getTracks().forEach(t => t.stop()); recStream = null; }
+        clearInterval(recTimer); recTimer = null;
+        setRecUI(false);
+        if (recCanceled || !chunks.length) return;
+        const dur = (Date.now() - recStart) / 1000;
+        if (dur < 0.6) return; // muy corto, ignorar
+        const type = mediaRec.mimeType || mime || 'audio/webm';
+        const blob = new Blob(chunks, { type });
+        await sendAudio(blob, extForMime(type), type);
+      };
+      mediaRec.start();
+      recStart = Date.now();
+      recTime.textContent = '0:00';
+      setRecUI(true);
+      recTimer = setInterval(() => { recTime.textContent = fmtT((Date.now() - recStart) / 1000); }, 200);
+    }
+    function stopRec(cancel) {
+      recCanceled = !!cancel;
+      if (mediaRec && mediaRec.state !== 'inactive') mediaRec.stop();
+      else { setRecUI(false); if (recStream) { recStream.getTracks().forEach(t => t.stop()); recStream = null; } clearInterval(recTimer); }
+    }
+    async function sendAudio(blob, ext, type) {
+      const path = `${currentUser.id}/audio-${Date.now()}-${Math.random().toString(36).slice(2,6)}.${ext}`;
+      const { error: upErr } = await sb.storage.from('photos').upload(path, blob, { contentType: type, cacheControl: '3600', upsert: false });
+      if (upErr) { alert('Error subiendo audio: ' + upErr.message); return; }
+      const audioUrl = sb.storage.from('photos').getPublicUrl(path).data.publicUrl;
+      const payload = {
+        chat_id: chat.id, author_user_id: currentUser.id, audio_url: audioUrl,
+        ...(replyingTo && { reply_to: replyingTo.id }),
+      };
+      const { error } = await sb.from('messages').insert(payload);
+      if (error) { alert('No se pudo enviar el audio: ' + error.message); return; }
+      clearReply();
+    }
+    micBtn.addEventListener('click', startRec);
+    recCancel.addEventListener('click', () => stopRec(true));
+    recSend.addEventListener('click', () => stopRec(false));
+
     input.focus();
   }
 
@@ -2010,7 +2127,7 @@
   function setReply(msg) {
     const from = profilesById.get(msg.author_user_id);
     const name = from ? from.name : 'Anónimo';
-    const snippet = msg.photo_url ? '📷 Foto' : (msg.text || '').slice(0, 80);
+    const snippet = msg.audio_url ? '🎤 Audio' : msg.photo_url ? '📷 Foto' : (msg.text || '').slice(0, 80);
     replyingTo = { id: msg.id, name, snippet };
     renderReplyBar();
     document.getElementById('composerInput')?.focus();
@@ -2154,6 +2271,62 @@
     document.addEventListener('click', onQuoteTap);
   }
 
+  // ================ Player de audio (delegado, un solo audio a la vez) ================
+  if (!window.__audioWired) {
+    window.__audioWired = true;
+    const PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+    const PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>';
+    let curAudio = null, curWrap = null, raf = null;
+    const fmt = s => (!isFinite(s) ? '0:00' : Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0'));
+    function paint() {
+      if (!curAudio || !curWrap) return;
+      const fill = curWrap.querySelector('.msg-audio-fill');
+      const time = curWrap.querySelector('.msg-audio-time');
+      const d = curAudio.duration || 0;
+      if (fill) fill.style.width = d ? (curAudio.currentTime / d * 100) + '%' : '0%';
+      if (time) time.textContent = fmt(curAudio.currentTime || 0);
+      raf = requestAnimationFrame(paint);
+    }
+    function resetWrap(w) {
+      if (!w) return;
+      const b = w.querySelector('.msg-audio-btn'); if (b) b.innerHTML = PLAY;
+      const f = w.querySelector('.msg-audio-fill'); if (f) f.style.width = '0%';
+    }
+    function stopCur() {
+      if (raf) { cancelAnimationFrame(raf); raf = null; }
+      if (curAudio) { curAudio.pause(); curAudio.currentTime = 0; }
+      resetWrap(curWrap);
+      curAudio = null; curWrap = null;
+    }
+    document.addEventListener('click', (e) => {
+      // seek en la barra
+      const track = e.target.closest && e.target.closest('.msg-audio-track');
+      if (track && curWrap && track.closest('.msg-audio') === curWrap && curAudio && curAudio.duration) {
+        const r = track.getBoundingClientRect();
+        curAudio.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * curAudio.duration;
+        return;
+      }
+      const btn = e.target.closest && e.target.closest('.msg-audio-btn');
+      if (!btn) return;
+      const wrap = btn.closest('.msg-audio');
+      const url = wrap && wrap.dataset.audio;
+      if (!url) return;
+      // mismo audio → toggle
+      if (curWrap === wrap && curAudio) {
+        if (curAudio.paused) { curAudio.play(); btn.innerHTML = PAUSE; raf = requestAnimationFrame(paint); }
+        else { curAudio.pause(); btn.innerHTML = PLAY; if (raf) cancelAnimationFrame(raf); }
+        return;
+      }
+      // otro audio → parar el anterior y arrancar este
+      stopCur();
+      const audio = new Audio(url);
+      curAudio = audio; curWrap = wrap;
+      audio.addEventListener('loadedmetadata', () => { const t = wrap.querySelector('.msg-audio-time'); if (t) t.textContent = fmt(audio.duration || 0); });
+      audio.addEventListener('ended', () => { btn.innerHTML = PLAY; if (raf) cancelAnimationFrame(raf); const f = wrap.querySelector('.msg-audio-fill'); if (f) f.style.width = '0%'; const t = wrap.querySelector('.msg-audio-time'); if (t) t.textContent = fmt(audio.duration || 0); curAudio = null; curWrap = null; });
+      audio.play().then(() => { btn.innerHTML = PAUSE; raf = requestAnimationFrame(paint); }).catch(() => { btn.innerHTML = PLAY; alert('No se pudo reproducir el audio.'); });
+    });
+  }
+
   // ================ NOTIF PANEL ================
   const notifBtn = document.getElementById('notifBtn');
   const notifPanel = document.getElementById('notifPanel');
@@ -2183,7 +2356,7 @@
       const name = chatDisplayName(c);
       const msgs = messagesByChat.get(c.id) || [];
       const last = msgs[msgs.length-1];
-      const preview = last ? (last.photo_url ? '📷 Foto' : (last.text || '').slice(0, 46)) : '';
+      const preview = last ? (last.audio_url ? '🎤 Audio' : last.photo_url ? '📷 Foto' : (last.text || '').slice(0, 46)) : '';
       const isGroup = c.type === 'group';
       return `<button class="notif-item" data-id="${c.id}">
         <div class="avatar-mini" style="background:${isGroup ? 'var(--school)' : colorFor(name)}">${isGroup ? '👥' : name[0].toUpperCase()}</div>
@@ -2234,7 +2407,7 @@
     //    lo que ya estaba cargado en vez de reemplazar — asi no desaparecen los
     //    mensajes ya vistos al re-entrar a un chat.
     const { data: allMsgs } = await sb.from('messages')
-      .select('id, chat_id, author_user_id, text, photo_url, created_at, reply_to')
+      .select('id, chat_id, author_user_id, text, photo_url, audio_url, created_at, reply_to')
       .in('chat_id', chatIds)
       .order('created_at', { ascending: false })
       .limit(1000);
