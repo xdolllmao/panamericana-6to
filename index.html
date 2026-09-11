@@ -1938,6 +1938,26 @@
   }
   .name-chip .pw-badge svg { width: 10px; height: 10px; }
 
+  /* Banner de Música */
+  .music-banner {
+    display: flex; align-items: center; gap: 20px;
+    background: linear-gradient(120deg, #1DB954, #16a34a 60%, var(--school));
+    color: #fff; border-radius: var(--radius-lg); padding: 22px 24px;
+    box-shadow: 0 14px 34px rgba(29,185,84,.28);
+    transition: transform .18s ease, box-shadow .18s ease;
+  }
+  .music-banner:hover { transform: translateY(-2px); box-shadow: 0 18px 40px rgba(29,185,84,.36); }
+  .music-banner-ico { width: 60px; height: 60px; border-radius: 16px; background: rgba(255,255,255,.18); display: grid; place-items: center; flex-shrink: 0; }
+  .music-banner-ico svg { width: 30px; height: 30px; }
+  .music-banner-body { flex: 1; min-width: 0; }
+  .music-banner-body h2 { font-family: var(--f-display); font-weight: 800; font-size: clamp(22px, 3vw, 30px); margin: 4px 0 4px; line-height: 1; }
+  .music-banner-body p { margin: 0; font-size: 14px; opacity: .92; max-width: 60ch; }
+  .music-banner-cta { display: inline-flex; align-items: center; gap: 8px; background: #fff; color: #16a34a; font-weight: 800; font-size: 14px; padding: 10px 18px; border-radius: 999px; flex-shrink: 0; }
+  @media (max-width: 640px) {
+    .music-banner { flex-direction: column; text-align: center; }
+    .music-banner-cta { width: 100%; justify-content: center; }
+  }
+
   /* Reveal */
   .reveal { opacity: 0; transform: translateY(12px); transition: opacity .6s ease, transform .6s ease; }
   .reveal.in { opacity: 1; transform: none; }
@@ -2056,9 +2076,9 @@
       <a class="nav-link" href="#estudiantes">Estudiantes</a>
       <a class="nav-link" href="#horario">Horario</a>
       <a class="nav-link" href="#empresas">Empresas</a>
+      <a class="nav-link" href="/musica/">Música</a>
       <a class="nav-link" href="#partidos">Partidos</a>
       <a class="nav-link" href="#ships">Ships</a>
-      <a class="nav-link" href="/musica/">Música</a>
       <a class="nav-link" href="#chismes">Chismes</a>
       <a class="nav-link" href="#records">Récords</a>
       <a class="nav-link" href="/resumen/">Weekly</a>
@@ -2217,6 +2237,24 @@
   </div>
 
   <div class="empresas reveal" id="empresasGrid"></div>
+</section>
+
+<!-- =================== MÚSICA (banner) =================== -->
+<section class="wrap block">
+  <a href="/musica/" class="music-banner reveal">
+    <div class="music-banner-ico" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+    </div>
+    <div class="music-banner-body">
+      <div class="section-tag" style="color:#fff;opacity:.9">♪ Playlist colaborativa · nueva</div>
+      <h2>La playlist de la semana</h2>
+      <p>Poné hasta 10 canciones (anónimas), dales like y elegí la canción de la semana. Se reinicia cada lunes.</p>
+    </div>
+    <div class="music-banner-cta">
+      Entrar
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </div>
+  </a>
 </section>
 
 <!-- =================== PARTIDOS =================== -->
