@@ -2844,27 +2844,28 @@
     { fecha: 'Jornada 19', tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 2, gb: 1, res: 'won',  note: '<b>Magaña</b> ×2 para Equipo 1; <b>Roberto</b> para Equipo 2.' },
     { fecha: 'Jornada 20', tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 6, gb: 5, res: 'won',  note: 'Partidazo. <b>Magaña</b> ×2, <b>Mateo</b> ×2, <b>Iglesias</b> y <b>Javier</b> para Equipo 1; <b>Gerardo</b> ×2, <b>Deleón</b> ×2 y <b>Eduardo</b> para Equipo 2.' },
     { fecha: 'Jornada 21', tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 1, gb: 0, res: 'won',  note: 'Gol único de <b>Iglesias</b>. Triunfo mínimo.' },
+    { fecha: 'Jornada 22', tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 6, gb: 3, res: 'won',  note: '<b>Iglesias</b> ×2, <b>Mateo</b>, <b>Javier</b>, <b>Magaña</b> y un autogol de <b>Alejandro</b> (B) para Equipo 1; <b>Gerardo</b> ×2 y <b>Suil</b> para Equipo 2.' },
   ];
 
   const STANDINGS = [
-    { name: 'Equipo 1', pj: 21, g: 10, e: 5, p: 6, gf: 43, gc: 38 },
-    { name: 'Equipo 2', pj: 21, g: 6, e: 5, p: 10, gf: 38, gc: 43 },
+    { name: 'Equipo 1', pj: 22, g: 11, e: 5, p: 6, gf: 49, gc: 41 },
+    { name: 'Equipo 2', pj: 22, g: 6, e: 5, p: 11, gf: 41, gc: 49 },
   ].map(t => ({ ...t, pts: t.g * 3 + t.e }))
    .sort((a,b) => b.pts - a.pts || (b.gf - b.gc) - (a.gf - a.gc));
 
   const GOLEADORES = [
     { name: 'Deleón',    goles: 18 },
-    { name: 'Magaña',    goles: 11 },
-    { name: 'Mateo',     goles: 10 },
-    { name: 'Gerardo',   goles: 9 },
-    { name: 'Javier',    goles: 8 },
+    { name: 'Magaña',    goles: 12 },
+    { name: 'Mateo',     goles: 11 },
+    { name: 'Gerardo',   goles: 11 },
+    { name: 'Javier',    goles: 9 },
+    { name: 'Iglesias',  goles: 8 },
     { name: 'Lucas',     goles: 6 },
-    { name: 'Iglesias',  goles: 6 },
     { name: 'Osegueda',  goles: 3 },
     { name: 'Josué',     goles: 3 },
     { name: 'Eduardo',   goles: 3 },
+    { name: 'Suil',      goles: 3 },
     { name: 'Alejandro', goles: 2 },
-    { name: 'Suil',      goles: 2 },
     { name: 'Roberto',   goles: 1 },
     { name: 'Fabricio',  goles: 1 },
   ].sort((a, b) => b.goles - a.goles);
