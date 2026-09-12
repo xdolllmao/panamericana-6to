@@ -1975,6 +1975,8 @@
       e.preventDefault();
       const text = input.value.trim().slice(0, 500); // tope duro de 500 caracteres
       if (!text && !pendingPhoto) return;
+      // Prohibido decir "67" en el chat
+      if (/67/.test(text)) { alert('No se permite escribir "67" en el chat.'); return; }
       const sendBtn = form.querySelector('button[type="submit"]');
       sendBtn.disabled = true;
       let photoUrl = null;
