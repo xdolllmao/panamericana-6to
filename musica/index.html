@@ -169,7 +169,7 @@
   <div id="sotwHost"></div>
 
   <div class="toolbar">
-    <span class="count-pill" id="countPill">0 / 10 canciones</span>
+    <span class="count-pill" id="countPill">0 / 15 canciones</span>
     <button class="add-btn" id="addBtn" type="button">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
       Agregar canción
@@ -203,7 +203,9 @@
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFteHVneXF3Z3B0Z2FmaXRicXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzOTQ0NDcsImV4cCI6MjEwMzk3MDQ0N30.AtfxRuD_zSojiVCW170wmQjZudRQJyUl_mdm_L5ii_I';
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
 
-  const MAX_SONGS = 10;
+  const MAX_SONGS = 15;
+  // ¿ya publiqué una canción esta semana? (1 por persona)
+  function iAlreadyPosted() { return !!(me && songs.some(s => s.author_user_id === me.id)); }
   let me = null, myProfile = null;
   let songs = [];
   let likes = new Map();            // song_id -> Set(user_id)
@@ -275,7 +277,10 @@
     }
 
     $('countPill').textContent = `${songs.length} / ${MAX_SONGS} canciones`;
-    $('addBtn').disabled = songs.length >= MAX_SONGS;
+    const posted = iAlreadyPosted();
+    const addBtn = $('addBtn');
+    addBtn.disabled = songs.length >= MAX_SONGS || posted;
+    addBtn.title = posted ? 'Ya publicaste tu canción de esta semana' : '';
 
     const el = $('songsList');
     if (!list.length) {
@@ -353,7 +358,8 @@
 
   $('addBtn').addEventListener('click', () => {
     if (!myProfile) { alert('Reclamá tu nombre en la home para agregar canciones.'); return; }
-    if (songs.length >= MAX_SONGS) { alert('Ya hay 10 canciones esta semana. Esperá al reinicio.'); return; }
+    if (iAlreadyPosted()) { alert('Ya publicaste tu canción de esta semana. Solo se permite una por persona.'); return; }
+    if (songs.length >= MAX_SONGS) { alert('Ya hay ' + MAX_SONGS + ' canciones esta semana. Esperá al reinicio.'); return; }
     searchInput.value = ''; searchResults.innerHTML = ''; searchHint.hidden = false; searchHint.className = 'search-hint'; searchHint.textContent = 'Empezá a escribir para buscar.';
     searchModal.classList.add('open'); setTimeout(() => searchInput.focus(), 50);
   });
@@ -391,14 +397,15 @@
   }
 
   async function addSong(t) {
-    if (songs.length >= MAX_SONGS) { alert('Ya hay 10 canciones esta semana.'); return; }
+    if (iAlreadyPosted()) { alert('Ya publicaste tu canción de esta semana. Solo se permite una por persona.'); searchModal.classList.remove('open'); return; }
+    if (songs.length >= MAX_SONGS) { alert('Ya hay ' + MAX_SONGS + ' canciones esta semana.'); return; }
     if (songs.find(s => s.spotify_id === t.id)) { alert('Esa canción ya está en la lista.'); searchModal.classList.remove('open'); return; }
     const { error } = await sb.from('songs').insert({
       week: CURRENT_WEEK, spotify_id: t.id, name: t.name, artists: t.artists,
       cover_url: t.cover, spotify_url: t.url, author_user_id: me.id,
     });
     if (error) {
-      const msg = /row-level security|violates|check/i.test(error.message) ? 'No se pudo agregar (¿ya hay 10, o falta reclamar tu nombre?).' : error.message;
+      const msg = /row-level security|violates|check/i.test(error.message) ? 'No se pudo agregar (ya publicaste una, ya hay ' + MAX_SONGS + ', o falta reclamar tu nombre).' : error.message;
       alert(msg); return;
     }
     searchModal.classList.remove('open');
