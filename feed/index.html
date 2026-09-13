@@ -125,7 +125,19 @@
   .story-header button:hover { background: rgba(255,255,255,.24); }
   .story-stage { flex: 1; position: relative; display: grid; place-items: center; overflow: hidden; user-select: none; -webkit-user-select: none; }
   .story-stage img, .story-stage video { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
-  .story-stage .opinion-view { padding: 40px 28px; text-align: center; color: #fff; font-family: var(--f-display); font-weight: 700; font-size: clamp(26px, 6vw, 42px); line-height: 1.2; letter-spacing: -0.02em; word-wrap: break-word; }
+  .story-stage .opinion-view { box-sizing: border-box; width: 100%; max-width: 100%; max-height: 100%; overflow-y: auto; padding: 40px 28px; text-align: center; color: #fff; font-family: var(--f-display); font-weight: 700; font-size: 34px; line-height: 1.22; letter-spacing: -0.02em; overflow-wrap: anywhere; word-break: break-word; }
+  .story-stage .audio-view { box-sizing: border-box; width: 100%; max-width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; padding: 40px 28px; text-align: center; color: #fff; background: radial-gradient(circle at 50% 38%, rgba(107,62,232,.55), rgba(0,0,0,.15) 72%); }
+  .story-stage .audio-view .audio-emoji { font-size: 72px; line-height: 1; filter: drop-shadow(0 6px 18px rgba(0,0,0,.4)); }
+  .story-stage .audio-view .audio-bars { display: flex; align-items: flex-end; gap: 6px; height: 46px; }
+  .story-stage .audio-view .audio-bars span { width: 7px; height: 12px; border-radius: 4px; background: #fff; animation: stBar 1s ease-in-out infinite; }
+  .story-stage .audio-view .audio-bars span:nth-child(1){animation-delay:-1.1s} .story-stage .audio-view .audio-bars span:nth-child(2){animation-delay:-.5s} .story-stage .audio-view .audio-bars span:nth-child(3){animation-delay:-.8s} .story-stage .audio-view .audio-bars span:nth-child(4){animation-delay:-.2s} .story-stage .audio-view .audio-bars span:nth-child(5){animation-delay:-.9s} .story-stage .audio-view .audio-bars span:nth-child(6){animation-delay:-.4s} .story-stage .audio-view .audio-bars span:nth-child(7){animation-delay:-.7s}
+  @keyframes stBar { 0%,100%{height:12px} 50%{height:46px} }
+  .story-stage .audio-view .audio-text { font-family: var(--f-display); font-weight: 700; font-size: 26px; line-height: 1.25; letter-spacing: -0.02em; overflow-wrap: anywhere; word-break: break-word; max-height: 42%; overflow-y: auto; }
+  .audio-opts { margin-top: 12px; display: flex; flex-direction: column; gap: 10px; }
+  .audio-opts .ao-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .audio-opts .ao-row label { font-size: 13px; font-weight: 600; color: var(--ink-soft); }
+  .audio-opts .ao-row input { width: 92px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); color: var(--ink); font-size: 14px; }
+  .audio-opts .ao-hint { font-size: 12px; color: var(--ink-soft); opacity: .85; }
   .story-caption { position: absolute; left: 0; right: 0; bottom: 0; padding: 40px 20px 20px; background: linear-gradient(to top, rgba(0,0,0,.7), transparent); color: #fff; font-size: 14px; line-height: 1.4; z-index: 2; }
   .story-tap { position: absolute; top: 0; bottom: 0; width: 30%; z-index: 2; }
   .story-tap.left { left: 0; }
@@ -359,14 +371,26 @@
         <button class="ct is-active" data-type="opinion">💬 Opinión</button>
         <button class="ct" data-type="photo">📷 Foto</button>
         <button class="ct" data-type="reel">🎬 Reel</button>
+        <button class="ct" data-type="audio">🎵 Audio</button>
       </div>
       <div class="form-row">
-        <label>Texto (opcional en fotos/reels)</label>
+        <label>Texto (opcional en fotos, reels o audio)</label>
         <textarea id="stContent" maxlength="300" placeholder="¿Qué querés contar?"></textarea>
       </div>
       <div id="stMediaWrap" class="media-preview" hidden>
         <input type="file" id="stFile" hidden>
         <div id="stMediaContent"></div>
+      </div>
+      <div id="stAudioOpts" class="audio-opts" hidden>
+        <div class="ao-row">
+          <label>Empieza en el segundo</label>
+          <input type="number" id="stAudioStart" min="0" step="1" value="0">
+        </div>
+        <div class="ao-row">
+          <label>Duración (segundos, máx 30)</label>
+          <input type="number" id="stAudioDur" min="1" max="30" step="1" value="15">
+        </div>
+        <div class="ao-hint" id="stAudioHint"></div>
       </div>
     </div>
     <div class="modal-foot">
@@ -409,6 +433,37 @@
   function slug(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,''); }
   function keyOf(name, section){ return `${section}-${slug(name)}`.toLowerCase(); }
   function timeAgo(ts){ const d=Math.max(0,Date.now()-new Date(ts).getTime()); if(d<60000) return 'ahora'; if(d<3600000) return Math.floor(d/60000)+'m'; if(d<86400000) return Math.floor(d/3600000)+'h'; return Math.floor(d/86400000)+'d'; }
+  // Ajusta el tamaño de fuente de una opinión según su largo para que nunca se salga de la pantalla.
+  function fitOpinionFont(div, text){
+    const len = (text || '').length;
+    let size;
+    if (len <= 30) size = 42;
+    else if (len <= 80) size = 34;
+    else if (len <= 150) size = 27;
+    else if (len <= 240) size = 22;
+    else size = 18;
+    div.style.fontSize = size + 'px';
+  }
+  // Lee un fragmento #t=inicio,fin de una URL de media y devuelve la url base + tiempos.
+  function parseMediaFragment(u){
+    const str = String(u || '');
+    const hash = str.indexOf('#t=');
+    if (hash < 0) return { url: str, start: 0, end: null };
+    const m = str.slice(hash + 3).match(/^([\d.]+)(?:,([\d.]+))?/);
+    if (!m) return { url: str, start: 0, end: null };
+    return { url: str.slice(0, hash), start: parseFloat(m[1]) || 0, end: m[2] != null ? parseFloat(m[2]) : null };
+  }
+  // Duración (segundos) de un archivo de audio local.
+  function getAudioDuration(file){
+    return new Promise((resolve, reject) => {
+      const a = document.createElement('audio');
+      a.preload = 'metadata';
+      const url = URL.createObjectURL(file);
+      a.onloadedmetadata = () => { const d = a.duration; URL.revokeObjectURL(url); resolve(isFinite(d) && d > 0 ? d : 0); };
+      a.onerror = () => { URL.revokeObjectURL(url); reject(new Error('No pudimos leer ese audio.')); };
+      a.src = url;
+    });
+  }
 
   let me = null, myProfile = null;
   let profilesById = new Map();
@@ -695,6 +750,17 @@
   // Prepara un archivo para subir: comprime si es imagen, valida tamaño+decodificación si es video.
   // Devuelve { blob, ext, type, sizeKB } o lanza con mensaje al usuario.
   async function preparePostMedia(file, kind) {
+    if (kind === 'audio') {
+      if (file.size > 25 * 1024 * 1024) throw new Error('Audio muy pesado (máx 25 MB).');
+      if (file.type && !file.type.startsWith('audio/')) {
+        throw new Error('Ese archivo no parece un audio. Elegí un MP3, M4A o WAV.');
+      }
+      let duration = 0;
+      try { duration = await getAudioDuration(file); }
+      catch (err) { throw new Error('No pudimos leer ese audio. Probá con un MP3 o M4A.'); }
+      const rawExt = (file.name && file.name.includes('.')) ? file.name.split('.').pop().toLowerCase().slice(0, 5) : 'mp3';
+      return { blob: file, ext: rawExt || 'mp3', type: file.type || 'audio/mpeg', sizeKB: file.size / 1024, duration };
+    }
     if (kind === 'reel') {
       if (file.size > 40 * 1024 * 1024) throw new Error('Video muy pesado (máx 40 MB).');
       if (file.type && !file.type.startsWith('video/')) {
@@ -974,9 +1040,8 @@
     document.body.style.overflow = '';
     if (viewerTimer) { clearTimeout(viewerTimer); viewerTimer = null; }
     if (viewerRAF) { cancelAnimationFrame(viewerRAF); viewerRAF = null; }
-    // Remove any video
-    const oldMedia = storyStage.querySelector('img, video, .opinion-view, .story-caption, .story-delete');
-    if (oldMedia) storyStage.querySelectorAll('img, video, .opinion-view, .story-caption, .story-delete').forEach(n => n.remove());
+    // Remove any media
+    storyStage.querySelectorAll('img, video, audio, .opinion-view, .audio-view, .story-caption, .story-delete').forEach(n => n.remove());
     renderStoriesBar();
   }
   function showViewerStory() {
@@ -1006,14 +1071,29 @@
     document.getElementById('storyCloseBtn').addEventListener('click', closeStoryViewer);
 
     // Clear stage keeping tap zones
-    storyStage.querySelectorAll('img, video, .opinion-view, .story-caption, .story-delete').forEach(n => n.remove());
+    storyStage.querySelectorAll('img, video, audio, .opinion-view, .audio-view, .story-caption, .story-delete').forEach(n => n.remove());
 
     viewerDuration = STORY_DURATION;
     if (s.type === 'opinion') {
       const div = document.createElement('div');
       div.className = 'opinion-view';
       div.textContent = s.content || '';
+      fitOpinionFont(div, s.content || '');
       storyStage.prepend(div);
+    } else if (s.type === 'audio' && s.media_url) {
+      const frag = parseMediaFragment(s.media_url);
+      const wrap = document.createElement('div');
+      wrap.className = 'audio-view';
+      wrap.innerHTML = `<div class="audio-emoji">🎵</div><div class="audio-bars">${'<span></span>'.repeat(7)}</div>${s.content ? '<div class="audio-text"></div>' : ''}`;
+      if (s.content) wrap.querySelector('.audio-text').textContent = s.content;
+      storyStage.prepend(wrap);
+      const a = document.createElement('audio');
+      a.src = frag.url; a.preload = 'auto'; a.autoplay = true;
+      a.addEventListener('loadedmetadata', () => { try { a.currentTime = frag.start || 0; } catch(e){} });
+      a.addEventListener('timeupdate', () => { if (frag.end != null && a.currentTime >= frag.end) { try { a.pause(); } catch(e){} } });
+      const seg = frag.end != null ? (frag.end - frag.start) : 30;
+      viewerDuration = Math.min(30000, Math.max(1000, seg * 1000));
+      storyStage.appendChild(a);
     } else if (s.type === 'photo' && s.media_url) {
       const img = document.createElement('img');
       img.src = s.media_url;
@@ -1120,11 +1200,11 @@
   storyViewersEl.addEventListener('click', (e) => { if (e.target === storyViewersEl) { storyViewersEl.hidden = true; resumeStory(); } });
   function pauseStory() {
     if (viewerRAF) { cancelAnimationFrame(viewerRAF); viewerRAF = null; }
-    const v = storyStage.querySelector('video'); if (v) { try { v.pause(); } catch(e){} }
+    const v = storyStage.querySelector('video, audio'); if (v) { try { v.pause(); } catch(e){} }
   }
   function resumeStory() {
     if (!storyViewer.classList.contains('open')) return;
-    const v = storyStage.querySelector('video'); if (v) { try { v.play(); } catch(e){} }
+    const v = storyStage.querySelector('video, audio'); if (v) { try { v.play(); } catch(e){} }
     startProgress();
   }
   function startProgress() {
@@ -1188,6 +1268,10 @@
   const stFile = document.getElementById('stFile');
   const stMediaWrap = document.getElementById('stMediaWrap');
   const stMediaContent = document.getElementById('stMediaContent');
+  const stAudioOpts = document.getElementById('stAudioOpts');
+  const stAudioStart = document.getElementById('stAudioStart');
+  const stAudioDur = document.getElementById('stAudioDur');
+  const stAudioHint = document.getElementById('stAudioHint');
   const stSubmit = document.getElementById('stSubmit');
   const stCancel = document.getElementById('stCancel');
   const stCloseBtn = document.getElementById('stClose');
@@ -1218,22 +1302,44 @@
     updateStMedia();
   }));
   function updateStMedia() {
-    if (stType === 'opinion') { stMediaWrap.hidden = true; return; }
+    if (stType === 'opinion') { stMediaWrap.hidden = true; stAudioOpts.hidden = true; return; }
     stMediaWrap.hidden = false;
-    stFile.accept = stType === 'reel' ? 'video/*' : 'image/*';
+    stFile.accept = stType === 'reel' ? 'video/*' : stType === 'audio' ? 'audio/*' : 'image/*';
+    stAudioOpts.hidden = !(stType === 'audio' && stMedia);
     if (!stMedia) {
-      stMediaContent.innerHTML = `<button type="button" class="picker-btn" id="stPickBtn">${stType === 'reel' ? '🎬 Elegir video' : '📷 Elegir foto'}</button>`;
+      const lbl = stType === 'reel' ? '🎬 Elegir video' : stType === 'audio' ? '🎵 Elegir audio' : '📷 Elegir foto';
+      stMediaContent.innerHTML = `<button type="button" class="picker-btn" id="stPickBtn">${lbl}</button>`;
       document.getElementById('stPickBtn').addEventListener('click', () => stFile.click());
     } else {
       if (stPreviewUrl) URL.revokeObjectURL(stPreviewUrl);
       stPreviewUrl = URL.createObjectURL(stMedia.blob);
       const info = `<div style="font-size:12px;opacity:.7;margin-top:6px">Listo (${stMedia.sizeKB.toFixed(0)} KB)</div>`;
-      stMediaContent.innerHTML = stType === 'reel'
-        ? `<video src="${stPreviewUrl}" controls muted playsinline></video>${info}<button type="button" class="picker-btn" id="stClrBtn" style="margin-top:8px">Cambiar</button>`
-        : `<img src="${stPreviewUrl}">${info}<button type="button" class="picker-btn" id="stClrBtn" style="margin-top:8px">Cambiar</button>`;
+      if (stType === 'reel') {
+        stMediaContent.innerHTML = `<video src="${stPreviewUrl}" controls muted playsinline></video>${info}<button type="button" class="picker-btn" id="stClrBtn" style="margin-top:8px">Cambiar</button>`;
+      } else if (stType === 'audio') {
+        stMediaContent.innerHTML = `<audio src="${stPreviewUrl}" controls style="width:100%"></audio>${info}<button type="button" class="picker-btn" id="stClrBtn" style="margin-top:8px">Cambiar</button>`;
+        const total = Math.max(1, Math.floor(stMedia.duration || 0));
+        stAudioStart.max = String(Math.max(0, total - 1));
+        stAudioStart.value = '0';
+        stAudioDur.value = String(Math.min(30, total));
+        stAudioHint.textContent = `El audio dura ${total}s en total. Se mostrará hasta 30s como máximo.`;
+      } else {
+        stMediaContent.innerHTML = `<img src="${stPreviewUrl}">${info}<button type="button" class="picker-btn" id="stClrBtn" style="margin-top:8px">Cambiar</button>`;
+      }
       document.getElementById('stClrBtn').addEventListener('click', () => { clearStMedia(); updateStMedia(); });
     }
   }
+  function clampAudioOpts() {
+    if (!stMedia || stType !== 'audio') return;
+    const total = Math.max(1, Math.floor(stMedia.duration || 0));
+    let start = Math.max(0, Math.min(parseInt(stAudioStart.value, 10) || 0, Math.max(0, total - 1)));
+    let dur = Math.max(1, Math.min(parseInt(stAudioDur.value, 10) || 1, 30));
+    if (start + dur > total) dur = Math.max(1, total - start);
+    stAudioStart.value = String(start);
+    stAudioDur.value = String(dur);
+  }
+  if (stAudioStart) stAudioStart.addEventListener('change', clampAudioOpts);
+  if (stAudioDur) stAudioDur.addEventListener('change', clampAudioOpts);
   stFile.addEventListener('change', async (e) => {
     const f = e.target.files[0]; if (!f) return;
     stMediaContent.innerHTML = `<div style="padding:16px;opacity:.7">Procesando…</div>`;
@@ -1250,6 +1356,7 @@
     const content = stContent.value.trim();
     if (stType === 'opinion' && !content) { alert('Escribí algo'); return; }
     if (stType !== 'opinion' && !stMedia) { alert('Elegí un archivo'); return; }
+    if (stType === 'audio') clampAudioOpts();
     stSubmit.disabled = true; stSubmit.textContent = 'Subiendo…';
     let media_url = null, media_type = null;
     if (stMedia) {
@@ -1258,6 +1365,11 @@
       if (upErr) { alert('Error subiendo: ' + upErr.message); stSubmit.disabled = false; stSubmit.textContent = 'Publicar historia'; return; }
       media_url = sb.storage.from('posts').getPublicUrl(path).data.publicUrl;
       media_type = stMedia.type;
+      if (stType === 'audio') {
+        const start = parseInt(stAudioStart.value, 10) || 0;
+        const dur = Math.min(30, Math.max(1, parseInt(stAudioDur.value, 10) || 15));
+        media_url += `#t=${start},${start + dur}`;
+      }
     }
     const { error } = await sb.from('stories').insert({
       author_user_id: me.id, type: stType, content: content || null, media_url, media_type
