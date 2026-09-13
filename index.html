@@ -1330,6 +1330,20 @@
   .ship-like.liked { color: var(--coral); border-color: var(--coral); background: color-mix(in oklab, var(--coral) 12%, var(--paper)); }
   .ship-like.liked svg { fill: var(--coral); }
   .ship-like:disabled { opacity: .5; cursor: not-allowed; }
+  .ship-dislike {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 999px;
+    background: transparent; border: 1px solid var(--line);
+    color: var(--ink-mute); font-family: var(--f-mono); font-size: 11px;
+    cursor: pointer; transition: all .15s;
+    font-weight: 700;
+  }
+  .ship-dislike svg { width: 12px; height: 12px; transition: transform .15s; }
+  .ship-dislike:hover:not(:disabled) { color: var(--school); border-color: var(--school); }
+  .ship-dislike:hover:not(:disabled) svg { transform: scale(1.15); }
+  .ship-dislike.disliked { color: var(--school); border-color: var(--school); background: color-mix(in oklab, var(--school) 12%, var(--paper)); }
+  .ship-dislike.disliked svg { fill: var(--school); }
+  .ship-dislike:disabled { opacity: .5; cursor: not-allowed; }
   .ship-comment-btn {
     display: inline-flex; align-items: center; gap: 6px;
     padding: 4px 10px; border-radius: 999px;
@@ -3557,6 +3571,10 @@
   let shipLikes = new Map();
   function likesFor(id) { return shipLikes.get(id) || new Set(); }
   function iLiked(id) { return !!(currentUser && likesFor(id).has(currentUser.id)); }
+  // Estado de dislikes: Map<ship_id, Set<user_id>> — mismo patrón anónimo que los likes.
+  let shipDislikes = new Map();
+  function dislikesFor(id) { return shipDislikes.get(id) || new Set(); }
+  function iDisliked(id) { return !!(currentUser && dislikesFor(id).has(currentUser.id)); }
   // Comentarios por ship: Map<ship_id, [{id, author_user_id, text, created_at}]>
   let shipComments = new Map();
   function commentsFor(id) { return shipComments.get(id) || []; }
@@ -3621,7 +3639,13 @@
       const heart = liked
         ? '<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>'
         : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+      const nDislikes = dislikesFor(s.id).size;
+      const disliked = iDisliked(s.id);
+      const thumbDown = disliked
+        ? '<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2m-7 7l-1-1a3 3 0 0 1-.88-2.12V14H4.5a2 2 0 0 1-2-2.34l1.38-9A2 2 0 0 1 5.85 1H14v13l-4 7z"/></svg>'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2m-7 7l-1-1a3 3 0 0 1-.88-2.12V14H4.5a2 2 0 0 1-2-2.34l1.38-9A2 2 0 0 1 5.85 1H14v13l-4 7z"/></svg>';
       const likeDisabled = account ? '' : 'disabled title="Iniciá sesión para dar like"';
+      const dislikeDisabled = account ? '' : 'disabled title="Iniciá sesión para dar dislike"';
       const isMine = currentUser && s.author_user_id === currentUser.id;
       const delBtn = isMine
         ? `<button class="ship-delete" type="button" data-del="${s.id}" title="Borrar tu ship">Borrar</button>`
@@ -3637,6 +3661,7 @@
           <span>Anónimo · ${timeAgo(s.created_at)}</span>
           <div class="ship-actions">
             <button class="ship-like ${liked ? 'liked' : ''}" type="button" data-like="${s.id}" aria-pressed="${liked}" ${likeDisabled}>${heart}<span>${nLikes}</span></button>
+            <button class="ship-dislike ${disliked ? 'disliked' : ''}" type="button" data-dislike="${s.id}" aria-pressed="${disliked}" ${dislikeDisabled} title="No me gusta">${thumbDown}<span>${nDislikes}</span></button>
             <button class="ship-comment-btn" type="button" data-comment="${s.id}" title="Ver comentarios">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
               <span>${nComments}</span>
@@ -3664,11 +3689,18 @@
         if (!account || !currentUser) { openModal(); return; }
         const id = btn.dataset.like;
         const already = iLiked(id);
+        const hadDislike = iDisliked(id);
         btn.disabled = true;
         // Optimistic
         const set = shipLikes.get(id) || new Set();
         if (already) set.delete(currentUser.id); else set.add(currentUser.id);
         shipLikes.set(id, set);
+        // Al dar like, quito mi dislike (no se puede tener las dos).
+        if (!already && hadDislike) {
+          const dset = shipDislikes.get(id) || new Set();
+          dset.delete(currentUser.id);
+          shipDislikes.set(id, dset);
+        }
         renderShipsWall();
         const q = already
           ? sb.from('ship_likes').delete().eq('ship_id', id).eq('user_id', currentUser.id)
@@ -3678,9 +3710,46 @@
           // Rollback
           if (already) set.add(currentUser.id); else set.delete(currentUser.id);
           shipLikes.set(id, set);
+          if (!already && hadDislike) { const dset = shipDislikes.get(id) || new Set(); dset.add(currentUser.id); shipDislikes.set(id, dset); }
           renderShipsWall();
           alert('No se pudo: ' + error.message);
+          return;
         }
+        if (!already && hadDislike) { await sb.from('ship_dislikes').delete().eq('ship_id', id).eq('user_id', currentUser.id); }
+      });
+    });
+    shipsWall.querySelectorAll('button[data-dislike]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!account || !currentUser) { openModal(); return; }
+        const id = btn.dataset.dislike;
+        const already = iDisliked(id);
+        const hadLike = iLiked(id);
+        btn.disabled = true;
+        // Optimistic
+        const set = shipDislikes.get(id) || new Set();
+        if (already) set.delete(currentUser.id); else set.add(currentUser.id);
+        shipDislikes.set(id, set);
+        // Al dar dislike, quito mi like.
+        if (!already && hadLike) {
+          const lset = shipLikes.get(id) || new Set();
+          lset.delete(currentUser.id);
+          shipLikes.set(id, lset);
+        }
+        renderShipsWall();
+        const q = already
+          ? sb.from('ship_dislikes').delete().eq('ship_id', id).eq('user_id', currentUser.id)
+          : sb.from('ship_dislikes').insert({ ship_id: id, user_id: currentUser.id });
+        const { error } = await q;
+        if (error) {
+          // Rollback
+          if (already) set.add(currentUser.id); else set.delete(currentUser.id);
+          shipDislikes.set(id, set);
+          if (!already && hadLike) { const lset = shipLikes.get(id) || new Set(); lset.add(currentUser.id); shipLikes.set(id, lset); }
+          renderShipsWall();
+          alert('No se pudo: ' + error.message);
+          return;
+        }
+        if (!already && hadLike) { await sb.from('ship_likes').delete().eq('ship_id', id).eq('user_id', currentUser.id); }
       });
     });
     renderShipsPager(totalPages);
@@ -3714,9 +3783,10 @@
     });
   }
   async function refreshShips() {
-    const [{ data: sh, error: shErr }, { data: lk, error: lkErr }, { data: cm, error: cmErr }] = await Promise.all([
+    const [{ data: sh, error: shErr }, { data: lk, error: lkErr }, { data: dk, error: dkErr }, { data: cm, error: cmErr }] = await Promise.all([
       sb.from('ships').select('id, a, b, created_at, author_user_id').order('created_at', { ascending: false }).limit(500),
       sb.from('ship_likes').select('ship_id, user_id'),
+      sb.from('ship_dislikes').select('ship_id, user_id'),
       sb.from('ship_comments').select('id, ship_id, author_user_id, text, created_at').order('created_at', { ascending: true }),
     ]);
     if (!shErr) ships = sh || [];
@@ -3726,6 +3796,14 @@
         const s = shipLikes.get(l.ship_id) || new Set();
         s.add(l.user_id);
         shipLikes.set(l.ship_id, s);
+      });
+    }
+    if (!dkErr) {
+      shipDislikes = new Map();
+      (dk || []).forEach(l => {
+        const s = shipDislikes.get(l.ship_id) || new Set();
+        s.add(l.user_id);
+        shipDislikes.set(l.ship_id, s);
       });
     }
     if (!cmErr) {
@@ -4126,6 +4204,7 @@
         if (!id) return;
         ships = ships.filter(s => s.id !== id);
         shipLikes.delete(id);
+        shipDislikes.delete(id);
         renderShipsWall();
       })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ship_likes' }, (payload) => {
@@ -4141,6 +4220,21 @@
         if (!ship_id || !user_id) return;
         const s = shipLikes.get(ship_id);
         if (s) { s.delete(user_id); if (s.size === 0) shipLikes.delete(ship_id); else shipLikes.set(ship_id, s); }
+        renderShipsWall();
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ship_dislikes' }, (payload) => {
+        const { ship_id, user_id } = payload.new || {};
+        if (!ship_id || !user_id) return;
+        const s = shipDislikes.get(ship_id) || new Set();
+        s.add(user_id);
+        shipDislikes.set(ship_id, s);
+        renderShipsWall();
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'ship_dislikes' }, (payload) => {
+        const { ship_id, user_id } = payload.old || {};
+        if (!ship_id || !user_id) return;
+        const s = shipDislikes.get(ship_id);
+        if (s) { s.delete(user_id); if (s.size === 0) shipDislikes.delete(ship_id); else shipDislikes.set(ship_id, s); }
         renderShipsWall();
       })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ship_comments' }, (payload) => {
