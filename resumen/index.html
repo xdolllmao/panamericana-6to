@@ -152,16 +152,16 @@
 
 <main class="wrap">
   <div class="page-head">
-    <div class="page-tag">Weekly Bulletin · <em>Semana 4</em></div>
+    <div class="page-tag">Weekly Bulletin · <em>Semana 5</em></div>
     <h1>Resumen del weekly.</h1>
-    <p>Lo importante de cada materia esta semana: evaluaciones, experimentos y entregas. Nada de relleno. Tocá una materia para el detalle de A y B.</p>
+    <p>Lo importante de cada materia esta semana: evaluaciones, experimentos y entregas. Nada de relleno. Tocá una materia para ver el detalle.</p>
   </div>
 
   <div class="globals">
-    <div class="g-ico">👖🍩</div>
+    <div class="g-ico">📅</div>
     <div>
-      <strong>Viernes 11 septiembre</strong>
-      <span>Jeans Day + venta de donuts</span>
+      <strong>Martes 15: asueto · Viernes 18: pausa pedagógica</strong>
+      <span>Esos dos días no hay clase</span>
     </div>
   </div>
 
@@ -207,53 +207,44 @@
 <script>
   const SUBJECTS = [
     {
-      id: 'math', name: 'Math', teacher: 'Ms. Vásquez', icon: '🧮', color: '#D91F26',
+      id: 'math', name: 'Math', teacher: 'Ms. Norma Vásquez', icon: '🧮', color: '#D91F26',
       content: {
         both: {
-          topic: [{ t: 'Álgebra: Ecuaciones (Lesson 1-5)', p: 'Textbook pp. 22-27 · variables, ecuaciones de un paso, problem solving con guess-and-check' }],
-          hands: [{ t: 'Algebraic balance', p: 'Actividad con balanza física y contadores para resolver variables desconocidas' }],
-          eval:  [{ date: 'Jue 11 sept', t: 'Daily activity Nº 2', p: 'Ejercicios asignados del textbook' }],
-          notes: [{ t: 'Lesson extra: Variables and Expressions', p: 'Pages 18-21' }],
+          topic: [
+            { t: 'Lesson 1-6 · Algebra: Properties', p: 'Textbook pp. 30-33 · propiedades Distributiva, Conmutativa, Asociativa e Identidad' },
+            { t: 'Lesson 1-7 · Sequences', p: 'Textbook pp. 34-36 · secuencias aritméticas y geométricas' },
+          ],
+          hands: [{ t: 'Modelos visuales', p: 'Con material de manualidades y cuadrícula: construir secuencias geométricas visuales y modelos de área para las propiedades algebraicas' }],
+          eval:  [{ date: 'Toda la semana', t: 'Daily activity', p: 'Ejercicios asignados del textbook, práctica guiada e independiente en el cuaderno' }],
+          notes: [{ t: 'Repaso', p: 'Lesson 1-5a Guess and Check (pp. 22-23) · Lesson 1-5 Equations (pp. 24-27)' }],
         }
       }
     },
     {
       id: 'lang', name: 'Language Arts', teacher: 'Ms. Verónica Castillo', icon: '🔤', color: '#3B5EF0',
       content: {
-        A: {
+        both: {
           topic: [
-            { t: 'Spelling · List 3', p: 'Vocales /ou/ /o-o/ /o/ /oi/ (mound, gloomy, caution, annoy, dawdle, counter, haughty, moisten, devour, thoughtful, flawless, maroon, droop, doubt, bamboo, hoist, oyster, exhausted, pronounce, boundary, annoyance, applaud, council, disappoint)' },
-            { t: 'Grammar', p: 'The verb phrase, compound subjects and compound verbs · Workbook pp. 11-16' },
-            { t: 'Reading', p: 'Play: "Upside-Down and Backward" · Vocab: overcome, fleeting, miserable, demeaning, elope, conspiring, garland, outraged' },
+            { t: 'Grammar', p: 'Simple sentences and compound sentences · Grammar Book pp. 17-21 y cuaderno' },
+            { t: 'Spelling · List 4', p: 'Vowel + /r/ sounds (source, flirt, hurdle, parka, frontier, forward, radar, earnest, afford, urban, discard, smirk, rehearse, mourn, surface, parcel, yearn, fierce, starch, formula, cashier, awkward, furrow, according)' },
+            { t: 'Reading & Oral Expression', p: 'Realistic Fiction "Identity Theft" · Retell · Vocab: imitation, indifference, spitefully, pondered, fumed, confided, escorting, habitually, surmised' },
           ],
           eval: [
-            { date: 'Lun 7 sept', t: 'Spelling Dictation 2', p: 'La miss dicta 24 palabras 3 veces, se escriben en hoja aparte (scene, bracelets, mute, strive, faithful, devote, rhyme, succeed, coax, rely, conceal, forgave, lonesome, delete, confine, exceed, terrain, reproach, abuse, defeat, profile, conclude, scientific, podium)' },
+            { date: 'Lun 14 sept', t: 'Grammar Quiz 1 · 4th Daily Activity', p: 'Identificar Subjects, Verbs y Verb Phrases · Grammar Workbook pp. 5-13 y cuaderno' },
+            { date: 'Mié 16 sept', t: 'Spelling Dictation 3 · 3rd Daily Activity', p: 'La miss dicta cada palabra 3 veces, se escriben en hoja aparte (mound, gloomy, caution, annoy, dawdle, counter, haughty, moisten, devour, thoughtful, flawless, maroon, droop, doubt, bamboo, hoist, oyster, exhausted, pronounce, boundary, annoyance, applaud, council, disappoint)' },
             { t: 'Speaking in English', p: 'Se evalúa toda la semana' },
           ],
-          notes: [{ t: '⚠️ Traer siempre', p: 'Device en cada clase. Material extra en Google Classroom.' }],
-        },
-        B: {
-          topic: [
-            { t: 'Spelling · List 3', p: 'Mismas 24 palabras que A · /ou/ /o-o/ /o/ /oi/' },
-            { t: 'Grammar', p: 'The verb phrase, compound subjects and compound verbs · Workbook pp. 11-16' },
-            { t: 'Reading', p: 'Play: "Upside-Down and Backward" · mismo vocab' },
-          ],
-          eval: [
-            { date: 'Mar 8 sept', t: 'Spelling Dictation 2', p: '24 palabras dictadas 3 veces (scene, bracelets, mute, strive, faithful, devote, rhyme, succeed, coax, rely, conceal, forgave, lonesome, delete, confine, exceed, terrain, reproach, abuse, defeat, profile, conclude, scientific, podium)' },
-            { t: 'Speaking in English', p: 'Se evalúa toda la semana' },
-          ],
-          notes: [{ t: '⚠️ Traer siempre', p: 'Device en cada clase. Material extra en Google Classroom.' }],
-        },
+          notes: [{ t: '⚠️ Traer siempre', p: 'Device en cada clase' }],
+        }
       }
     },
     {
       id: 'social', name: 'Social Studies', teacher: 'Ms. Claudia Vásquez', icon: '🌎', color: '#0891B2',
       content: {
         both: {
-          topic: [{ t: 'Chapter 9 · Lesson 3: Life During the Civil War', p: 'Leer pp. 322-329 y responder preguntas en el libro. Escribir definiciones en el cuaderno.' }],
-          eval:  [{ date: 'Mié', t: 'Lesson 3 OPEN BOOK quiz', p: 'A libro abierto' }],
-          hands: [{ t: 'Mapa de EE.UU.', p: 'Etiquetar los 50 estados y colorearlos según "Slave free states and territories, 1820-1854"' }],
-          notes: [{ t: '⚠️ Traer siempre', p: 'Diccionario de inglés + device en cada clase' }],
+          topic: [{ t: 'Lesson 4 · The War Ends', p: 'Textbook pp. 330-337 · el final de la Guerra Civil, la rendición de Lee ante Grant en Appomattox Court House' }],
+          eval:  [{ date: 'Mié', t: 'Lesson 4 Review Questions', p: '"The War Ends" · repaso oral + guided notes + exit ticket' }],
+          notes: [{ t: 'Key vocabulary', p: 'Union · Confederacy · surrender · Appomattox Court House · emancipation' }],
         }
       }
     },
@@ -261,25 +252,19 @@
       id: 'sci', name: 'Science / Discovery', teacher: 'Ms. Claudia Vásquez', icon: '🔬', color: '#22B573',
       content: {
         both: {
-          topic: [{ t: 'Chapter 1 · Lesson 3: Gravity and Motion', p: 'Día 1: leer pp. 18-21 y responder. Día 2: Review and Reinforce (open book). Día 3: quiz.' }],
-          eval:  [{ date: 'Día 3', t: 'Open book Lesson 3 quiz', p: 'Sobre gravedad y movimiento' }],
-          exp:   [{ date: 'Mié 10 sept', t: 'Balloon Rocket Race 🎈', p: 'Explorar cómo el aire empuja el globo (3ra Ley de Newton). Sin materiales que traer. <a href="https://youtu.be/TfZsGy_q9zA" target="_blank" rel="noopener">Ver referencia</a>' }],
-          notes: [{ t: '⚠️ Traer siempre', p: 'Diccionario de inglés + device' }],
+          topic: [{ t: 'Fases de la Luna y eclipses', p: 'Textbook pp. 22-27 · por qué la Luna cambia de forma, qué causa los eclipses solares y lunares, modelar posiciones Tierra-Luna-Sol' }],
+          hands: [{ t: 'Dibujar y etiquetar', p: 'Un eclipse lunar · completar worksheet en el cuaderno' }],
         }
       }
     },
     {
       id: 'cyv', name: 'Ciudadanía y Valores', teacher: 'Ms. Dolores Hernández', icon: '🏛️', color: '#DB2777',
       content: {
-        A: {
-          topic: [{ t: 'Semana 4 · Formas de vida urbanas vs. rurales', p: 'Interdependencia campo-ciudad · libro pp. 38-41 · desmitificar estereotipos' }],
-          eval:  [{ date: 'Vie 11 sept', t: 'Evaluación cotidiana 4', p: 'Actividad "La maleta de las palabras", debate + trabajo del libro' }],
-          hands: [{ t: 'Taller creativo', p: '"Pacto de Convivencia Territorial" · en grupos, diseñar una Campaña de Concientización' }],
-        },
-        B: {
-          topic: [{ t: 'Semana 4 · Formas de vida urbanas vs. rurales', p: 'Interdependencia campo-ciudad · libro pp. 38-41' }],
-          eval:  [{ date: 'Jue 10 sept', t: 'Evaluación cotidiana 4', p: 'Actividad + debate + trabajo del libro' }],
-          hands: [{ t: 'Taller creativo', p: '"Pacto de Convivencia Territorial" · Campaña de Concientización en grupos' }],
+        both: {
+          topic: [{ t: 'Semana 5 · Características demográficas de El Salvador', p: 'Densidad, diversidad étnica, migración y estructura por edades · herencia mestiza e indígena · fenómeno migratorio y remesas · bono demográfico · libro pp. 42-50' }],
+          eval:  [{ date: 'Jue 17 sept', t: 'La Mini-Asamblea Ciudadana', p: 'En grupos de 4 ("Consejo Ciudadano"): elegir un reto demográfico y crear una Propuesta de Ley Ciudadana → cartel (Problema, Valor, Solución) y presentarlo en 2 min. Rúbrica: comprensión 30%, valores 25%, viabilidad/creatividad 25%, trabajo en equipo 20%.' }],
+          hands: [{ t: 'Cuadro comparativo + juego', p: 'Herencia mestiza vs. indígena · dinámica "la pelota rebotona": ¿la migración es un fracaso del país o una estrategia de supervivencia?' }],
+          notes: [{ t: '📅 Sin clase', p: 'Martes 15 asueto · Viernes 18 pausa pedagógica' }],
         }
       }
     },
@@ -287,50 +272,31 @@
       id: 'cyt', name: 'Ciencia y Tecnología', teacher: 'Ms. Dolores Hernández', icon: '⚗️', color: '#10B981',
       content: {
         both: {
-          topic: [{ t: 'Semana 4 · Caudal y principio de Bernoulli', p: 'Libro pp. 23-28 · velocidad + presión de fluidos · por qué vuelan los aviones' }],
-          exp:   [{ date: 'Mié 9 sept', t: '🧪 "El papel mágico"', p: 'Evaluación formativa y práctica. <strong>Traer una tira de papel bond de 15 × 5 cm ya cortada.</strong>' }],
+          topic: [{ t: 'Unidad 2 · La Temperatura', p: 'Calor y temperatura: qué es la temperatura (energía cinética, °C), en qué se diferencia del calor, y cómo usar el termómetro' }],
+          exp:   [{ t: '🌡️ Detectives de la Temperatura', p: 'En parejas (20 min): medir la temperatura de 3 muestras (agua con hielo, ambiente del aula, agua tibia). Entregar mini ficha con las 3 temperaturas + reflexión. <strong>Si tenés termómetro en casa, podés llevarlo.</strong>' }],
         }
       }
     },
     {
       id: 'com', name: 'Comunicación', teacher: 'Ms. Iris Zaldaña', icon: '💬', color: '#7C3AED',
       content: {
-        A: {
+        both: {
           topic: [
-            { t: 'Lunes', p: 'La coma en vocativos y frases explicativas · libro p. 33' },
-            { t: 'Martes', p: 'Determinantes numerales · libro Ortotrazos pp. 19-24' },
-            { t: 'Miércoles', p: 'Libreta de caligrafía' },
-            { t: 'Jueves', p: 'La historieta · libro p. 35' },
+            { t: 'Lunes', p: 'La infografía · libro p. 38: elegí un tema de la unidad y hacé en tu cuaderno el boceto de tu infografía' },
+            { t: 'Martes 15', p: 'Asueto' },
+            { t: 'Miércoles', p: 'Continuación de la infografía' },
+            { t: 'Jueves', p: 'El registro formal, culto o especializado · libro pp. 41-42 ejercicios 1 y 3' },
+            { t: 'Viernes', p: 'Pausa pedagógica' },
           ],
-          eval: [{ date: 'Vie 11 sept', t: 'Actividad evaluada · Historieta', p: '4 viñetas con título, personajes, inicio/desarrollo/final, globos de diálogo y al menos una onomatopeya. Debe promover una acción positiva.' }],
-        },
-        B: {
-          topic: [
-            { t: 'Lunes', p: 'La coma en vocativos y frases explicativas · libro p. 33' },
-            { t: 'Martes', p: 'La historieta · libro p. 35' },
-            { t: 'Miércoles', p: 'Libreta de caligrafía' },
-            { t: 'Jueves', p: 'Determinantes numerales · libro Ortotrazos pp. 19-24' },
-          ],
-          eval: [{ date: 'Vie 11 sept', t: 'Actividad evaluada · Historieta', p: '4 viñetas con título, personajes, inicio/desarrollo/final, globos de diálogo y al menos una onomatopeya. Debe promover una acción positiva.' }],
+          eval: [{ date: 'Lunes', t: 'Actividad evaluada · Infografía', p: 'Boceto de la infografía explicando el tema elegido (libro p. 38)' }],
         }
       }
     },
     {
       id: 'arte', name: 'Arte', teacher: 'Ms. Clancy de Fuentes', icon: '🎨', color: '#F5DE3A',
       content: {
-        A: {
-          topic: [{ t: 'Henri Matisse · Papiers découpés', p: 'Reproducción libre de una obra: pintura acrílica/témpera o collage' }],
-          hands: [
-            { date: 'Mar 8 sept', t: 'Actividad cotidiana · Planificación', p: 'Conocer a Matisse, elegir obra y bocetar en la libreta' },
-            { date: 'Vie 11 sept', t: 'Actividad cotidiana · Creación', p: 'Realizar la reproducción cuidando composición, contraste y armonía de colores' },
-          ],
-        },
-        B: {
-          topic: [{ t: 'Henri Matisse · Papiers découpés', p: 'Reproducción libre de una obra: pintura acrílica/témpera o collage' }],
-          hands: [
-            { date: 'Lun 7 sept', t: 'Actividad cotidiana · Planificación', p: 'Conocer a Matisse, elegir obra y bocetar en la libreta' },
-            { date: 'Mié 9 sept', t: 'Actividad cotidiana · Creación', p: 'Realizar la reproducción cuidando composición, contraste y armonía de colores' },
-          ],
+        both: {
+          notes: [{ t: '📅 Sin clase esta semana', p: 'Martes 15 asueto · Viernes 18 pausa pedagógica' }],
         }
       }
     },
@@ -338,23 +304,17 @@
       id: 'lec', name: 'Lectura y Escritura', teacher: 'Ms. Dolores Hernández', icon: '📖', color: '#EA580C',
       content: {
         both: {
-          topic: [{ t: '"Sonetos de octubre y vientos de octubre"', p: 'Libro pp. 15-18 · comprensión literal, crítica, inferencial y creativa · lectura conjunta y por versos' }],
-          notes: [{ t: 'Reglas de hoja de trabajo', p: 'Con tinta · sin manchones · letra legible · aplicar reglas ortográficas' }],
+          notes: [{ t: '📅 Sin clase', p: 'No hay clase por asueto del 15 de septiembre' }],
         }
       }
     },
     {
       id: 'mus', name: 'Música', teacher: 'Mr. Pablo Díaz', icon: '🎵', color: '#F59E0B',
       content: {
-        A: {
-          topic: [{ t: '"Greensleeves" en ukelele', p: 'Trabajo por frases · precisión, coordinación, fluidez y expresividad' }],
-          eval: [{ date: 'Esta semana', t: 'Evaluación individual', p: 'Ejecución de la canción por cada estudiante' }],
-          notes: [{ t: 'Classroom', p: 'Código para el grupo: <strong>azg7rump</strong>' }],
-        },
-        B: {
-          topic: [{ t: '"Greensleeves" en ukelele', p: 'Trabajo por frases · precisión, coordinación, fluidez y expresividad' }],
-          eval: [{ date: 'Esta semana', t: 'Evaluación individual', p: 'Ejecución de la canción por cada estudiante' }],
-          notes: [{ t: 'Classroom', p: 'Código para el grupo: <strong>aoarrrkk</strong>' }],
+        both: {
+          topic: [{ t: '"Greensleeves" en ukelele', p: 'Continúa el aprendizaje de la melodía · pulso, continuidad, fraseo, dinámicas y coordinación' }],
+          eval: [{ date: 'Esta semana', t: 'Prueba Objetiva', p: 'Se evalúa la ejecución de la canción como parte de una nota de Prueba Objetiva' }],
+          notes: [{ t: 'Para practicar', p: '"Greensleeves - Easy Beginner Ukulele Tabs With Playthrough Tutorial Lesson"' }],
         }
       }
     },
@@ -362,7 +322,7 @@
       id: 'val', name: 'Valores', teacher: 'Mr. José Rodas', icon: '❤️', color: '#DB2777',
       content: {
         both: {
-          topic: [{ t: 'El autoconocimiento II', p: 'Definir el concepto, reflexionar su importancia en decisiones y relaciones, identificar propias fortalezas, debilidades, intereses y emociones' }],
+          topic: [{ t: 'La dignidad: reconozco mi valor y el de los demás', p: 'La dignidad es el valor que tiene cada persona por ser humana: merece respeto, consideración y trato justo sin importar apariencia, capacidades o diferencias. También es reconocer el propio valor. "Tu valor no depende de lo que otros piensen de ti."' }],
         }
       }
     },
@@ -370,8 +330,7 @@
       id: 'tec', name: 'Technology', teacher: 'Mr. Francisco Sánchez', icon: '💻', color: '#0EA5A5',
       content: {
         both: {
-          topic: [{ t: 'Proyecto 1: Números del entretenimiento', p: 'Hojas de cálculo · Microsoft Excel · industria del entretenimiento' }],
-          notes: [{ t: 'Identidad digital', p: 'Qué es y consejos prácticos para cuidarla' }],
+          topic: [{ t: 'Proyecto 1: Números del entretenimiento', p: 'Hojas de cálculo · Microsoft Excel: construir una tabla con las películas de más recaudación de la historia, calcular la taquilla total y compararla con el presupuesto para determinar ganancias' }],
         }
       }
     },
@@ -379,8 +338,8 @@
       id: 'efi', name: 'Educación Física', teacher: 'Mr. Ernesto Argumedo', icon: '🏀', color: '#6366F1',
       content: {
         both: {
-          topic: [{ t: 'Baloncesto · Tiros a canasta', p: 'Calentamiento (coordinación + estiramientos), tiros de media distancia, tiros en movimiento' }],
-          hands: [{ t: 'Juegos y competencias', p: 'Competencias de tiros libres · juego "alrededor del mundo"' }],
+          topic: [{ t: 'Minibaloncesto · Defensa', p: 'Fundamento técnico de movimientos defensivos y defensa básica' }],
+          hands: [{ t: 'Ejercicios y juegos', p: 'Calentamiento (circuito de agilidad y reacción + estiramientos dinámicos) · posición defensiva · deslizamientos laterales con oposición · uno contra uno · defensa en equipo' }],
         }
       }
     },
