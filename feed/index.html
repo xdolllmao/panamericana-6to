@@ -51,6 +51,7 @@
 
   * { box-sizing: border-box; }
   body { margin: 0; font-family: var(--f-body); color: var(--ink); background: var(--ground); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  [hidden] { display: none !important; }
   a { color: inherit; text-decoration: none; }
   button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
   input, textarea { font: inherit; color: inherit; }
@@ -126,14 +127,36 @@
   .story-stage { flex: 1; position: relative; display: grid; place-items: center; overflow: hidden; user-select: none; -webkit-user-select: none; }
   .story-stage img, .story-stage video { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
   .story-stage .opinion-view { box-sizing: border-box; width: 100%; max-width: 100%; max-height: 100%; overflow-y: auto; padding: 40px 28px; text-align: center; color: #fff; font-family: var(--f-display); font-weight: 700; font-size: 34px; line-height: 1.22; letter-spacing: -0.02em; overflow-wrap: anywhere; word-break: break-word; }
-  .story-stage .audio-view { box-sizing: border-box; width: 100%; max-width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; padding: 40px 28px; text-align: center; color: #fff; background: radial-gradient(circle at 50% 38%, rgba(107,62,232,.55), rgba(0,0,0,.15) 72%); }
-  .story-stage .audio-view .audio-emoji { font-size: 72px; line-height: 1; filter: drop-shadow(0 6px 18px rgba(0,0,0,.4)); }
-  .story-stage .audio-view .audio-bars { display: flex; align-items: flex-end; gap: 6px; height: 46px; }
-  .story-stage .audio-view .audio-bars span { width: 7px; height: 12px; border-radius: 4px; background: #fff; animation: stBar 1s ease-in-out infinite; }
-  .story-stage .audio-view .audio-bars span:nth-child(1){animation-delay:-1.1s} .story-stage .audio-view .audio-bars span:nth-child(2){animation-delay:-.5s} .story-stage .audio-view .audio-bars span:nth-child(3){animation-delay:-.8s} .story-stage .audio-view .audio-bars span:nth-child(4){animation-delay:-.2s} .story-stage .audio-view .audio-bars span:nth-child(5){animation-delay:-.9s} .story-stage .audio-view .audio-bars span:nth-child(6){animation-delay:-.4s} .story-stage .audio-view .audio-bars span:nth-child(7){animation-delay:-.7s}
-  @keyframes stBar { 0%,100%{height:12px} 50%{height:46px} }
-  .story-stage .audio-view .audio-text { font-family: var(--f-display); font-weight: 700; font-size: 26px; line-height: 1.25; letter-spacing: -0.02em; overflow-wrap: anywhere; word-break: break-word; max-height: 42%; overflow-y: auto; }
-  .audio-opts { margin-top: 12px; display: flex; flex-direction: column; gap: 10px; }
+  /* Chip "sonando" dentro del visor */
+  .story-music-chip { position: absolute; left: 14px; bottom: 14px; z-index: 4; display: flex; align-items: center; gap: 9px; max-width: 72%; padding: 7px 12px 7px 8px; border-radius: 999px; background: rgba(0,0,0,.5); backdrop-filter: blur(6px); color: #fff; }
+  .story-music-chip img { width: 26px; height: 26px; border-radius: 6px; object-fit: cover; flex-shrink: 0; }
+  .story-music-chip .mc-note { width: 26px; height: 26px; border-radius: 6px; display: grid; place-items: center; background: rgba(255,255,255,.16); flex-shrink: 0; }
+  .story-music-chip .mc-txt { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .story-music-chip .mc-bars { display: flex; align-items: flex-end; gap: 2px; height: 14px; flex-shrink: 0; }
+  .story-music-chip .mc-bars span { width: 3px; height: 4px; border-radius: 2px; background: #fff; animation: stBar 1s ease-in-out infinite; }
+  .story-music-chip .mc-bars span:nth-child(2){animation-delay:-.5s} .story-music-chip .mc-bars span:nth-child(3){animation-delay:-.8s}
+  @keyframes stBar { 0%,100%{height:4px} 50%{height:14px} }
+  /* Sección de música en el composer */
+  .music-pick { display: flex; gap: 8px; flex-wrap: wrap; }
+  .music-btn { padding: 9px 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--paper); color: var(--ink); font-size: 13px; font-weight: 700; cursor: pointer; }
+  .music-btn:hover { background: var(--paper-soft); }
+  .song-search { margin-top: 10px; }
+  .song-search input { width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); color: var(--ink); font-size: 14px; }
+  .song-results { margin-top: 8px; max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+  .song-row { display: flex; align-items: center; gap: 10px; padding: 7px 8px; border-radius: 10px; cursor: pointer; }
+  .song-row:hover { background: var(--paper-soft); }
+  .song-row img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+  .song-row .sr-txt { min-width: 0; flex: 1; }
+  .song-row .sr-name { font-size: 14px; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .song-row .sr-art { font-size: 12px; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .song-row .sr-no { font-size: 11px; color: var(--ink-soft); opacity: .7; }
+  .audio-chosen { margin-top: 10px; display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper-soft); }
+  .audio-chosen img, .audio-chosen .ac-note { width: 42px; height: 42px; border-radius: 8px; object-fit: cover; flex-shrink: 0; display: grid; place-items: center; background: var(--paper); }
+  .audio-chosen .ac-txt { flex: 1; min-width: 0; }
+  .audio-chosen .ac-name { font-size: 14px; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .audio-chosen .ac-sub { font-size: 12px; color: var(--ink-soft); }
+  .audio-chosen .ac-remove { color: var(--coral); font-weight: 700; font-size: 13px; cursor: pointer; flex-shrink: 0; }
+  .audio-opts { margin-top: 10px; display: flex; flex-direction: column; gap: 10px; }
   .audio-opts .ao-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
   .audio-opts .ao-row label { font-size: 13px; font-weight: 600; color: var(--ink-soft); }
   .audio-opts .ao-row input { width: 92px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); color: var(--ink); font-size: 14px; }
@@ -371,26 +394,38 @@
         <button class="ct is-active" data-type="opinion">💬 Opinión</button>
         <button class="ct" data-type="photo">📷 Foto</button>
         <button class="ct" data-type="reel">🎬 Reel</button>
-        <button class="ct" data-type="audio">🎵 Audio</button>
       </div>
       <div class="form-row">
-        <label>Texto (opcional en fotos, reels o audio)</label>
+        <label>Texto (opcional en fotos/reels)</label>
         <textarea id="stContent" maxlength="300" placeholder="¿Qué querés contar?"></textarea>
       </div>
       <div id="stMediaWrap" class="media-preview" hidden>
         <input type="file" id="stFile" hidden>
         <div id="stMediaContent"></div>
       </div>
-      <div id="stAudioOpts" class="audio-opts" hidden>
-        <div class="ao-row">
-          <label>Empieza en el segundo</label>
-          <input type="number" id="stAudioStart" min="0" step="1" value="0">
+      <div class="form-row" id="stMusicRow">
+        <label>🎵 Música / audio (opcional)</label>
+        <div class="music-pick" id="stMusicPick">
+          <button type="button" class="music-btn" id="stSongBtn">🔎 Buscar canción</button>
+          <button type="button" class="music-btn" id="stAudioFileBtn">🎵 Subir audio</button>
+          <input type="file" id="stAudioFile" accept="audio/*" hidden>
         </div>
-        <div class="ao-row">
-          <label>Duración (segundos, máx 30)</label>
-          <input type="number" id="stAudioDur" min="1" max="30" step="1" value="15">
+        <div class="song-search" id="stSongSearch" hidden>
+          <input type="text" id="stSongQuery" placeholder="Nombre de la canción o artista…">
+          <div class="song-results" id="stSongResults"></div>
         </div>
-        <div class="ao-hint" id="stAudioHint"></div>
+        <div class="audio-chosen" id="stAudioChosen" hidden></div>
+        <div id="stAudioOpts" class="audio-opts" hidden>
+          <div class="ao-row">
+            <label>Empieza en el segundo</label>
+            <input type="number" id="stAudioStart" min="0" step="1" value="0">
+          </div>
+          <div class="ao-row">
+            <label>Duración (segundos, máx 30)</label>
+            <input type="number" id="stAudioDur" min="1" max="30" step="1" value="15">
+          </div>
+          <div class="ao-hint" id="stAudioHint"></div>
+        </div>
       </div>
     </div>
     <div class="modal-foot">
@@ -461,6 +496,19 @@
       const url = URL.createObjectURL(file);
       a.onloadedmetadata = () => { const d = a.duration; URL.revokeObjectURL(url); resolve(isFinite(d) && d > 0 ? d : 0); };
       a.onerror = () => { URL.revokeObjectURL(url); reject(new Error('No pudimos leer ese audio.')); };
+      a.src = url;
+    });
+  }
+  // Duración (segundos) de un audio remoto (preview de canción). Nunca rechaza: 0 si falla.
+  function getAudioDurationFromUrl(url){
+    return new Promise((resolve) => {
+      const a = document.createElement('audio');
+      a.preload = 'metadata'; a.crossOrigin = 'anonymous';
+      let done = false;
+      const finish = (d) => { if (done) return; done = true; resolve(isFinite(d) && d > 0 ? d : 0); };
+      a.onloadedmetadata = () => finish(a.duration);
+      a.onerror = () => finish(0);
+      setTimeout(() => finish(a.duration || 0), 4000);
       a.src = url;
     });
   }
@@ -912,7 +960,7 @@
   async function loadStories() {
     const cutoff = new Date(Date.now() - STORY_TTL).toISOString();
     const { data, error } = await sb.from('stories')
-      .select('id, author_user_id, type, content, media_url, media_type, created_at')
+      .select('*')
       .gt('created_at', cutoff)
       .order('created_at', { ascending: true });
     if (error) return;
@@ -1041,7 +1089,7 @@
     if (viewerTimer) { clearTimeout(viewerTimer); viewerTimer = null; }
     if (viewerRAF) { cancelAnimationFrame(viewerRAF); viewerRAF = null; }
     // Remove any media
-    storyStage.querySelectorAll('img, video, audio, .opinion-view, .audio-view, .story-caption, .story-delete').forEach(n => n.remove());
+    storyStage.querySelectorAll('img, video, audio, .opinion-view, .story-caption, .story-delete, .story-music-chip').forEach(n => n.remove());
     renderStoriesBar();
   }
   function showViewerStory() {
@@ -1071,29 +1119,16 @@
     document.getElementById('storyCloseBtn').addEventListener('click', closeStoryViewer);
 
     // Clear stage keeping tap zones
-    storyStage.querySelectorAll('img, video, audio, .opinion-view, .audio-view, .story-caption, .story-delete').forEach(n => n.remove());
+    storyStage.querySelectorAll('img, video, audio, .opinion-view, .story-caption, .story-delete, .story-music-chip').forEach(n => n.remove());
 
     viewerDuration = STORY_DURATION;
+    const hasAudio = !!s.audio_url;
     if (s.type === 'opinion') {
       const div = document.createElement('div');
       div.className = 'opinion-view';
       div.textContent = s.content || '';
       fitOpinionFont(div, s.content || '');
       storyStage.prepend(div);
-    } else if (s.type === 'audio' && s.media_url) {
-      const frag = parseMediaFragment(s.media_url);
-      const wrap = document.createElement('div');
-      wrap.className = 'audio-view';
-      wrap.innerHTML = `<div class="audio-emoji">🎵</div><div class="audio-bars">${'<span></span>'.repeat(7)}</div>${s.content ? '<div class="audio-text"></div>' : ''}`;
-      if (s.content) wrap.querySelector('.audio-text').textContent = s.content;
-      storyStage.prepend(wrap);
-      const a = document.createElement('audio');
-      a.src = frag.url; a.preload = 'auto'; a.autoplay = true;
-      a.addEventListener('loadedmetadata', () => { try { a.currentTime = frag.start || 0; } catch(e){} });
-      a.addEventListener('timeupdate', () => { if (frag.end != null && a.currentTime >= frag.end) { try { a.pause(); } catch(e){} } });
-      const seg = frag.end != null ? (frag.end - frag.start) : 30;
-      viewerDuration = Math.min(30000, Math.max(1000, seg * 1000));
-      storyStage.appendChild(a);
     } else if (s.type === 'photo' && s.media_url) {
       const img = document.createElement('img');
       img.src = s.media_url;
@@ -1107,7 +1142,7 @@
     } else if (s.type === 'reel' && s.media_url) {
       const v = document.createElement('video');
       v.src = s.media_url;
-      v.autoplay = true; v.playsInline = true; v.muted = false;
+      v.autoplay = true; v.playsInline = true; v.muted = hasAudio; // si hay música elegida, silenciamos el video
       v.controls = false;
       v.addEventListener('loadedmetadata', () => {
         viewerDuration = Math.max(1500, Math.min(v.duration * 1000, 60000));
@@ -1121,6 +1156,26 @@
         cap.textContent = s.content;
         storyStage.appendChild(cap);
       }
+    }
+
+    // Audio adjunto (canción buscada o audio propio): funciona en cualquier tipo de historia
+    if (hasAudio) {
+      const frag = parseMediaFragment(s.audio_url);
+      const a = document.createElement('audio');
+      a.src = frag.url; a.preload = 'auto'; a.autoplay = true;
+      a.addEventListener('loadedmetadata', () => { try { a.currentTime = frag.start || 0; } catch(e){} });
+      a.addEventListener('timeupdate', () => { if (frag.end != null && a.currentTime >= frag.end) { try { a.pause(); } catch(e){} } });
+      storyStage.appendChild(a);
+      // El audio marca la duración de opiniones y fotos; el reel usa la duración del video.
+      if (s.type !== 'reel') {
+        const seg = frag.end != null ? (frag.end - frag.start) : 30;
+        viewerDuration = Math.min(30000, Math.max(1000, seg * 1000));
+      }
+      const chip = document.createElement('div');
+      chip.className = 'story-music-chip';
+      const art = s.audio_cover ? `<img src="${escapeHtml(s.audio_cover)}" alt="">` : `<span class="mc-note">🎵</span>`;
+      chip.innerHTML = `${art}<span class="mc-txt">${escapeHtml(s.audio_title || 'Audio')}</span><span class="mc-bars"><span></span><span></span><span></span></span>`;
+      storyStage.appendChild(chip);
     }
 
     if (isMine) {
@@ -1268,6 +1323,14 @@
   const stFile = document.getElementById('stFile');
   const stMediaWrap = document.getElementById('stMediaWrap');
   const stMediaContent = document.getElementById('stMediaContent');
+  const stMusicPick = document.getElementById('stMusicPick');
+  const stSongBtn = document.getElementById('stSongBtn');
+  const stAudioFileBtn = document.getElementById('stAudioFileBtn');
+  const stAudioFile = document.getElementById('stAudioFile');
+  const stSongSearch = document.getElementById('stSongSearch');
+  const stSongQuery = document.getElementById('stSongQuery');
+  const stSongResults = document.getElementById('stSongResults');
+  const stAudioChosen = document.getElementById('stAudioChosen');
   const stAudioOpts = document.getElementById('stAudioOpts');
   const stAudioStart = document.getElementById('stAudioStart');
   const stAudioDur = document.getElementById('stAudioDur');
@@ -1277,21 +1340,31 @@
   const stCloseBtn = document.getElementById('stClose');
   let stType = 'opinion';
   let stMedia = null, stPreviewUrl = null;
+  // Audio adjunto a la historia: { source:'song'|'file', url?, title, cover, blob?, ext?, type?, duration }
+  let stAudio = null;
   function clearStMedia() {
     if (stPreviewUrl) { URL.revokeObjectURL(stPreviewUrl); stPreviewUrl = null; }
     stMedia = null;
     if (stFile) stFile.value = '';
   }
+  function clearStAudio() {
+    stAudio = null;
+    if (stAudioFile) stAudioFile.value = '';
+    stSongSearch.hidden = true;
+    stSongResults.innerHTML = '';
+    if (stSongQuery) stSongQuery.value = '';
+    updateAudioUI();
+  }
 
   function openStoryComposer() {
     if (!myProfile) { alert('Reclamá tu nombre primero'); return; }
-    stType = 'opinion'; clearStMedia();
+    stType = 'opinion'; clearStMedia(); clearStAudio();
     stContent.value = '';
     stTabs.querySelectorAll('.ct').forEach(t => t.classList.toggle('is-active', t.dataset.type === stType));
     updateStMedia();
     stModal.hidden = false; stModal.classList.add('open');
   }
-  function closeStoryComposer() { stModal.classList.remove('open'); stModal.hidden = true; clearStMedia(); }
+  function closeStoryComposer() { stModal.classList.remove('open'); stModal.hidden = true; clearStMedia(); clearStAudio(); }
   stCloseBtn.addEventListener('click', closeStoryComposer);
   stCancel.addEventListener('click', closeStoryComposer);
   stModal.addEventListener('click', e => { if (e.target === stModal) closeStoryComposer(); });
@@ -1302,44 +1375,23 @@
     updateStMedia();
   }));
   function updateStMedia() {
-    if (stType === 'opinion') { stMediaWrap.hidden = true; stAudioOpts.hidden = true; return; }
+    if (stType === 'opinion') { stMediaWrap.hidden = true; return; }
     stMediaWrap.hidden = false;
-    stFile.accept = stType === 'reel' ? 'video/*' : stType === 'audio' ? 'audio/*' : 'image/*';
-    stAudioOpts.hidden = !(stType === 'audio' && stMedia);
+    stFile.accept = stType === 'reel' ? 'video/*' : 'image/*';
     if (!stMedia) {
-      const lbl = stType === 'reel' ? '🎬 Elegir video' : stType === 'audio' ? '🎵 Elegir audio' : '📷 Elegir foto';
+      const lbl = stType === 'reel' ? '🎬 Elegir video' : '📷 Elegir foto';
       stMediaContent.innerHTML = `<button type="button" class="picker-btn" id="stPickBtn">${lbl}</button>`;
       document.getElementById('stPickBtn').addEventListener('click', () => stFile.click());
     } else {
       if (stPreviewUrl) URL.revokeObjectURL(stPreviewUrl);
       stPreviewUrl = URL.createObjectURL(stMedia.blob);
       const info = `<div style="font-size:12px;opacity:.7;margin-top:6px">Listo (${stMedia.sizeKB.toFixed(0)} KB)</div>`;
-      if (stType === 'reel') {
-        stMediaContent.innerHTML = `<video src="${stPreviewUrl}" controls muted playsinline></video>${info}<button type="button" class="picker-btn" id="stClrBtn" style="margin-top:8px">Cambiar</button>`;
-      } else if (stType === 'audio') {
-        stMediaContent.innerHTML = `<audio src="${stPreviewUrl}" controls style="width:100%"></audio>${info}<button type="button" class="picker-btn" id="stClrBtn" style="margin-top:8px">Cambiar</button>`;
-        const total = Math.max(1, Math.floor(stMedia.duration || 0));
-        stAudioStart.max = String(Math.max(0, total - 1));
-        stAudioStart.value = '0';
-        stAudioDur.value = String(Math.min(30, total));
-        stAudioHint.textContent = `El audio dura ${total}s en total. Se mostrará hasta 30s como máximo.`;
-      } else {
-        stMediaContent.innerHTML = `<img src="${stPreviewUrl}">${info}<button type="button" class="picker-btn" id="stClrBtn" style="margin-top:8px">Cambiar</button>`;
-      }
+      stMediaContent.innerHTML = stType === 'reel'
+        ? `<video src="${stPreviewUrl}" controls muted playsinline></video>${info}<button type="button" class="picker-btn" id="stClrBtn" style="margin-top:8px">Cambiar</button>`
+        : `<img src="${stPreviewUrl}">${info}<button type="button" class="picker-btn" id="stClrBtn" style="margin-top:8px">Cambiar</button>`;
       document.getElementById('stClrBtn').addEventListener('click', () => { clearStMedia(); updateStMedia(); });
     }
   }
-  function clampAudioOpts() {
-    if (!stMedia || stType !== 'audio') return;
-    const total = Math.max(1, Math.floor(stMedia.duration || 0));
-    let start = Math.max(0, Math.min(parseInt(stAudioStart.value, 10) || 0, Math.max(0, total - 1)));
-    let dur = Math.max(1, Math.min(parseInt(stAudioDur.value, 10) || 1, 30));
-    if (start + dur > total) dur = Math.max(1, total - start);
-    stAudioStart.value = String(start);
-    stAudioDur.value = String(dur);
-  }
-  if (stAudioStart) stAudioStart.addEventListener('change', clampAudioOpts);
-  if (stAudioDur) stAudioDur.addEventListener('change', clampAudioOpts);
   stFile.addEventListener('change', async (e) => {
     const f = e.target.files[0]; if (!f) return;
     stMediaContent.innerHTML = `<div style="padding:16px;opacity:.7">Procesando…</div>`;
@@ -1352,30 +1404,129 @@
       updateStMedia();
     }
   });
+
+  // ---- Música / audio adjunto (aplica a opinión, foto y reel) ----
+  function updateAudioUI() {
+    const has = !!stAudio;
+    stMusicPick.hidden = has;
+    stAudioChosen.hidden = !has;
+    stAudioOpts.hidden = !has;
+    if (!has) return;
+    const total = Math.max(1, Math.floor(stAudio.duration || 30));
+    const art = stAudio.cover ? `<img src="${escapeHtml(stAudio.cover)}" alt="">` : `<span class="ac-note">🎵</span>`;
+    const sub = stAudio.source === 'song' ? 'Canción' : 'Audio propio';
+    stAudioChosen.innerHTML = `${art}<div class="ac-txt"><div class="ac-name">${escapeHtml(stAudio.title || 'Audio')}</div><div class="ac-sub">${sub}</div></div><span class="ac-remove" id="stAudioRemove">Quitar</span>`;
+    document.getElementById('stAudioRemove').addEventListener('click', clearStAudio);
+    stAudioStart.max = String(Math.max(0, total - 1));
+    if ((parseInt(stAudioStart.value, 10) || 0) > total - 1) stAudioStart.value = '0';
+    stAudioDur.value = String(Math.min(30, total, parseInt(stAudioDur.value, 10) || 30));
+    stAudioHint.textContent = `Dura ${total}s en total. La historia mostrará hasta 30s.`;
+  }
+  function clampAudioOpts() {
+    if (!stAudio) return;
+    const total = Math.max(1, Math.floor(stAudio.duration || 30));
+    let start = Math.max(0, Math.min(parseInt(stAudioStart.value, 10) || 0, Math.max(0, total - 1)));
+    let dur = Math.max(1, Math.min(parseInt(stAudioDur.value, 10) || 1, 30));
+    if (start + dur > total) dur = Math.max(1, total - start);
+    stAudioStart.value = String(start);
+    stAudioDur.value = String(dur);
+  }
+  if (stAudioStart) stAudioStart.addEventListener('change', clampAudioOpts);
+  if (stAudioDur) stAudioDur.addEventListener('change', clampAudioOpts);
+
+  // Subir un audio propio
+  stAudioFileBtn.addEventListener('click', () => stAudioFile.click());
+  stAudioFile.addEventListener('change', async (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    try {
+      const m = await preparePostMedia(f, 'audio');
+      stAudio = { source: 'file', blob: m.blob, ext: m.ext, type: m.type, title: f.name.replace(/\.[^.]+$/, ''), cover: null, duration: m.duration || 30 };
+      stSongSearch.hidden = true;
+      updateAudioUI();
+    } catch (err) { alert(err.message || 'No pudimos leer ese audio.'); }
+  });
+
+  // Buscar una canción
+  stSongBtn.addEventListener('click', () => {
+    stSongSearch.hidden = !stSongSearch.hidden;
+    if (!stSongSearch.hidden) stSongQuery.focus();
+  });
+  let songSearchTimer = null;
+  stSongQuery.addEventListener('input', () => {
+    clearTimeout(songSearchTimer);
+    const q = stSongQuery.value.trim();
+    if (q.length < 2) { stSongResults.innerHTML = ''; return; }
+    songSearchTimer = setTimeout(() => searchSongs(q), 350);
+  });
+  async function searchSongs(q) {
+    stSongResults.innerHTML = `<div class="sr-no" style="padding:8px">Buscando…</div>`;
+    let tracks = [];
+    try {
+      const r = await fetch('/api/spotify?q=' + encodeURIComponent(q));
+      const data = await r.json();
+      tracks = data.tracks || [];
+    } catch (e) { stSongResults.innerHTML = `<div class="sr-no" style="padding:8px">No se pudo buscar. Probá de nuevo.</div>`; return; }
+    if (!tracks.length) { stSongResults.innerHTML = `<div class="sr-no" style="padding:8px">Sin resultados.</div>`; return; }
+    stSongResults.innerHTML = tracks.map((t, i) => {
+      const playable = !!t.preview;
+      const cover = t.cover ? `<img src="${escapeHtml(t.cover)}" alt="">` : `<span class="ac-note">🎵</span>`;
+      return `<div class="song-row" data-i="${i}" ${playable ? '' : 'style="opacity:.45;cursor:not-allowed"'}>
+        ${cover}
+        <div class="sr-txt"><div class="sr-name">${escapeHtml(t.name)}</div><div class="sr-art">${escapeHtml(t.artists || '')}</div></div>
+        ${playable ? '' : '<span class="sr-no">sin preview</span>'}
+      </div>`;
+    }).join('');
+    stSongResults.querySelectorAll('.song-row').forEach(row => row.addEventListener('click', async () => {
+      const t = tracks[parseInt(row.dataset.i, 10)];
+      if (!t || !t.preview) return;
+      row.style.opacity = '.5';
+      const dur = await getAudioDurationFromUrl(t.preview);
+      stAudio = { source: 'song', url: t.preview, title: `${t.name} — ${t.artists}`, cover: t.cover || null, duration: dur || 30 };
+      stSongSearch.hidden = true;
+      updateAudioUI();
+    }));
+  }
   stSubmit.addEventListener('click', async () => {
     const content = stContent.value.trim();
-    if (stType === 'opinion' && !content) { alert('Escribí algo'); return; }
+    if (stType === 'opinion' && !content && !stAudio) { alert('Escribí algo o agregá un audio'); return; }
     if (stType !== 'opinion' && !stMedia) { alert('Elegí un archivo'); return; }
-    if (stType === 'audio') clampAudioOpts();
+    if (stAudio) clampAudioOpts();
     stSubmit.disabled = true; stSubmit.textContent = 'Subiendo…';
+    const reset = () => { stSubmit.disabled = false; stSubmit.textContent = 'Publicar historia'; };
     let media_url = null, media_type = null;
     if (stMedia) {
       const path = `${me.id}/story-${Date.now()}-${Math.random().toString(36).slice(2,6)}.${stMedia.ext}`;
       const { error: upErr } = await sb.storage.from('posts').upload(path, stMedia.blob, { contentType: stMedia.type, cacheControl: '3600', upsert: false });
-      if (upErr) { alert('Error subiendo: ' + upErr.message); stSubmit.disabled = false; stSubmit.textContent = 'Publicar historia'; return; }
+      if (upErr) { alert('Error subiendo: ' + upErr.message); reset(); return; }
       media_url = sb.storage.from('posts').getPublicUrl(path).data.publicUrl;
       media_type = stMedia.type;
-      if (stType === 'audio') {
-        const start = parseInt(stAudioStart.value, 10) || 0;
-        const dur = Math.min(30, Math.max(1, parseInt(stAudioDur.value, 10) || 15));
-        media_url += `#t=${start},${start + dur}`;
-      }
     }
-    const { error } = await sb.from('stories').insert({
-      author_user_id: me.id, type: stType, content: content || null, media_url, media_type
-    });
-    stSubmit.disabled = false; stSubmit.textContent = 'Publicar historia';
-    if (error) { alert(error.message); return; }
+    // Audio adjunto (canción buscada o audio propio)
+    let audio_url = null, audio_title = null, audio_cover = null;
+    if (stAudio) {
+      const start = parseInt(stAudioStart.value, 10) || 0;
+      const dur = Math.min(30, Math.max(1, parseInt(stAudioDur.value, 10) || 15));
+      let baseUrl = stAudio.url;
+      if (stAudio.source === 'file') {
+        const apath = `${me.id}/audio-${Date.now()}-${Math.random().toString(36).slice(2,6)}.${stAudio.ext}`;
+        const { error: aErr } = await sb.storage.from('posts').upload(apath, stAudio.blob, { contentType: stAudio.type, cacheControl: '3600', upsert: false });
+        if (aErr) { alert('Error subiendo el audio: ' + aErr.message); reset(); return; }
+        baseUrl = sb.storage.from('posts').getPublicUrl(apath).data.publicUrl;
+      }
+      audio_url = baseUrl + `#t=${start},${start + dur}`;
+      audio_title = stAudio.title || null;
+      audio_cover = stAudio.cover || null;
+    }
+    const row = { author_user_id: me.id, type: stType, content: content || null, media_url, media_type };
+    if (audio_url) { row.audio_url = audio_url; row.audio_title = audio_title; row.audio_cover = audio_cover; }
+    const { error } = await sb.from('stories').insert(row);
+    reset();
+    if (error) {
+      if (/audio_url|audio_title|audio_cover|column|schema/i.test(error.message || '')) {
+        alert('Todavía falta correr el SQL de audio en historias. Publicá sin audio o corré la migración.');
+      } else alert(error.message);
+      return;
+    }
     closeStoryComposer();
     loadStories();
   });

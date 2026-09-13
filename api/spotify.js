@@ -42,6 +42,7 @@ async function searchSpotify(q) {
     artists: (t.artists || []).map((a) => a.name).join(", "),
     cover: (t.album && t.album.images && t.album.images[0] && t.album.images[0].url) || null,
     url: (t.external_urls && t.external_urls.spotify) || "https://open.spotify.com/track/" + t.id,
+    preview: t.preview_url || null, // clip de 30s (suele venir null en apps nuevas)
     source: "spotify",
   }));
 }
@@ -64,6 +65,7 @@ async function searchITunes(q) {
       cover: (t.artworkUrl100 || "").replace("100x100bb", "300x300bb") || null,
       // link de play: abre Spotify con la busqueda de la cancion (1 tap para reproducir)
       url: "https://open.spotify.com/search/" + query,
+      preview: t.previewUrl || null, // clip de 30s reproducible (m4a de Apple)
       source: "itunes",
     };
   });
