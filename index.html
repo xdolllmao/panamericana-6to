@@ -1279,6 +1279,24 @@
   }
   .ship-composer-foot .btn { padding: 10px 16px; }
 
+  .ships-search {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 16px; padding: 10px 14px;
+    background: var(--paper); border: 1px solid var(--line); border-radius: 999px;
+  }
+  .ships-search svg { width: 18px; height: 18px; color: var(--ink-mute); flex: none; }
+  .ships-search input {
+    flex: 1; border: 0; background: transparent; color: var(--ink);
+    font: inherit; font-size: 15px; outline: none;
+  }
+  .ships-search input::placeholder { color: var(--ink-mute); }
+  .ships-search button {
+    flex: none; width: 24px; height: 24px; border-radius: 50%;
+    background: var(--paper-soft); color: var(--ink-mute); border: 1px solid var(--line);
+    cursor: pointer; font-size: 12px; line-height: 1; display: grid; place-items: center;
+  }
+  .ships-search button:hover { color: var(--coral); border-color: var(--coral); }
+  .ships-search:focus-within { border-color: var(--school); }
   .ships-wall {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -2408,6 +2426,11 @@
   </div>
 
   <div class="ship-composer-wrap reveal" id="shipComposerHost"></div>
+  <div class="ships-search reveal">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <input type="text" id="shipsSearch" placeholder="Buscar un nombre en los ships…" autocomplete="off" aria-label="Buscar nombres en los ships">
+    <button type="button" id="shipsSearchClear" aria-label="Limpiar búsqueda" hidden>✕</button>
+  </div>
   <div class="ships-wall reveal" id="shipsWall"></div>
   <nav class="pager reveal" id="shipsPager" hidden aria-label="Paginación de ships"></nav>
 </section>
@@ -3565,6 +3588,7 @@
   const SHIPS_PER_PAGE   = 12;
   let ships = [];
   let shipsPage = 1;
+  let shipsQuery = '';
   // Estado de likes: Map<ship_id, Set<user_id>> — solo usamos el size para el contador
   // y checamos si currentUser.id esta adentro para saber si YO ya di like (anonimo
   // hacia afuera, no mostramos quien).
@@ -3620,17 +3644,53 @@
     [inA, inB].forEach(el => el.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); submit(); } }));
   }
 
+  // Buscador de ships por nombre.
+  const shipsSearchInput = document.getElementById('shipsSearch');
+  const shipsSearchClear = document.getElementById('shipsSearchClear');
+  if (shipsSearchInput) {
+    shipsSearchInput.addEventListener('input', () => {
+      shipsQuery = shipsSearchInput.value;
+      shipsSearchClear.hidden = !shipsQuery;
+      shipsPage = 1;
+      renderShipsWall();
+    });
+  }
+  if (shipsSearchClear) {
+    shipsSearchClear.addEventListener('click', () => {
+      shipsSearchInput.value = '';
+      shipsQuery = '';
+      shipsSearchClear.hidden = true;
+      shipsPage = 1;
+      renderShipsWall();
+      shipsSearchInput.focus();
+    });
+  }
+
+  // Normaliza para buscar sin acentos ni mayúsculas.
+  function normShip(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+  function filteredShips() {
+    const q = normShip(shipsQuery).trim();
+    if (!q) return ships;
+    return ships.filter(s => normShip(s.a).includes(q) || normShip(s.b).includes(q));
+  }
+
   function renderShipsWall() {
     if (!ships.length) {
       shipsWall.innerHTML = '<div class="ships-empty">Todavía nadie tiró un ship. Iniciá vos, todo es anónimo.</div>';
       shipsPagerEl.hidden = true;
       return;
     }
-    const totalPages = Math.max(1, Math.ceil(ships.length / SHIPS_PER_PAGE));
+    const list = filteredShips();
+    if (!list.length) {
+      shipsWall.innerHTML = `<div class="ships-empty">Ningún ship con “${escapeHtml(shipsQuery.trim())}”.</div>`;
+      shipsPagerEl.hidden = true;
+      return;
+    }
+    const totalPages = Math.max(1, Math.ceil(list.length / SHIPS_PER_PAGE));
     if (shipsPage > totalPages) shipsPage = totalPages;
     if (shipsPage < 1) shipsPage = 1;
     const start = (shipsPage - 1) * SHIPS_PER_PAGE;
-    const slice = ships.slice(start, start + SHIPS_PER_PAGE);
+    const slice = list.slice(start, start + SHIPS_PER_PAGE);
     shipsWall.innerHTML = slice.map((s, i) => {
       const tilt = ((((start + i) * 37) % 5) - 2) * 0.6;
       const tint = (start + i) % 4;
