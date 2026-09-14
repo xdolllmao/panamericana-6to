@@ -122,10 +122,10 @@
   }
   .book {
     position: relative;
-    /* Aspect ratio de las paginas cropeadas: 1569x2227 ≈ 0.705:1 (portrait).
+    /* Aspect ratio de las paginas cropeadas: 754x1070 ≈ 0.705:1 (portrait).
        Ancho limitado para que la altura (=width / 0.705) no pase 82vh. */
     width: min(94vw, calc(82vh * 0.705), 620px);
-    aspect-ratio: 1569 / 2227;
+    aspect-ratio: 754 / 1070;
     filter: drop-shadow(0 30px 60px rgba(12,24,70,.22)) drop-shadow(0 8px 18px rgba(12,24,70,.14));
   }
   .page {
@@ -286,7 +286,7 @@
     <button class="ctrl-btn" id="prevBtn" aria-label="Página anterior" title="Anterior">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
-    <div class="page-indicator"><b id="pageNow">1</b> / <span id="pageTotal">5</span></div>
+    <div class="page-indicator"><b id="pageNow">1</b> / <span id="pageTotal">7</span></div>
     <button class="ctrl-btn" id="nextBtn" aria-label="Página siguiente" title="Siguiente">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
     </button>
@@ -299,7 +299,8 @@
 </main>
 
 <script>
-  const PAGES = ['/periodico/pages/1.png', '/periodico/pages/2.png', '/periodico/pages/3.png', '/periodico/pages/4.png', '/periodico/pages/5.png'];
+  const PAGE_V = '3'; // subir cuando se reemplacen las imágenes (evita caché viejo)
+  const PAGES = [1,2,3,4,5,6,7].map(n => `/periodico/pages/${n}.png?v=${PAGE_V}`);
   const book = document.getElementById('book');
   const prevBtn = document.getElementById('prevBtn');
   const nextBtn = document.getElementById('nextBtn');
