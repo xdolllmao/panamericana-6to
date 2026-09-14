@@ -286,7 +286,7 @@
     <button class="ctrl-btn" id="prevBtn" aria-label="Página anterior" title="Anterior">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
-    <div class="page-indicator"><b id="pageNow">1</b> / <span id="pageTotal">7</span></div>
+    <div class="page-indicator"><b id="pageNow">1</b> / <span id="pageTotal">8</span></div>
     <button class="ctrl-btn" id="nextBtn" aria-label="Página siguiente" title="Siguiente">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
     </button>
@@ -299,8 +299,8 @@
 </main>
 
 <script>
-  const PAGE_V = '3'; // subir cuando se reemplacen las imágenes (evita caché viejo)
-  const PAGES = [1,2,3,4,5,6,7].map(n => `/periodico/pages/${n}.png?v=${PAGE_V}`);
+  const PAGE_V = '4'; // subir cuando se reemplacen las imágenes (evita caché viejo)
+  const PAGES = [1,2,3,4,5,6,7,8].map(n => `/periodico/pages/${n}.png?v=${PAGE_V}`);
   const book = document.getElementById('book');
   const prevBtn = document.getElementById('prevBtn');
   const nextBtn = document.getElementById('nextBtn');
