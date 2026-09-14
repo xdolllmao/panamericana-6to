@@ -3192,6 +3192,7 @@
 
   let currentUser = null;
   let account = null;
+  let manualLogout = false; // true = cerré sesión a propósito (no auto-relogin)
   let profilesByKey = new Map();
   let posts = [];
   let storiesByAuthor = new Map();
@@ -3234,7 +3235,10 @@
       container.innerHTML = list.map(st => {
         const k = keyOf(st.n, st.s);
         const claimed = profilesByKey.get(k);
-        const isMe = account && account.name === st.n && account.section === st.s;
+        // "Mío" = la sesión local, o la fila pertenece a mi uid (así puedo volver
+        // a entrar a mi propio nombre aunque haya cerrado sesión).
+        const isMe = (account && account.name === st.n && account.section === st.s)
+          || (claimed && currentUser && claimed.user_id === currentUser.id);
         const isTaken = !!claimed && !isMe;
         const hasPw = namesWithPassword.has(k);
         // El candado aparece SIEMPRE que haya contraseña (aunque nadie tenga
@@ -3283,7 +3287,12 @@
     const k = keyOf(name, section);
     const existing = profilesByKey.get(k);
     if (existing && existing.user_id !== currentUser.id) { alert('Ese nombre ya está tomado'); return; }
-    if (account && (account.name !== name || account.section !== section)) {
+    manualLogout = false;
+    // Si ya tengo un perfil con OTRO nombre en este dispositivo, lo suelto
+    // (evita arrastrar bio/foto de una identidad a otra). Reclamar el MISMO
+    // nombre conserva todo (upsert on conflict no toca bio/avatar).
+    const myRow = [...profilesByKey.values()].find(p => p.user_id === currentUser.id);
+    if (myRow && (myRow.name !== name || myRow.section !== section)) {
       await sb.from('profiles').delete().eq('user_id', currentUser.id);
     }
     const { error } = await sb.from('profiles').upsert({
@@ -3300,9 +3309,11 @@
 
   async function releaseAccount() {
     if (!account || !currentUser) return;
-    await sb.from('profiles').delete().eq('user_id', currentUser.id);
+    // Cerrar sesión NO borra el perfil: conserva bio, foto y seguidores.
+    // Solo olvidamos la sesión localmente; al volver a elegir tu nombre
+    // (mismo dispositivo) o entrar con contraseña (otro), todo sigue ahí.
+    manualLogout = true;
     account = null;
-    await refreshProfiles();
     updateAccountChip();
     renderComposer();
     renderShipComposer();
@@ -3412,6 +3423,7 @@
       return;
     }
     // Éxito: recargamos perfiles y cerramos todo
+    manualLogout = false;
     account = { name: pwAskTarget.name, section: pwAskTarget.section, role: null };
     await refreshProfiles();
     refreshNamesWithPassword();
@@ -3429,12 +3441,13 @@
   });
 
   async function refreshProfiles() {
-    const { data, error } = await sb.from('profiles').select('user_id, name, section, role, avatar_url');
+    const { data, error } = await sb.from('profiles').select('user_id, name, section, role, avatar_url, last_seen');
     if (error) return;
     if (!data || !data.length) return; // respuesta vacia transitoria — no tocar estado
     profilesByKey = new Map(data.map(p => [keyOf(p.name, p.section), p]));
     const wasLogged = !!account;
-    if (currentUser) {
+    // Si cerré sesión a propósito, no me vuelvo a loguear solo aunque mi perfil siga.
+    if (currentUser && !manualLogout) {
       const mine = data.find(p => p.user_id === currentUser.id);
       account = mine ? { name: mine.name, section: mine.section, role: mine.role } : null;
     }

@@ -995,6 +995,7 @@
   // ================ STATE ================
   let currentUser = null;               // auth user
   let account = null;                   // { user_id, name, section, role }
+  let manualLogout = false;             // cerré sesión a propósito (no auto-relogin)
   let profilesById = new Map();         // uid -> profile
   let profilesByKey = new Map();        // section-slug(name) -> profile
 
@@ -1084,7 +1085,9 @@
       container.innerHTML = list.map(st => {
         const k = keyOf(st.n, st.s);
         const claimed = profilesByKey.get(k);
-        const isMe = account && account.name === st.n && account.section === st.s;
+        // "Mío" = sesión local o la fila es de mi uid (poder volver a entrar tras logout).
+        const isMe = (account && account.name === st.n && account.section === st.s)
+          || (claimed && currentUser && claimed.user_id === currentUser.id);
         const taken = !!claimed && !isMe;
         const hasPw = namesWithPassword.has(k);
         // Con contraseña: SIEMPRE clickeable (pide password). Sin contraseña y
@@ -1127,6 +1130,7 @@
 
   async function claimName(name, section) {
     if (!currentUser) { alert('Conectando…'); return; }
+    manualLogout = false;
     if (account && account.name === name && account.section === section) { closeBackdrop(loginModal); return; }
     // El RPC decide: si es tuyo lo refresca; si otro lo tiene ACTIVO ahora
     // mismo lo bloquea; si está inactivo hace takeover y migra tu historial.
@@ -1222,6 +1226,7 @@
       pwMsg(pwAskMsg, (error.message || '').includes('bad_password') ? 'Contraseña incorrecta.' : ('No se pudo: ' + (error.message || 'error')));
       return;
     }
+    manualLogout = false;
     closeBackdrop(pwAskModal);
     closeBackdrop(loginModal);
     await refreshProfiles();
@@ -1233,9 +1238,9 @@
 
   loginLogout.addEventListener('click', async () => {
     if (!account || !currentUser) return;
-    await sb.from('profiles').delete().eq('user_id', currentUser.id);
+    // Cerrar sesión NO borra el perfil: conserva bio, foto y seguidores.
+    manualLogout = true;
     account = null;
-    await refreshProfiles();
     updateAccountChip();
     renderApp();
     closeBackdrop(loginModal);
@@ -1250,7 +1255,8 @@
     profilesById = new Map(data.map(p => [p.user_id, p]));
     profilesByKey = new Map(data.map(p => [keyOf(p.name, p.section), p]));
     const wasLogged = !!account;
-    if (currentUser) {
+    // Si cerré sesión a propósito, no me vuelvo a loguear solo aunque mi perfil siga.
+    if (currentUser && !manualLogout) {
       const mine = profilesById.get(currentUser.id);
       account = mine || null;
     }
@@ -2290,7 +2296,7 @@
   // servidor sabe si un nombre está tomado ahora mismo o quedó abierto.
   let heartbeatTimer = null;
   async function heartbeat() {
-    if (!currentUser) return;
+    if (!currentUser || !account) return; // sin sesión activa no marco presencia
     try { await sb.rpc('touch_presence'); } catch (e) {}
   }
   function startHeartbeat() {

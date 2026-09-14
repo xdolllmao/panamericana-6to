@@ -86,79 +86,9 @@ end;
 $$;
 grant execute on function public.clear_name_password() to authenticated, anon;
 
--- Reclamar un nombre en otro dispositivo usando la contraseña.
--- Verifica la contraseña, migra toda la data del user_id viejo al nuevo
--- y actualiza el profile. Ignora la ventana "ACTIVE" porque la contraseña
--- prueba que sos el dueño real.
-create or replace function public.claim_with_password(p_name text, p_section text, p_password text)
-returns void
-language plpgsql
-security definer
-set search_path = public, extensions
-as $$
-declare
-  v_ok boolean;
-  v_new_uid uuid := auth.uid();
-  v_old_uid uuid;
-begin
-  if v_new_uid is null then raise exception 'not_authenticated'; end if;
-  if p_section not in ('A','B') then raise exception 'invalid_section'; end if;
-
-  -- Verificar contraseña
-  select (hash = crypt(p_password, hash)) into v_ok
-    from public.name_passwords
-   where section = p_section and name = p_name;
-  if v_ok is null or v_ok = false then
-    raise exception 'bad_password';
-  end if;
-
-  -- Owner actual
-  select user_id into v_old_uid from public.profiles
-   where section = p_section and name = p_name;
-
-  -- Si ya soy yo, refrescar last_seen y salir
-  if v_old_uid = v_new_uid then
-    update public.profiles set last_seen = now() where user_id = v_new_uid;
-    return;
-  end if;
-
-  -- Takeover: migrar todo del owner viejo al mio (si hay owner)
-  if v_old_uid is not null then
-    delete from public.profiles where user_id = v_old_uid;
-    -- Chats: transferir creador + mensajes + membresias
-    update public.chats set created_by = v_new_uid where created_by = v_old_uid;
-    update public.messages set author_user_id = v_new_uid where author_user_id = v_old_uid;
-    delete from public.chat_members
-      where user_id = v_old_uid
-        and chat_id in (select chat_id from public.chat_members where user_id = v_new_uid);
-    update public.chat_members set user_id = v_new_uid where user_id = v_old_uid;
-    -- Feed
-    update public.posts set author_user_id = v_new_uid where author_user_id = v_old_uid;
-    update public.post_comments set author_user_id = v_new_uid where author_user_id = v_old_uid;
-    delete from public.post_likes
-      where user_id = v_old_uid
-        and post_id in (select post_id from public.post_likes where user_id = v_new_uid);
-    update public.post_likes set user_id = v_new_uid where user_id = v_old_uid;
-    update public.stories set author_user_id = v_new_uid where author_user_id = v_old_uid;
-    -- Ships
-    update public.ships set author_user_id = v_new_uid where author_user_id = v_old_uid;
-    delete from public.ship_likes
-      where user_id = v_old_uid
-        and ship_id in (select ship_id from public.ship_likes where user_id = v_new_uid);
-    update public.ship_likes set user_id = v_new_uid where user_id = v_old_uid;
-    update public.ship_comments set author_user_id = v_new_uid where author_user_id = v_old_uid;
-  end if;
-
-  -- Soltar cualquier otro perfil que yo tuviera
-  delete from public.profiles where user_id = v_new_uid and (name <> p_name or section <> p_section);
-
-  -- Crear/refrescar mi perfil
-  insert into public.profiles (user_id, name, section, last_seen)
-    values (v_new_uid, p_name, p_section, now())
-    on conflict (user_id) do update
-      set name = excluded.name,
-          section = excluded.section,
-          last_seen = now();
-end;
-$$;
-grant execute on function public.claim_with_password(text, text, text) to authenticated, anon;
+-- =====================================================
+-- claim_with_password se define ahora (versión NO destructiva, que
+-- conserva el perfil y migra follows/vistas) en:
+--   migration-account-persistence.sql
+-- Se removió de este archivo la versión vieja que borraba el perfil.
+-- =====================================================
