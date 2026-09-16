@@ -77,6 +77,20 @@ begin
     update public.song_likes set user_id = v_new where user_id = v_old;
   exception when undefined_table then null; end;
 
+  -- protestas
+  begin
+    update public.protests set author_user_id = v_new where author_user_id = v_old;
+    update public.protest_comments set author_user_id = v_new where author_user_id = v_old;
+    delete from public.protest_likes pl
+      where pl.user_id = v_old
+        and exists (select 1 from public.protest_likes x where x.protest_id = pl.protest_id and x.user_id = v_new);
+    update public.protest_likes set user_id = v_new where user_id = v_old;
+    delete from public.protest_dislikes pd
+      where pd.user_id = v_old
+        and exists (select 1 from public.protest_dislikes x where x.protest_id = pd.protest_id and x.user_id = v_new);
+    update public.protest_dislikes set user_id = v_new where user_id = v_old;
+  exception when undefined_table then null; end;
+
   -- FOLLOWS: los que YO sigo + los que me siguen a MÍ
   begin
     delete from public.follows f

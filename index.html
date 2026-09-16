@@ -1296,6 +1296,7 @@
     cursor: pointer; font-size: 12px; line-height: 1; display: grid; place-items: center;
   }
   .ships-search button:hover { color: var(--coral); border-color: var(--coral); }
+  .ships-search button[hidden] { display: none !important; }
   .ships-search:focus-within { border-color: var(--school); }
   .ships-wall {
     display: grid;
@@ -1437,6 +1438,89 @@
     .ship-fields { grid-template-columns: 1fr; }
     .ship-fields .ship-plus { justify-self: center; }
   }
+
+  /* ============ PROTESTAS ============ */
+  .protesta-composer {
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 18px;
+    box-shadow: var(--shadow-sm);
+    display: flex; flex-direction: column; gap: 14px;
+    max-width: 680px; margin: 0 auto 22px;
+  }
+  .protesta-composer textarea {
+    width: 100%; box-sizing: border-box;
+    padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 10px;
+    background: var(--paper-soft); color: var(--ink);
+    font-family: var(--f-body); font-size: 15px; resize: vertical; min-height: 70px;
+    outline: none; transition: border-color .15s;
+  }
+  .protesta-composer textarea:focus { border-color: var(--school); background: var(--paper); }
+  .protesta-field-label {
+    font-family: var(--f-mono); font-size: 11px; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--ink-mute); margin-bottom: 6px; font-weight: 700;
+  }
+  .cat-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .cat-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 13px; border-radius: 999px;
+    background: var(--paper-soft); border: 1.5px solid var(--line);
+    color: var(--ink-soft); font-size: 13px; font-weight: 700; cursor: pointer;
+    transition: all .15s; user-select: none;
+  }
+  .cat-chip:hover { border-color: var(--school); }
+  .cat-chip.on { background: color-mix(in oklab, var(--school) 14%, var(--paper)); border-color: var(--school); color: var(--school); }
+  .protesta-solution-wrap { display: none; }
+  .protesta-solution-wrap.show { display: block; }
+  .protesta-add-solution {
+    align-self: flex-start; background: transparent; border: 1px dashed var(--line-strong);
+    color: var(--school); font-weight: 700; font-size: 13px; padding: 8px 14px;
+    border-radius: 999px; cursor: pointer;
+  }
+  .protesta-add-solution:hover { background: color-mix(in oklab, var(--school) 8%, var(--paper)); }
+  .protesta-composer-foot {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .anon-toggle { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: var(--ink-soft); font-weight: 600; }
+  .anon-toggle input { width: 16px; height: 16px; accent-color: var(--school); cursor: pointer; }
+  .protesta-composer-locked {
+    background: var(--paper); border: 1px dashed var(--line-strong);
+    border-radius: var(--radius); padding: 22px; text-align: center;
+    color: var(--ink-soft); max-width: 680px; margin: 0 auto 22px; font-size: 14px;
+  }
+  .protesta-composer-locked a { color: var(--school); font-weight: 700; text-decoration: underline; cursor: pointer; }
+
+  .protestas-filter { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .protestas-filter .cat-chip.count-0 { opacity: .5; }
+
+  .protestas-wall { display: flex; flex-direction: column; gap: 14px; }
+  .protesta {
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: 14px; padding: 16px 18px 12px; box-shadow: var(--shadow-sm);
+    transition: box-shadow .18s ease;
+  }
+  .protesta:hover { box-shadow: var(--shadow-lg); }
+  .protesta-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .protesta-cat {
+    font-family: var(--f-mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
+    font-weight: 700; padding: 3px 9px; border-radius: 999px;
+    background: color-mix(in oklab, var(--school) 12%, var(--paper)); color: var(--school);
+  }
+  .protesta-body { font-size: 16px; line-height: 1.5; color: var(--ink); word-break: break-word; white-space: pre-wrap; }
+  .protesta-solution {
+    margin-top: 10px; padding: 10px 12px; border-radius: 10px;
+    background: color-mix(in oklab, var(--mint) 12%, var(--paper));
+    border: 1px solid color-mix(in oklab, var(--mint) 40%, var(--line));
+    font-size: 14px; line-height: 1.45; color: var(--ink); word-break: break-word; white-space: pre-wrap;
+  }
+  .protesta-solution b { display: block; font-family: var(--f-mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--mint-ink, var(--ink-soft)); margin-bottom: 3px; }
+  .protesta-meta {
+    display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;
+    margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--line);
+    font-family: var(--f-mono); font-size: 11px; color: var(--ink-mute); letter-spacing: .06em;
+  }
+  .protesta-author { font-weight: 700; }
+  .protesta-author.named { color: var(--school); }
+  @media (max-width: 480px) { .protesta-meta .ship-actions { flex-wrap: wrap; } }
 
   /* ============ CHISMES · muro anónimo ============ */
   .chismes-intro {
@@ -2111,6 +2195,7 @@
       <a class="nav-link" href="/musica/">Música</a>
       <a class="nav-link" href="#partidos">Partidos</a>
       <a class="nav-link" href="#ships">Ships</a>
+      <a class="nav-link" href="#protestas">Protestas</a>
       <a class="nav-link" href="#chismes">Chismes</a>
       <a class="nav-link" href="#records">Récords</a>
       <a class="nav-link" href="/resumen/">Weekly</a>
@@ -2435,6 +2520,27 @@
   <nav class="pager reveal" id="shipsPager" hidden aria-label="Paginación de ships"></nav>
 </section>
 
+<!-- =================== PROTESTAS =================== -->
+<section id="protestas" class="wrap block">
+  <div class="section-head reveal">
+    <div>
+      <div class="section-tag">06 · <em>alza la voz</em></div>
+      <h2>Protestas.</h2>
+    </div>
+    <p>Poné lo que no te gusta y proponé una solución. Vos decidís si sale tu nombre o anónimo. Dale like, dislike y comentá.</p>
+  </div>
+
+  <div class="protesta-composer-wrap reveal" id="protestaComposerHost"></div>
+  <div class="ships-search reveal">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <input type="text" id="protestasSearch" placeholder="Buscar en las protestas…" autocomplete="off" aria-label="Buscar protestas">
+    <button type="button" id="protestasSearchClear" aria-label="Limpiar búsqueda" hidden>✕</button>
+  </div>
+  <div class="protestas-filter reveal" id="protestasFilter"></div>
+  <div class="protestas-wall reveal" id="protestasWall"></div>
+  <nav class="pager reveal" id="protestasPager" hidden aria-label="Paginación de protestas"></nav>
+</section>
+
 <!-- =================== CHISMES =================== -->
 <section id="chismes" class="wrap block">
   <div class="section-head reveal">
@@ -2589,6 +2695,26 @@
       <div id="shipCommentsList" class="ship-comments-list"></div>
     </div>
     <div class="modal-foot ship-comments-foot" id="shipCommentsFoot"></div>
+  </div>
+</div>
+
+<!-- =================== MODAL · comentarios de una protesta =================== -->
+<div class="modal-backdrop" id="protestaCommentsModal" role="dialog" aria-modal="true" aria-labelledby="protestaCommentsTitle" hidden>
+  <div class="modal ship-comments-modal">
+    <div class="modal-head">
+      <div>
+        <div class="section-tag" style="color: var(--coral)">Protesta</div>
+        <h3 id="protestaCommentsTitle">Comentarios</h3>
+        <p>Comentarios anónimos. Nadie sabe quién los escribió.</p>
+      </div>
+      <button class="modal-close" id="protestaCommentsClose" aria-label="Cerrar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div id="protestaCommentsList" class="ship-comments-list"></div>
+    </div>
+    <div class="modal-foot ship-comments-foot" id="protestaCommentsFoot"></div>
   </div>
 </div>
 
@@ -3304,6 +3430,7 @@
     updateAccountChip();
     renderComposer();
     renderShipComposer();
+    renderProtestaComposer();
     closeModal();
   }
 
@@ -3317,6 +3444,7 @@
     updateAccountChip();
     renderComposer();
     renderShipComposer();
+    renderProtestaComposer();
     renderNames();
   }
   loginLogout.addEventListener('click', releaseAccount);
@@ -3430,6 +3558,7 @@
     updateAccountChip();
     renderComposer();
     renderShipComposer();
+    renderProtestaComposer();
     closePasswordAsk();
     closeModal();
   });
@@ -3459,6 +3588,7 @@
       try { updateAccountChip(); } catch (e) {}
       try { renderComposer(); } catch (e) {}
       try { renderShipComposer(); } catch (e) {}
+      try { renderProtestaComposer(); } catch (e) {}
       try {
         await sb.auth.signOut();
         const { data: ns } = await sb.auth.signInAnonymously();
@@ -3980,6 +4110,365 @@
   shipCommentsModal.addEventListener('click', (e) => { if (e.target === shipCommentsModal) closeShipComments(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !shipCommentsModal.hidden) closeShipComments(); });
 
+  // ======================= PROTESTAS =======================
+  const PROTEST_CATS = [
+    { id: 'maestros',      label: 'Maestros',      icon: '🎓' },
+    { id: 'instalaciones', label: 'Instalaciones', icon: '🏫' },
+    { id: 'deportes',      label: 'Deportes',      icon: '⚽' },
+    { id: 'reportes',      label: 'Reportes',      icon: '📋' },
+    { id: 'injusticia',    label: 'Injusticia',    icon: '⚖️' },
+    { id: 'comodidad',     label: 'Comodidad',     icon: '🛋️' },
+  ];
+  const CAT_IDS = new Set(PROTEST_CATS.map(c => c.id));
+  const catLabel = id => (PROTEST_CATS.find(c => c.id === id) || {}).label || id;
+  const catIcon  = id => (PROTEST_CATS.find(c => c.id === id) || {}).icon || '';
+
+  const protestaComposerHost = document.getElementById('protestaComposerHost');
+  const protestasWall = document.getElementById('protestasWall');
+  const protestasPagerEl = document.getElementById('protestasPager');
+  const protestasFilterEl = document.getElementById('protestasFilter');
+  const PROTESTS_PER_PAGE = 8;
+  let protests = [];
+  let protestsPage = 1;
+  let protestsQuery = '';
+  let protestCatFilter = null; // id de categoría o null = todas
+  let protestLikes = new Map();
+  let protestDislikes = new Map();
+  let protestComments = new Map();
+  const pLikesFor = id => protestLikes.get(id) || new Set();
+  const pILiked = id => !!(currentUser && pLikesFor(id).has(currentUser.id));
+  const pDislikesFor = id => protestDislikes.get(id) || new Set();
+  const pIDisliked = id => !!(currentUser && pDislikesFor(id).has(currentUser.id));
+  const pCommentsFor = id => protestComments.get(id) || [];
+  const pCommentCount = id => pCommentsFor(id).length;
+  function normProt(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+
+  const P_HEART = liked => liked
+    ? '<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+  const P_THUMB = down => down
+    ? '<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2m-7 7l-1-1a3 3 0 0 1-.88-2.12V14H4.5a2 2 0 0 1-2-2.34l1.38-9A2 2 0 0 1 5.85 1H14v13l-4 7z"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2m-7 7l-1-1a3 3 0 0 1-.88-2.12V14H4.5a2 2 0 0 1-2-2.34l1.38-9A2 2 0 0 1 5.85 1H14v13l-4 7z"/></svg>';
+  const P_CHAT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
+
+  function renderProtestaComposer() {
+    if (!protestaComposerHost) return;
+    if (!account) {
+      protestaComposerHost.innerHTML = `<div class="protesta-composer-locked">Elegí tu nombre para poder publicar una protesta. <a id="protestaLoginLink" role="button">Iniciar sesión</a></div>`;
+      const l = document.getElementById('protestaLoginLink');
+      if (l) l.addEventListener('click', openModal);
+      return;
+    }
+    protestaComposerHost.innerHTML = `
+      <div class="protesta-composer">
+        <div>
+          <div class="protesta-field-label">Tu protesta</div>
+          <textarea id="protestaBody" maxlength="500" placeholder="¿Qué está mal? Explicalo…"></textarea>
+        </div>
+        <div>
+          <div class="protesta-field-label">Categoría (elegí una o varias)</div>
+          <div class="cat-chips" id="protestaCats">
+            ${PROTEST_CATS.map(c => `<button type="button" class="cat-chip" data-cat="${c.id}">${c.icon} ${c.label}</button>`).join('')}
+          </div>
+        </div>
+        <div>
+          <button type="button" class="protesta-add-solution" id="protestaAddSolBtn">+ Proponer una solución</button>
+          <div class="protesta-solution-wrap" id="protestaSolWrap">
+            <div class="protesta-field-label" style="margin-top:12px">Solución propuesta (opcional)</div>
+            <textarea id="protestaSolution" maxlength="400" placeholder="¿Cómo se podría solucionar?"></textarea>
+          </div>
+        </div>
+        <div class="protesta-composer-foot">
+          <label class="anon-toggle"><input type="checkbox" id="protestaAnon" checked> Publicar anónimo (sin mi nombre)</label>
+          <button class="btn btn-primary" id="postProtesta" type="button">
+            Publicar
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>`;
+    const selected = new Set();
+    protestaComposerHost.querySelectorAll('.cat-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const c = chip.dataset.cat;
+        if (selected.has(c)) { selected.delete(c); chip.classList.remove('on'); }
+        else { selected.add(c); chip.classList.add('on'); }
+      });
+    });
+    const solWrap = document.getElementById('protestaSolWrap');
+    const addSolBtn = document.getElementById('protestaAddSolBtn');
+    addSolBtn.addEventListener('click', () => {
+      solWrap.classList.toggle('show');
+      addSolBtn.textContent = solWrap.classList.contains('show') ? '– Quitar solución' : '+ Proponer una solución';
+      if (!solWrap.classList.contains('show')) { const s = document.getElementById('protestaSolution'); if (s) s.value = ''; }
+    });
+    const btn = document.getElementById('postProtesta');
+    btn.addEventListener('click', async () => {
+      const bodyEl = document.getElementById('protestaBody');
+      const anonEl = document.getElementById('protestaAnon');
+      const solEl = document.getElementById('protestaSolution');
+      const body = bodyEl.value.trim();
+      if (!body) { alert('Escribí tu protesta.'); return; }
+      const cats = [...selected];
+      if (!cats.length) { alert('Elegí al menos una categoría.'); return; }
+      const anonymous = anonEl.checked;
+      const solution = (solWrap.classList.contains('show') && solEl.value.trim()) ? solEl.value.trim().slice(0, 400) : null;
+      btn.disabled = true;
+      const { error } = await sb.from('protests').insert({
+        author_user_id: currentUser.id,
+        body: body.slice(0, 500),
+        solution,
+        categories: cats,
+        anonymous,
+        author_name: anonymous ? null : (account.name || null),
+      });
+      btn.disabled = false;
+      if (error) { alert('No se pudo publicar: ' + error.message); return; }
+      bodyEl.value = ''; if (solEl) solEl.value = '';
+      solWrap.classList.remove('show'); addSolBtn.textContent = '+ Proponer una solución';
+      selected.clear();
+      protestaComposerHost.querySelectorAll('.cat-chip.on').forEach(c => c.classList.remove('on'));
+    });
+  }
+
+  function renderProtestasFilter() {
+    if (!protestasFilterEl) return;
+    const chips = [`<button type="button" class="cat-chip ${protestCatFilter === null ? 'on' : ''}" data-fcat="">Todas</button>`];
+    PROTEST_CATS.forEach(c => {
+      const n = protests.filter(p => (p.categories || []).includes(c.id)).length;
+      chips.push(`<button type="button" class="cat-chip ${protestCatFilter === c.id ? 'on' : ''} ${n === 0 ? 'count-0' : ''}" data-fcat="${c.id}">${c.icon} ${c.label} · ${n}</button>`);
+    });
+    protestasFilterEl.innerHTML = chips.join('');
+    protestasFilterEl.querySelectorAll('.cat-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const v = chip.dataset.fcat;
+        protestCatFilter = v === '' ? null : v;
+        protestsPage = 1;
+        renderProtestasFilter();
+        renderProtestasWall();
+      });
+    });
+  }
+
+  function filteredProtests() {
+    let list = protests;
+    if (protestCatFilter) list = list.filter(p => (p.categories || []).includes(protestCatFilter));
+    const q = normProt(protestsQuery).trim();
+    if (q) {
+      list = list.filter(p => {
+        const hay = [p.body, p.solution, p.anonymous ? '' : p.author_name, ...(p.categories || []).map(catLabel)].join(' ');
+        return normProt(hay).includes(q);
+      });
+    }
+    return list;
+  }
+
+  function renderProtestasWall() {
+    if (!protestasWall) return;
+    if (!protests.length) {
+      protestasWall.innerHTML = '<div class="ships-empty">Todavía nadie protestó. Empezá vos.</div>';
+      protestasPagerEl.hidden = true;
+      return;
+    }
+    const list = filteredProtests();
+    if (!list.length) {
+      protestasWall.innerHTML = `<div class="ships-empty">Ninguna protesta coincide con el filtro.</div>`;
+      protestasPagerEl.hidden = true;
+      return;
+    }
+    const totalPages = Math.max(1, Math.ceil(list.length / PROTESTS_PER_PAGE));
+    if (protestsPage > totalPages) protestsPage = totalPages;
+    if (protestsPage < 1) protestsPage = 1;
+    const start = (protestsPage - 1) * PROTESTS_PER_PAGE;
+    const slice = list.slice(start, start + PROTESTS_PER_PAGE);
+    protestasWall.innerHTML = slice.map(p => {
+      const cats = (p.categories || []).map(c => `<span class="protesta-cat">${catIcon(c)} ${escapeHtml(catLabel(c))}</span>`).join('');
+      const author = p.anonymous ? 'Anónimo' : (p.author_name ? escapeHtml(p.author_name) : 'Alguien');
+      const authorClass = p.anonymous ? '' : 'named';
+      const nLikes = pLikesFor(p.id).size, liked = pILiked(p.id);
+      const nDis = pDislikesFor(p.id).size, disliked = pIDisliked(p.id);
+      const nCom = pCommentCount(p.id);
+      const dis = account ? '' : 'disabled';
+      const isMine = currentUser && p.author_user_id === currentUser.id;
+      const del = isMine ? `<button class="ship-delete" type="button" data-pdel="${p.id}" title="Borrar tu protesta">Borrar</button>` : '';
+      const sol = p.solution ? `<div class="protesta-solution"><b>Solución propuesta</b>${escapeHtml(p.solution)}</div>` : '';
+      return `<article class="protesta" data-id="${p.id}">
+        <div class="protesta-top">${cats}</div>
+        <div class="protesta-body">${escapeHtml(p.body)}</div>
+        ${sol}
+        <div class="protesta-meta">
+          <span class="protesta-author ${authorClass}">${author} · ${timeAgo(p.created_at)}</span>
+          <div class="ship-actions">
+            <button class="ship-like ${liked ? 'liked' : ''}" type="button" data-plike="${p.id}" ${dis}>${P_HEART(liked)}<span>${nLikes}</span></button>
+            <button class="ship-dislike ${disliked ? 'disliked' : ''}" type="button" data-pdislike="${p.id}" ${dis} title="No estoy de acuerdo">${P_THUMB(disliked)}<span>${nDis}</span></button>
+            <button class="ship-comment-btn" type="button" data-pcomment="${p.id}" title="Ver comentarios">${P_CHAT}<span>${nCom}</span></button>
+            ${del}
+          </div>
+        </div>
+      </article>`;
+    }).join('');
+
+    protestasWall.querySelectorAll('button[data-pdel]').forEach(btn => btn.addEventListener('click', async () => {
+      if (!confirm('¿Borrar esta protesta?')) return;
+      btn.disabled = true;
+      const { error } = await sb.from('protests').delete().eq('id', btn.dataset.pdel);
+      if (error) { alert('No se pudo borrar: ' + error.message); btn.disabled = false; return; }
+      protests = protests.filter(x => x.id !== btn.dataset.pdel);
+      renderProtestasFilter(); renderProtestasWall();
+    }));
+    protestasWall.querySelectorAll('button[data-pcomment]').forEach(btn => btn.addEventListener('click', () => openProtestaComments(btn.dataset.pcomment)));
+    protestasWall.querySelectorAll('button[data-plike]').forEach(btn => btn.addEventListener('click', async () => {
+      if (!account || !currentUser) { openModal(); return; }
+      const id = btn.dataset.plike, already = pILiked(id), hadDis = pIDisliked(id);
+      btn.disabled = true;
+      const set = protestLikes.get(id) || new Set();
+      if (already) set.delete(currentUser.id); else set.add(currentUser.id);
+      protestLikes.set(id, set);
+      if (!already && hadDis) { const d = protestDislikes.get(id) || new Set(); d.delete(currentUser.id); protestDislikes.set(id, d); }
+      renderProtestasWall();
+      const q = already
+        ? sb.from('protest_likes').delete().eq('protest_id', id).eq('user_id', currentUser.id)
+        : sb.from('protest_likes').insert({ protest_id: id, user_id: currentUser.id });
+      const { error } = await q;
+      if (error) {
+        if (already) set.add(currentUser.id); else set.delete(currentUser.id);
+        protestLikes.set(id, set);
+        if (!already && hadDis) { const d = protestDislikes.get(id) || new Set(); d.add(currentUser.id); protestDislikes.set(id, d); }
+        renderProtestasWall(); alert('No se pudo: ' + error.message); return;
+      }
+      if (!already && hadDis) { await sb.from('protest_dislikes').delete().eq('protest_id', id).eq('user_id', currentUser.id); }
+    }));
+    protestasWall.querySelectorAll('button[data-pdislike]').forEach(btn => btn.addEventListener('click', async () => {
+      if (!account || !currentUser) { openModal(); return; }
+      const id = btn.dataset.pdislike, already = pIDisliked(id), hadLike = pILiked(id);
+      btn.disabled = true;
+      const set = protestDislikes.get(id) || new Set();
+      if (already) set.delete(currentUser.id); else set.add(currentUser.id);
+      protestDislikes.set(id, set);
+      if (!already && hadLike) { const l = protestLikes.get(id) || new Set(); l.delete(currentUser.id); protestLikes.set(id, l); }
+      renderProtestasWall();
+      const q = already
+        ? sb.from('protest_dislikes').delete().eq('protest_id', id).eq('user_id', currentUser.id)
+        : sb.from('protest_dislikes').insert({ protest_id: id, user_id: currentUser.id });
+      const { error } = await q;
+      if (error) {
+        if (already) set.add(currentUser.id); else set.delete(currentUser.id);
+        protestDislikes.set(id, set);
+        if (!already && hadLike) { const l = protestLikes.get(id) || new Set(); l.add(currentUser.id); protestLikes.set(id, l); }
+        renderProtestasWall(); alert('No se pudo: ' + error.message); return;
+      }
+      if (!already && hadLike) { await sb.from('protest_likes').delete().eq('protest_id', id).eq('user_id', currentUser.id); }
+    }));
+    renderProtestasPager(totalPages);
+  }
+
+  function renderProtestasPager(totalPages) {
+    if (totalPages <= 1) { protestasPagerEl.hidden = true; return; }
+    protestasPagerEl.hidden = false;
+    const shown = new Set([1, totalPages, protestsPage - 1, protestsPage, protestsPage + 1]);
+    const numbers = [...shown].filter(n => n >= 1 && n <= totalPages).sort((a, b) => a - b);
+    const btns = []; let last = 0;
+    for (const n of numbers) {
+      if (n - last > 1) btns.push('<span class="dots">…</span>');
+      btns.push(`<button type="button" class="${n === protestsPage ? 'is-active' : ''}" data-page="${n}">${n}</button>`);
+      last = n;
+    }
+    protestasPagerEl.innerHTML = `
+      <span class="pager-count">Pág ${protestsPage} de ${totalPages}</span>
+      <button type="button" data-page="${protestsPage - 1}" ${protestsPage === 1 ? 'disabled' : ''} aria-label="Anterior">‹</button>
+      ${btns.join('')}
+      <button type="button" data-page="${protestsPage + 1}" ${protestsPage === totalPages ? 'disabled' : ''} aria-label="Siguiente">›</button>`;
+    protestasPagerEl.querySelectorAll('button[data-page]').forEach(btn => btn.addEventListener('click', () => {
+      const n = parseInt(btn.dataset.page, 10);
+      if (isNaN(n) || n < 1 || n > totalPages || n === protestsPage) return;
+      protestsPage = n; renderProtestasWall();
+      document.getElementById('protestas').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }));
+  }
+
+  async function refreshProtestas() {
+    const [{ data: pr, error: prErr }, { data: lk, error: lkErr }, { data: dk, error: dkErr }, { data: cm, error: cmErr }] = await Promise.all([
+      sb.from('protests').select('id, author_user_id, body, solution, categories, anonymous, author_name, created_at').order('created_at', { ascending: false }).limit(500),
+      sb.from('protest_likes').select('protest_id, user_id'),
+      sb.from('protest_dislikes').select('protest_id, user_id'),
+      sb.from('protest_comments').select('id, protest_id, author_user_id, text, created_at').order('created_at', { ascending: true }),
+    ]);
+    if (!prErr) protests = pr || [];
+    if (!lkErr) { protestLikes = new Map(); (lk || []).forEach(l => { const s = protestLikes.get(l.protest_id) || new Set(); s.add(l.user_id); protestLikes.set(l.protest_id, s); }); }
+    if (!dkErr) { protestDislikes = new Map(); (dk || []).forEach(l => { const s = protestDislikes.get(l.protest_id) || new Set(); s.add(l.user_id); protestDislikes.set(l.protest_id, s); }); }
+    if (!cmErr) { protestComments = new Map(); (cm || []).forEach(c => { const a = protestComments.get(c.protest_id) || []; a.push(c); protestComments.set(c.protest_id, a); }); }
+    renderProtestasFilter();
+    renderProtestasWall();
+    if (openProtestaId) renderProtestaCommentsModal();
+  }
+
+  // ---- buscador de protestas ----
+  const protestasSearchInput = document.getElementById('protestasSearch');
+  const protestasSearchClear = document.getElementById('protestasSearchClear');
+  if (protestasSearchInput) protestasSearchInput.addEventListener('input', () => {
+    protestsQuery = protestasSearchInput.value;
+    protestasSearchClear.hidden = !protestsQuery;
+    protestsPage = 1;
+    renderProtestasWall();
+  });
+  if (protestasSearchClear) protestasSearchClear.addEventListener('click', () => {
+    protestasSearchInput.value = ''; protestsQuery = ''; protestasSearchClear.hidden = true;
+    protestsPage = 1; renderProtestasWall(); protestasSearchInput.focus();
+  });
+
+  // ---- modal de comentarios de protesta ----
+  const protestaCommentsModal = document.getElementById('protestaCommentsModal');
+  const protestaCommentsTitle = document.getElementById('protestaCommentsTitle');
+  const protestaCommentsList = document.getElementById('protestaCommentsList');
+  const protestaCommentsFoot = document.getElementById('protestaCommentsFoot');
+  const protestaCommentsClose = document.getElementById('protestaCommentsClose');
+  let openProtestaId = null;
+  function openProtestaComments(id) { openProtestaId = id; renderProtestaCommentsModal(); protestaCommentsModal.hidden = false; protestaCommentsModal.classList.add('open'); }
+  function closeProtestaComments() { protestaCommentsModal.classList.remove('open'); protestaCommentsModal.hidden = true; openProtestaId = null; }
+  function renderProtestaCommentsModal() {
+    if (!openProtestaId) return;
+    const p = protests.find(x => x.id === openProtestaId);
+    if (!p) { closeProtestaComments(); return; }
+    protestaCommentsTitle.textContent = 'Comentarios';
+    const arr = pCommentsFor(openProtestaId);
+    protestaCommentsList.innerHTML = arr.length
+      ? arr.map(c => {
+          const mine = currentUser && c.author_user_id === currentUser.id;
+          const del = mine ? `<button class="ship-comment-del" data-cdel="${c.id}" type="button">Borrar</button>` : '';
+          return `<div class="ship-comment"><p>${escapeHtml(c.text)}</p><div class="ship-comment-meta"><span>Anónimo · ${timeAgo(c.created_at)}</span>${del}</div></div>`;
+        }).join('')
+      : '<div class="ship-comments-empty">Sé el primero en comentar</div>';
+    protestaCommentsList.querySelectorAll('button[data-cdel]').forEach(btn => btn.addEventListener('click', async () => {
+      if (!confirm('¿Borrar tu comentario?')) return;
+      btn.disabled = true;
+      const cid = btn.dataset.cdel;
+      const { error } = await sb.from('protest_comments').delete().eq('id', cid);
+      if (error) { alert('No se pudo borrar: ' + error.message); btn.disabled = false; return; }
+      protestComments.set(openProtestaId, (protestComments.get(openProtestaId) || []).filter(x => x.id !== cid));
+      renderProtestaCommentsModal(); renderProtestasWall();
+    }));
+    if (!account) {
+      protestaCommentsFoot.innerHTML = `<div class="ship-comment-locked">Iniciá sesión para comentar · <a id="protestaCommentLoginLink">Elegí tu nombre</a></div>`;
+      document.getElementById('protestaCommentLoginLink').addEventListener('click', () => { closeProtestaComments(); openModal(); });
+      return;
+    }
+    protestaCommentsFoot.innerHTML = `<form class="ship-comment-form" id="protestaCommentForm"><input id="protestaCommentInput" type="text" maxlength="240" placeholder="Comentá anónimo…" autocomplete="off" required><button class="btn btn-primary" type="submit">Publicar</button></form>`;
+    const form = document.getElementById('protestaCommentForm');
+    const input = document.getElementById('protestaCommentInput');
+    setTimeout(() => input.focus(), 30);
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = input.value.trim(); if (!text) return;
+      const b = form.querySelector('button[type="submit"]'); b.disabled = true; input.disabled = true;
+      const { error } = await sb.from('protest_comments').insert({ protest_id: openProtestaId, author_user_id: currentUser.id, text: text.slice(0, 240) });
+      b.disabled = false; input.disabled = false;
+      if (error) { alert('No se pudo comentar: ' + error.message); return; }
+      input.value = ''; input.focus();
+    });
+  }
+  protestaCommentsClose.addEventListener('click', closeProtestaComments);
+  protestaCommentsModal.addEventListener('click', (e) => { if (e.target === protestaCommentsModal) closeProtestaComments(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !protestaCommentsModal.hidden) closeProtestaComments(); });
+
   async function refreshNotifBadge() {
     if (!currentUser) { setNotifBadge(0); return; }
     const { data: mem } = await sb.from('chat_members').select('chat_id, last_read_at').eq('user_id', currentUser.id);
@@ -4253,12 +4742,14 @@
     refreshNamesWithPassword();
     await refreshChismes();
     await refreshShips();
+    await refreshProtestas();
     await refreshNotifBadge();
     await refreshVotes();
     await refreshStories();
     updateAccountChip();
     renderComposer();
     renderShipComposer();
+    renderProtestaComposer();
     dbNotice.textContent = 'Sincronizado en vivo · Supabase';
 
     sb.channel('chismes-live').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chismes' }, (payload) => {
@@ -4337,6 +4828,55 @@
       })
       .subscribe();
 
+    sb.channel('protestas-live')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'protests' }, (payload) => {
+        if (protests.find(p => p.id === payload.new.id)) return;
+        protests = [payload.new, ...protests].slice(0, 500);
+        renderProtestasFilter(); renderProtestasWall();
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'protests' }, (payload) => {
+        const id = payload.old && payload.old.id; if (!id) return;
+        protests = protests.filter(p => p.id !== id);
+        protestLikes.delete(id); protestDislikes.delete(id); protestComments.delete(id);
+        renderProtestasFilter(); renderProtestasWall();
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'protest_likes' }, (payload) => {
+        const { protest_id, user_id } = payload.new || {}; if (!protest_id || !user_id) return;
+        const s = protestLikes.get(protest_id) || new Set(); s.add(user_id); protestLikes.set(protest_id, s);
+        renderProtestasWall();
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'protest_likes' }, (payload) => {
+        const { protest_id, user_id } = payload.old || {}; if (!protest_id || !user_id) return;
+        const s = protestLikes.get(protest_id); if (s) { s.delete(user_id); if (!s.size) protestLikes.delete(protest_id); else protestLikes.set(protest_id, s); }
+        renderProtestasWall();
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'protest_dislikes' }, (payload) => {
+        const { protest_id, user_id } = payload.new || {}; if (!protest_id || !user_id) return;
+        const s = protestDislikes.get(protest_id) || new Set(); s.add(user_id); protestDislikes.set(protest_id, s);
+        renderProtestasWall();
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'protest_dislikes' }, (payload) => {
+        const { protest_id, user_id } = payload.old || {}; if (!protest_id || !user_id) return;
+        const s = protestDislikes.get(protest_id); if (s) { s.delete(user_id); if (!s.size) protestDislikes.delete(protest_id); else protestDislikes.set(protest_id, s); }
+        renderProtestasWall();
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'protest_comments' }, (payload) => {
+        const c = payload.new; if (!c) return;
+        const arr = protestComments.get(c.protest_id) || [];
+        if (arr.find(x => x.id === c.id)) return;
+        arr.push(c); protestComments.set(c.protest_id, arr);
+        renderProtestasWall();
+        if (openProtestaId === c.protest_id) renderProtestaCommentsModal();
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'protest_comments' }, (payload) => {
+        const c = payload.old; if (!c || !c.id) return;
+        for (const [pid, arr] of protestComments.entries()) {
+          const i = arr.findIndex(x => x.id === c.id);
+          if (i >= 0) { arr.splice(i, 1); protestComments.set(pid, arr); renderProtestasWall(); if (openProtestaId === pid) renderProtestaCommentsModal(); break; }
+        }
+      })
+      .subscribe();
+
     sb.channel('profiles-live').on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
       refreshProfiles();
     }).subscribe();
@@ -4369,6 +4909,7 @@
   updateAccountChip();
   renderComposer();
   renderShipComposer();
+  renderProtestaComposer();
   initSupabase();
 
   // ---------- calendario escolar ----------
