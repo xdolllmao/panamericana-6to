@@ -116,6 +116,12 @@ begin
     update public.follows set followed_id = v_new where followed_id = v_old;
   exception when undefined_table then null; end;
 
+  -- notificaciones (como destinatario y como actor)
+  begin
+    update public.notifications set user_id = v_new where user_id = v_old;
+    update public.notifications set actor_user_id = v_new where actor_user_id = v_old;
+  exception when undefined_table then null; end;
+
   -- vistas de perfil (quién vio a quién)
   begin
     delete from public.profile_views pv

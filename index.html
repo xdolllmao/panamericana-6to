@@ -2211,7 +2211,7 @@
     <button class="notif-btn" id="calBtn" aria-label="Calendario escolar" title="Calendario escolar" style="margin-right:4px">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
     </button>
-    <a href="/chat/" class="notif-btn" id="notifBtn" aria-label="Abrir chat">
+    <a href="/bandeja/" class="notif-btn" id="notifBtn" aria-label="Bandeja de entrada" title="Bandeja de entrada">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       <span class="notif-badge" id="notifBadge" hidden>0</span>
     </a>
@@ -4492,13 +4492,12 @@
 
   async function refreshNotifBadge() {
     if (!currentUser) { setNotifBadge(0); return; }
-    const { data: mem } = await sb.from('chat_members').select('chat_id, last_read_at').eq('user_id', currentUser.id);
-    if (!mem || !mem.length) { setNotifBadge(0); return; }
-    const readMap = new Map(mem.map(m => [m.chat_id, m.last_read_at]));
-    const chatIds = mem.map(m => m.chat_id);
-    const { data: msgs } = await sb.from('messages').select('chat_id, author_user_id, created_at').in('chat_id', chatIds).neq('author_user_id', currentUser.id);
-    const count = (msgs || []).filter(m => new Date(m.created_at) > new Date(readMap.get(m.chat_id) || 0)).length;
-    setNotifBadge(count);
+    // Cuenta notificaciones sin leer de la bandeja de entrada.
+    const { count, error } = await sb.from('notifications')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', currentUser.id).is('read_at', null);
+    if (error) { setNotifBadge(0); return; }
+    setNotifBadge(count || 0);
   }
 
   // ---------- récords: goleador + votaciones ----------
@@ -4902,7 +4901,7 @@
       refreshProfiles();
     }).subscribe();
 
-    sb.channel('messages-badge').on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, () => {
+    sb.channel('notif-badge').on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, () => {
       refreshNotifBadge();
     }).subscribe();
 

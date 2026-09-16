@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1E3AAB" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#070D24" media="(prefers-color-scheme: dark)">
+<title>Bandeja de entrada · Sextogram</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%231E3AAB'/%3E%3Cpath d='M20 9a6 6 0 0 0-6 6c0 7-3 9-3 9h18s-3-2-3-9a6 6 0 0 0-6-6z' fill='white'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+  :root {
+    --ground: #EEF1FA; --ground-2: #E4EAF7; --paper: #FFFFFF; --paper-soft: #F7F9FE;
+    --ink: #0C1846; --ink-soft: #2C3866; --ink-mute: #556388;
+    --line: #DBE1F2; --line-strong: #B9C3E1;
+    --school: #1E3AAB; --school-2: #3B5EF0; --school-tint: #DDE4FF;
+    --coral: #D91F26; --mint: #35C89A; --lemon: #F5DE3A; --gold: #F5B301;
+    --shadow-sm: 0 1px 2px rgba(12,24,70,.06), 0 4px 14px rgba(12,24,70,.06);
+    --shadow-lg: 0 4px 12px rgba(12,24,70,.08), 0 22px 44px rgba(12,24,70,.10);
+    --radius: 14px; --radius-lg: 22px;
+    --f-display: 'Bricolage Grotesque', system-ui, sans-serif;
+    --f-body: 'Manrope', system-ui, sans-serif;
+    --f-mono: 'JetBrains Mono', ui-monospace, monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #070D24; --ground-2: #0D163B; --paper: #121E4A; --paper-soft: #0F1940;
+      --ink: #F5F8FF; --ink-soft: #CBD5F5; --ink-mute: #9CACD9;
+      --line: #2C3D75; --line-strong: #364785;
+      --school: #7091FF; --school-2: #9DB3FF; --school-tint: #1A2A6B;
+      --coral: #FF6B72; --mint: #52D9AE; --lemon: #FFE85B; --gold: #FFC531;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,.5), 0 4px 14px rgba(0,0,0,.35);
+      --shadow-lg: 0 4px 12px rgba(0,0,0,.55), 0 22px 44px rgba(0,0,0,.45);
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; font-family: var(--f-body); color: var(--ink); background: var(--ground); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  a { color: inherit; text-decoration: none; }
+
+  .nav { position: sticky; top: 0; z-index: 40; backdrop-filter: saturate(140%) blur(14px); background: color-mix(in oklab, var(--ground) 82%, transparent); border-bottom: 1px solid var(--line); }
+  .nav-inner { display: flex; align-items: center; gap: 10px; padding: 12px 20px; max-width: 720px; margin: 0 auto; }
+  .brand { display: flex; align-items: center; gap: 9px; font-family: var(--f-display); font-weight: 800; font-size: 15px; }
+  .brand-mark { width: 30px; height: 30px; border-radius: 7px; background: #fff; object-fit: contain; padding: 2px; box-shadow: 0 1px 3px rgba(12,24,70,.15); }
+  .brand em { font-style: normal; color: var(--school); }
+  .nav-back { margin-left: auto; padding: 7px 13px; border-radius: 999px; font-family: var(--f-mono); font-size: 12px; font-weight: 600; color: var(--ink-soft); background: var(--paper); border: 1px solid var(--line); }
+
+  .wrap { max-width: 720px; margin: 0 auto; padding: 22px 16px 90px; }
+  .head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+  .head h1 { font-family: var(--f-display); font-weight: 800; font-size: clamp(26px, 5vw, 38px); letter-spacing: -.03em; margin: 0; }
+  .head .clear { font-family: var(--f-mono); font-size: 12px; color: var(--ink-mute); border: 1px solid var(--line); border-radius: 999px; padding: 7px 12px; background: var(--paper); }
+  .head .clear:hover { color: var(--coral); border-color: var(--coral); }
+
+  .list { display: flex; flex-direction: column; gap: 8px; }
+  .n-item { display: flex; align-items: flex-start; gap: 12px; background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 13px 15px; box-shadow: var(--shadow-sm); width: 100%; text-align: left; position: relative; }
+  .n-item.unread { border-color: color-mix(in oklab, var(--school) 40%, var(--line)); background: color-mix(in oklab, var(--school) 6%, var(--paper)); }
+  .n-item.unread::before { content: ""; position: absolute; left: 5px; top: 50%; transform: translateY(-50%); width: 6px; height: 6px; border-radius: 50%; background: var(--school); }
+  .n-ico { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; flex: none; font-size: 18px; }
+  .n-ico.like { background: color-mix(in oklab, var(--coral) 16%, var(--paper)); }
+  .n-ico.dislike { background: color-mix(in oklab, var(--school) 16%, var(--paper)); }
+  .n-ico.comment { background: color-mix(in oklab, var(--mint) 18%, var(--paper)); }
+  .n-ico.message { background: color-mix(in oklab, var(--school-2) 18%, var(--paper)); }
+  .n-body { flex: 1; min-width: 0; }
+  .n-text { font-size: 14px; color: var(--ink); }
+  .n-text b { font-weight: 800; }
+  .n-snippet { font-size: 13px; color: var(--ink-soft); margin-top: 2px; word-break: break-word; }
+  .n-time { font-family: var(--f-mono); font-size: 11px; color: var(--ink-mute); margin-top: 4px; letter-spacing: .04em; }
+
+  .empty { text-align: center; padding: 50px 20px; color: var(--ink-mute); }
+  .empty .big { font-size: 40px; margin-bottom: 10px; }
+  .locked { max-width: 620px; margin: 40px auto; padding: 30px 22px; text-align: center; color: var(--ink-soft); background: var(--paper); border: 1px dashed var(--line-strong); border-radius: var(--radius); }
+  .locked a { color: var(--school); font-weight: 700; text-decoration: underline; }
+  .db-notice { font-family: var(--f-mono); font-size: 11px; color: var(--ink-mute); text-align: center; padding: 8px; }
+  .db-notice.offline { color: var(--coral); }
+</style>
+</head>
+<body>
+<div class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/"><img class="brand-mark" src="/logo-sextogram.png" alt=""><span>Sexto<em>gram</em></span></a>
+    <a class="nav-back" href="/">← Inicio</a>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="head">
+    <h1>Bandeja de entrada</h1>
+    <button class="clear" id="clearBtn" hidden>Borrar todas</button>
+  </div>
+  <div id="lockedView" class="locked" hidden>
+    Para ver tus notificaciones necesitás tu nombre. <a href="/">Elegilo en la home</a>.
+  </div>
+  <div class="list" id="list"></div>
+</div>
+<div class="db-notice" id="dbNotice">Cargando…</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  const SUPABASE_URL = 'https://qmxugyqwgptgafitbquw.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFteHVneXF3Z3B0Z2FmaXRicXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzOTQ0NDcsImV4cCI6MjEwMzk3MDQ0N30.AtfxRuD_zSojiVCW170wmQjZudRQJyUl_mdm_L5ii_I';
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
+  const $ = id => document.getElementById(id);
+  try { const t = localStorage.getItem('sixth-theme'); if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t); } catch(e){}
+  const escapeHtml = s => String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function timeAgo(ts){ const d=Math.max(0,Date.now()-new Date(ts).getTime()); if(d<60000) return 'ahora'; if(d<3600000) return Math.floor(d/60000)+'m'; if(d<86400000) return Math.floor(d/3600000)+'h'; return Math.floor(d/86400000)+'d'; }
+
+  let me = null, myProfile = null;
+  let profilesById = new Map();
+
+  // type -> { icoClass, ico, text(actorName), link }
+  const TYPES = {
+    message:         { cls:'message', ico:'💬', text:a=>`<b>${a}</b> te escribió`, link:'/chat/' },
+    post_like:       { cls:'like',    ico:'❤️', text:a=>`A <b>${a}</b> le gustó tu publicación`, link:'/feed/' },
+    post_comment:    { cls:'comment', ico:'💬', text:a=>`<b>${a}</b> comentó tu publicación`, link:'/feed/' },
+    ship_like:       { cls:'like',    ico:'❤️', text:_=>`A <b>alguien</b> le gustó tu ship`, link:'/#ships' },
+    ship_comment:    { cls:'comment', ico:'💬', text:_=>`<b>Alguien</b> comentó tu ship`, link:'/#ships' },
+    protest_like:    { cls:'like',    ico:'❤️', text:_=>`A <b>alguien</b> le gustó tu protesta`, link:'/#protestas' },
+    protest_dislike: { cls:'dislike', ico:'👎', text:_=>`<b>Alguien</b> le dio dislike a tu protesta`, link:'/#protestas' },
+    protest_comment: { cls:'comment', ico:'💬', text:_=>`<b>Alguien</b> comentó tu protesta`, link:'/#protestas' },
+  };
+
+  async function init() {
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session && session.user) me = session.user;
+      else { const { data } = await sb.auth.signInAnonymously(); me = data.user; }
+    } catch (e) { $('dbNotice').className='db-notice offline'; $('dbNotice').textContent='Sin conexión'; return; }
+    const { data: prof } = await sb.from('profiles').select('user_id, name, section, avatar_url').eq('user_id', me.id).maybeSingle();
+    myProfile = prof || null;
+    if (!myProfile) { $('lockedView').hidden = false; $('dbNotice').textContent = 'Reclamá tu nombre en la home.'; return; }
+    const { data: profs } = await sb.from('profiles').select('user_id, name');
+    profilesById = new Map((profs || []).map(p => [p.user_id, p.name]));
+    await load();
+    subscribe();
+  }
+
+  async function load() {
+    const { data, error } = await sb.from('notifications').select('*').order('created_at', { ascending: false }).limit(150);
+    if (error) { $('dbNotice').textContent = 'No se pudieron cargar (¿falta correr el SQL?).'; return; }
+    render(data || []);
+    $('dbNotice').textContent = (data && data.length) ? 'Al día · en vivo' : '';
+    // marcar como leídas
+    const unread = (data || []).filter(n => !n.read_at);
+    if (unread.length) {
+      await sb.from('notifications').update({ read_at: new Date().toISOString() }).is('read_at', null).eq('user_id', me.id);
+    }
+  }
+
+  function render(items) {
+    $('clearBtn').hidden = !items.length;
+    if (!items.length) {
+      $('list').innerHTML = `<div class="empty"><div class="big">📭</div>Todavía no tenés notificaciones.<br>Cuando reaccionen a lo tuyo o te escriban, aparece acá.</div>`;
+      return;
+    }
+    $('list').innerHTML = items.map(n => {
+      const t = TYPES[n.type] || { cls:'message', ico:'🔔', text:_=>'Nueva notificación', link:'/' };
+      const actor = n.actor_user_id ? (profilesById.get(n.actor_user_id) || 'Alguien') : 'Alguien';
+      const snip = n.snippet ? `<div class="n-snippet">“${escapeHtml(n.snippet)}”</div>` : '';
+      return `<a class="n-item ${n.read_at ? '' : 'unread'}" href="${t.link}">
+        <div class="n-ico ${t.cls}">${t.ico}</div>
+        <div class="n-body">
+          <div class="n-text">${t.text(escapeHtml(actor))}</div>
+          ${snip}
+          <div class="n-time">${timeAgo(n.created_at)}</div>
+        </div>
+      </a>`;
+    }).join('');
+  }
+
+  $('clearBtn').addEventListener('click', async () => {
+    if (!confirm('¿Borrar todas tus notificaciones?')) return;
+    await sb.from('notifications').delete().eq('user_id', me.id);
+    render([]);
+  });
+
+  function subscribe() {
+    sb.channel('notif-live')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${me.id}` }, () => load())
+      .subscribe();
+  }
+
+  init();
+</script>
+</body>
+</html>
