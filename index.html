@@ -201,6 +201,29 @@
     box-shadow: 0 0 0 2px var(--ground);
   }
   .notif-badge[hidden] { display: none; }
+  .notif-wrap { position: relative; display: inline-flex; }
+  .notif-menu {
+    position: absolute; top: calc(100% + 8px); right: 0; z-index: 60;
+    min-width: 210px; padding: 6px;
+    background: var(--paper); border: 1px solid var(--line); border-radius: 14px;
+    box-shadow: var(--shadow-lg);
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .notif-menu[hidden] { display: none; }
+  .notif-menu a {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 10px;
+    color: var(--ink); font-size: 14px; font-weight: 600;
+  }
+  .notif-menu a:hover { background: var(--paper-soft); }
+  .notif-menu a svg { width: 18px; height: 18px; color: var(--school); flex: none; }
+  .notif-menu a span:first-of-type { flex: 1; }
+  .notif-menu-badge {
+    min-width: 18px; height: 18px; padding: 0 6px; border-radius: 999px;
+    background: var(--coral); color: #fff; font-family: var(--f-mono); font-size: 10px; font-weight: 700;
+    display: grid; place-items: center;
+  }
+  .notif-menu-badge[hidden] { display: none; }
   @media (max-width: 720px) {
     .nav-links { display: none; }
     .nav-mobile-btn { display: grid; }
@@ -2211,10 +2234,23 @@
     <button class="notif-btn" id="calBtn" aria-label="Calendario escolar" title="Calendario escolar" style="margin-right:4px">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
     </button>
-    <a href="/bandeja/" class="notif-btn" id="notifBtn" aria-label="Bandeja de entrada" title="Bandeja de entrada">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      <span class="notif-badge" id="notifBadge" hidden>0</span>
-    </a>
+    <div class="notif-wrap">
+      <button class="notif-btn" id="notifBtn" aria-label="Notificaciones" title="Notificaciones" aria-haspopup="true" aria-expanded="false">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-badge" id="notifBadge" hidden>0</span>
+      </button>
+      <div class="notif-menu" id="notifMenu" role="menu" hidden>
+        <a href="/bandeja/" role="menuitem">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span>Bandeja de entrada</span>
+          <span class="notif-menu-badge" id="notifMenuBadge" hidden>0</span>
+        </a>
+        <a href="/chat/" role="menuitem">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span>Mensajes</span>
+        </a>
+      </div>
+    </div>
     <button class="account-chip is-guest" id="accountChip" type="button">
       <span class="who-name">Iniciar sesión</span>
     </button>
@@ -2961,10 +2997,28 @@
   // Notif badge — se actualiza tras conectar a Supabase (más abajo)
   function setNotifBadge(n) {
     const badge = document.getElementById('notifBadge');
-    if (!badge) return;
-    if (n > 0) { badge.hidden = false; badge.textContent = n > 99 ? '99+' : String(n); }
-    else { badge.hidden = true; }
+    const mBadge = document.getElementById('notifMenuBadge');
+    const txt = n > 99 ? '99+' : String(n);
+    if (badge) { if (n > 0) { badge.hidden = false; badge.textContent = txt; } else badge.hidden = true; }
+    if (mBadge) { if (n > 0) { mBadge.hidden = false; mBadge.textContent = txt; } else mBadge.hidden = true; }
   }
+
+  // Menú de la campana: Bandeja de entrada + Mensajes
+  (function () {
+    const btn = document.getElementById('notifBtn');
+    const menu = document.getElementById('notifMenu');
+    if (!btn || !menu) return;
+    const close = () => { menu.hidden = true; btn.setAttribute('aria-expanded', 'false'); };
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const willOpen = menu.hidden;
+      menu.hidden = !willOpen;
+      btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+    });
+    document.addEventListener('click', (e) => { if (!menu.hidden && !menu.contains(e.target) && e.target !== btn) close(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+    menu.querySelectorAll('a').forEach(a => a.addEventListener('click', close));
+  })();
 
   // ---------- data ----------
   const STUDENTS = [
