@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1E3AAB" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#070D24" media="(prefers-color-scheme: dark)">
+<title>Calificar · Sextogram</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%231E3AAB'/%3E%3Cpath d='M20 8l3.5 7 7.5 1-5.5 5.3 1.3 7.7L20 32l-6.8 4 1.3-7.7L9 23l7.5-1z' fill='white'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+  :root {
+    --ground: #EEF1FA; --ground-2: #E4EAF7; --paper: #FFFFFF; --paper-soft: #F7F9FE;
+    --ink: #0C1846; --ink-soft: #2C3866; --ink-mute: #556388;
+    --line: #DBE1F2; --line-strong: #B9C3E1;
+    --school: #1E3AAB; --school-2: #3B5EF0; --school-tint: #DDE4FF;
+    --coral: #D91F26; --mint: #35C89A; --lemon: #F5DE3A; --gold: #F5B301;
+    --shadow-sm: 0 1px 2px rgba(12,24,70,.06), 0 4px 14px rgba(12,24,70,.06);
+    --shadow-lg: 0 4px 12px rgba(12,24,70,.08), 0 22px 44px rgba(12,24,70,.10);
+    --radius: 14px; --radius-lg: 22px;
+    --f-display: 'Bricolage Grotesque', system-ui, sans-serif;
+    --f-body: 'Manrope', system-ui, sans-serif;
+    --f-mono: 'JetBrains Mono', ui-monospace, monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #070D24; --ground-2: #0D163B; --paper: #121E4A; --paper-soft: #0F1940;
+      --ink: #F5F8FF; --ink-soft: #CBD5F5; --ink-mute: #9CACD9;
+      --line: #2C3D75; --line-strong: #364785;
+      --school: #7091FF; --school-2: #9DB3FF; --school-tint: #1A2A6B;
+      --coral: #FF6B72; --mint: #52D9AE; --lemon: #FFE85B; --gold: #FFC531;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,.5), 0 4px 14px rgba(0,0,0,.35);
+      --shadow-lg: 0 4px 12px rgba(0,0,0,.55), 0 22px 44px rgba(0,0,0,.45);
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; height: 100%; }
+  body { font-family: var(--f-body); color: var(--ink); background: var(--ground); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  a { color: inherit; text-decoration: none; }
+
+  .nav { position: sticky; top: 0; z-index: 40; backdrop-filter: saturate(140%) blur(14px); background: color-mix(in oklab, var(--ground) 82%, transparent); border-bottom: 1px solid var(--line); }
+  .nav-inner { display: flex; align-items: center; gap: 10px; padding: 10px 16px; max-width: 720px; margin: 0 auto; }
+  .brand { display: flex; align-items: center; gap: 9px; font-family: var(--f-display); font-weight: 800; font-size: 15px; }
+  .brand-mark { width: 30px; height: 30px; border-radius: 7px; background: #fff; object-fit: contain; padding: 2px; box-shadow: 0 1px 3px rgba(12,24,70,.15); }
+  .brand em { font-style: normal; color: var(--school); }
+  .nav-back { margin-left: auto; padding: 7px 13px; border-radius: 999px; font-family: var(--f-mono); font-size: 12px; font-weight: 600; color: var(--ink-soft); background: var(--paper); border: 1px solid var(--line); }
+
+  .tabs { display: flex; gap: 8px; padding: 10px 16px 0; max-width: 720px; margin: 0 auto; }
+  .tab { flex: 1; padding: 10px; border-radius: 12px 12px 0 0; font-weight: 800; font-family: var(--f-display); font-size: 15px; color: var(--ink-mute); background: transparent; border: 1px solid transparent; border-bottom: 0; }
+  .tab.on { color: var(--school); background: var(--paper); border-color: var(--line); }
+
+  .anon-banner { max-width: 720px; margin: 10px auto 0; padding: 10px 16px; }
+  .anon-banner .inner { display: flex; align-items: center; gap: 10px; background: color-mix(in oklab, var(--school) 12%, var(--paper)); border: 1px solid color-mix(in oklab, var(--school) 30%, var(--line)); color: var(--school); border-radius: 12px; padding: 10px 14px; font-size: 13px; font-weight: 600; }
+  .anon-banner svg { width: 18px; height: 18px; flex: none; }
+
+  .locked { max-width: 620px; margin: 40px auto; padding: 30px 22px; text-align: center; color: var(--ink-soft); background: var(--paper); border: 1px dashed var(--line-strong); border-radius: var(--radius); }
+  .locked a { color: var(--school); font-weight: 700; text-decoration: underline; }
+
+  /* ---------- FEED estilo tiktok ---------- */
+  .rate-feed { height: calc(100dvh - 118px); overflow-y: scroll; scroll-snap-type: y mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .rate-feed::-webkit-scrollbar { display: none; }
+  .rate-card { height: 100%; scroll-snap-align: start; display: flex; align-items: center; justify-content: center; padding: 18px; }
+  .rate-inner { width: 100%; max-width: 420px; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); padding: 26px 22px; text-align: center; }
+  .rate-avatar { width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 14px; display: grid; place-items: center; color: #fff; font-family: var(--f-display); font-weight: 800; font-size: 46px; overflow: hidden; border: 3px solid var(--paper); box-shadow: 0 6px 20px rgba(12,24,70,.18); }
+  .rate-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .rate-name { font-family: var(--f-display); font-weight: 800; font-size: 26px; letter-spacing: -.02em; }
+  .rate-section { font-family: var(--f-mono); font-size: 12px; color: var(--ink-mute); margin-bottom: 20px; }
+  .rate-cat { margin: 16px 0; }
+  .rate-cat-label { font-weight: 700; font-size: 15px; margin-bottom: 8px; }
+  .stars { display: flex; justify-content: center; gap: 6px; }
+  .stars button { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 10px; transition: transform .1s; }
+  .stars button:active { transform: scale(.9); }
+  .stars svg { width: 34px; height: 34px; }
+  .star-off { fill: none; stroke: var(--line-strong); stroke-width: 1.5; }
+  .star-on { fill: var(--gold); stroke: var(--gold); }
+  .rate-saved { font-family: var(--f-mono); font-size: 11px; color: var(--mint); height: 14px; margin-top: 4px; }
+  .swipe-hint { margin-top: 18px; font-family: var(--f-mono); font-size: 11px; color: var(--ink-mute); letter-spacing: .08em; }
+
+  /* ---------- Rankings ---------- */
+  .wrap { max-width: 720px; margin: 0 auto; padding: 16px 16px 90px; }
+  .rank-list { display: flex; flex-direction: column; gap: 10px; }
+  .rank-row { display: flex; align-items: center; gap: 12px; background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; box-shadow: var(--shadow-sm); cursor: pointer; text-align: left; width: 100%; }
+  .rank-row:hover { box-shadow: var(--shadow-lg); }
+  .rank-row.me { border-color: var(--school); background: color-mix(in oklab, var(--school) 7%, var(--paper)); }
+  .rank-av { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-family: var(--f-display); font-weight: 800; font-size: 18px; overflow: hidden; flex: none; }
+  .rank-av img { width: 100%; height: 100%; object-fit: cover; }
+  .rank-info { flex: 1; min-width: 0; }
+  .rank-name { font-family: var(--f-display); font-weight: 800; font-size: 16px; }
+  .rank-name .youtag { font-family: var(--f-mono); font-size: 10px; color: var(--school); margin-left: 6px; }
+  .rank-scores { display: flex; gap: 14px; margin-top: 3px; font-size: 12px; color: var(--ink-soft); flex-wrap: wrap; }
+  .rank-scores b { color: var(--gold); }
+  .rank-empty { padding: 30px; text-align: center; color: var(--ink-mute); }
+
+  .modal-backdrop { position: fixed; inset: 0; z-index: 100; background: rgba(12,24,70,.6); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; padding: 20px; }
+  .modal-backdrop.open { display: flex; }
+  .modal { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-lg); width: 100%; max-width: 460px; max-height: 88vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
+  .modal-head { display: flex; align-items: center; gap: 12px; padding: 18px 20px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--paper); }
+  .modal-head .rank-av { width: 44px; height: 44px; }
+  .modal-head h3 { margin: 0; font-family: var(--f-display); font-weight: 800; font-size: 18px; }
+  .modal-close { margin-left: auto; width: 32px; height: 32px; border-radius: 50%; background: var(--paper-soft); color: var(--ink-soft); display: grid; place-items: center; }
+  .modal-body { padding: 18px 20px; }
+  .cat-block { margin-bottom: 20px; }
+  .cat-block h4 { margin: 0 0 8px; font-family: var(--f-display); font-size: 16px; }
+  .cat-avg { display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px; }
+  .cat-avg .big { font-family: var(--f-display); font-weight: 800; font-size: 30px; color: var(--gold); }
+  .cat-avg .n { font-family: var(--f-mono); font-size: 12px; color: var(--ink-mute); }
+  .dist-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-size: 12px; }
+  .dist-row .lbl { width: 34px; color: var(--ink-mute); font-family: var(--f-mono); }
+  .dist-bar { flex: 1; height: 8px; border-radius: 999px; background: var(--paper-soft); overflow: hidden; }
+  .dist-bar span { display: block; height: 100%; background: var(--gold); }
+  .dist-row .cnt { width: 24px; text-align: right; color: var(--ink-soft); font-family: var(--f-mono); }
+  .cat-none { color: var(--ink-mute); font-size: 13px; }
+
+  .db-notice { font-family: var(--f-mono); font-size: 11px; color: var(--ink-mute); text-align: center; padding: 6px; }
+  .db-notice.offline { color: var(--coral); }
+</style>
+</head>
+<body>
+<div class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/"><img class="brand-mark" src="/logo-sextogram.png" alt=""><span>Sexto<em>gram</em></span></a>
+    <a class="nav-back" href="/">← Inicio</a>
+  </div>
+  <div class="tabs">
+    <button class="tab on" id="tabRate" type="button">Calificar</button>
+    <button class="tab" id="tabRanks" type="button">Calificaciones</button>
+  </div>
+</div>
+
+<div class="anon-banner">
+  <div class="inner">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+    <span>Todas tus calificaciones son <b>anónimas</b>. Nadie sabe quién calificó a quién.</span>
+  </div>
+</div>
+
+<div id="lockedView" class="locked" hidden>
+  Para calificar necesitás tu nombre. <a href="/">Elegilo en la home</a> y volvé.
+</div>
+
+<div id="rateView">
+  <div class="rate-feed" id="rateFeed"></div>
+</div>
+
+<div id="ranksView" class="wrap" hidden>
+  <div class="rank-list" id="rankList"></div>
+</div>
+
+<div class="db-notice" id="dbNotice">Cargando…</div>
+
+<!-- Modal detalle de calificaciones -->
+<div class="modal-backdrop" id="detailModal" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="rank-av" id="detailAv"></div>
+      <h3 id="detailName">—</h3>
+      <button class="modal-close" id="detailClose" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="modal-body" id="detailBody"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  const SUPABASE_URL = 'https://qmxugyqwgptgafitbquw.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFteHVneXF3Z3B0Z2FmaXRicXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzOTQ0NDcsImV4cCI6MjEwMzk3MDQ0N30.AtfxRuD_zSojiVCW170wmQjZudRQJyUl_mdm_L5ii_I';
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
+  const $ = id => document.getElementById(id);
+  try { const t = localStorage.getItem('sixth-theme'); if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t); } catch(e){}
+
+  const PALETTE = ['#1E3AAB','#3B5EF0','#6B3EE8','#D91F26','#35C89A','#0C1846','#C68416','#7A4A00'];
+  const colorFor = n => { let h=0; for(let i=0;i<n.length;i++) h=(h*31+n.charCodeAt(i))>>>0; return PALETTE[h%PALETTE.length]; };
+  const escapeHtml = s => String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const CATS = [{ id:'atractivo', label:'Atractivo/a' }, { id:'buena_onda', label:'Buena onda' }];
+
+  let me = null, myProfile = null;
+  let profiles = [];                 // otros con perfil (para calificar)
+  let allProfiles = [];              // incluyéndome (para ranking)
+  let myRatings = new Map();         // `${uid}|${cat}` -> stars
+  let avgMap = new Map();            // `${uid}|${cat}` -> { avg, cnt }
+  let feedQueue = [];
+
+  function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+  const starSvg = on => `<svg viewBox="0 0 24 24" class="${on?'star-on':'star-off'}"><path d="M12 2l3 6.5 7 .9-5.2 4.8 1.4 7-6.2-3.6-6.2 3.6 1.4-7L2 9.4l7-.9z"/></svg>`;
+
+  async function init() {
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session && session.user) me = session.user;
+      else { const { data } = await sb.auth.signInAnonymously(); me = data.user; }
+    } catch (e) { $('dbNotice').className='db-notice offline'; $('dbNotice').textContent='Sin conexión'; return; }
+    if (me) {
+      const { data: prof } = await sb.from('profiles').select('user_id, name, section, avatar_url').eq('user_id', me.id).maybeSingle();
+      myProfile = prof || null;
+    }
+    if (!myProfile) {
+      $('rateView').hidden = true;
+      $('lockedView').hidden = false;
+      $('dbNotice').textContent = 'Reclamá tu nombre en la home para calificar.';
+      // igual mostramos ranking en modo lectura
+      await loadData();
+      wireTabs();
+      return;
+    }
+    await loadData();
+    buildFeed();
+    wireTabs();
+    $('dbNotice').textContent = 'Deslizá para calificar · anónimo';
+  }
+
+  async function loadData() {
+    const [{ data: profs }, { data: mine }, { data: avgs }] = await Promise.all([
+      sb.from('profiles').select('user_id, name, section, avatar_url').order('name'),
+      myProfile ? sb.from('ratings').select('rated_user_id, category, stars') : Promise.resolve({ data: [] }),
+      sb.rpc('rating_averages'),
+    ]);
+    allProfiles = profs || [];
+    profiles = allProfiles.filter(p => !me || p.user_id !== me.id);
+    myRatings = new Map();
+    (mine || []).forEach(r => myRatings.set(`${r.rated_user_id}|${r.category}`, r.stars));
+    avgMap = new Map();
+    (avgs || []).forEach(a => avgMap.set(`${a.rated_user_id}|${a.category}`, { avg: Number(a.avg_stars), cnt: Number(a.cnt) }));
+  }
+
+  // ---------- FEED ----------
+  function buildFeed() {
+    feedQueue = shuffle(profiles);
+    const feed = $('rateFeed');
+    feed.innerHTML = '';
+    if (!feedQueue.length) { feed.innerHTML = '<div class="rate-card"><div class="rate-inner">Todavía no hay a quién calificar. Cuando más compas reclamen su nombre, aparecerán acá.</div></div>'; return; }
+    feedQueue.forEach(p => feed.appendChild(cardFor(p)));
+    // loop infinito: al acercarse al final, agregamos otra tanda
+    feed.addEventListener('scroll', () => {
+      if (feed.scrollTop + feed.clientHeight * 2 >= feed.scrollHeight) {
+        shuffle(profiles).forEach(p => feed.appendChild(cardFor(p)));
+      }
+    });
+  }
+
+  function cardFor(p) {
+    const card = document.createElement('div');
+    card.className = 'rate-card';
+    const av = p.avatar_url ? `<img src="${escapeHtml(p.avatar_url)}" alt="">` : escapeHtml((p.name||'?')[0].toUpperCase());
+    card.innerHTML = `
+      <div class="rate-inner">
+        <div class="rate-avatar" style="background:${colorFor(p.name||'?')}">${av}</div>
+        <div class="rate-name">${escapeHtml(p.name)}</div>
+        <div class="rate-section">Sección ${escapeHtml(p.section||'')}</div>
+        ${CATS.map(c => `
+          <div class="rate-cat">
+            <div class="rate-cat-label">${c.label}</div>
+            <div class="stars" data-uid="${p.user_id}" data-cat="${c.id}"></div>
+            <div class="rate-saved" data-saved="${p.user_id}|${c.id}"></div>
+          </div>`).join('')}
+        <div class="swipe-hint">▲ deslizá para el siguiente ▲</div>
+      </div>`;
+    CATS.forEach(c => {
+      const holder = card.querySelector(`.stars[data-uid="${p.user_id}"][data-cat="${c.id}"]`);
+      renderStars(holder, p.user_id, c.id);
+    });
+    return card;
+  }
+
+  function renderStars(holder, uid, cat) {
+    const cur = myRatings.get(`${uid}|${cat}`) || 0;
+    holder.innerHTML = [1,2,3,4,5].map(n => `<button type="button" data-n="${n}">${starSvg(n <= cur)}</button>`).join('');
+    holder.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => rate(uid, cat, parseInt(btn.dataset.n, 10), holder));
+    });
+  }
+
+  async function rate(uid, cat, stars, holder) {
+    if (!myProfile || !me) { alert('Reclamá tu nombre en la home.'); return; }
+    const prev = myRatings.get(`${uid}|${cat}`) || 0;
+    myRatings.set(`${uid}|${cat}`, stars);
+    renderStars(holder, uid, cat);
+    const savedEl = holder.parentElement.querySelector(`[data-saved="${uid}|${cat}"]`);
+    if (savedEl) { savedEl.textContent = '¡Guardado!'; setTimeout(() => { if (savedEl) savedEl.textContent=''; }, 1400); }
+    const { error } = await sb.from('ratings').upsert(
+      { rater_user_id: me.id, rated_user_id: uid, category: cat, stars, updated_at: new Date().toISOString() },
+      { onConflict: 'rater_user_id,rated_user_id,category' }
+    );
+    if (error) {
+      myRatings.set(`${uid}|${cat}`, prev);
+      renderStars(holder, uid, cat);
+      alert('No se pudo calificar: ' + error.message);
+    }
+  }
+
+  // ---------- RANKINGS ----------
+  function renderRanks() {
+    const list = $('rankList');
+    if (!allProfiles.length) { list.innerHTML = '<div class="rank-empty">Todavía no hay perfiles.</div>'; return; }
+    const rows = allProfiles.map(p => {
+      const a = avgMap.get(`${p.user_id}|atractivo`);
+      const b = avgMap.get(`${p.user_id}|buena_onda`);
+      const score = (a?a.avg:0) + (b?b.avg:0);
+      return { p, a, b, score };
+    }).sort((x, y) => y.score - x.score);
+    list.innerHTML = rows.map(({ p, a, b }) => {
+      const isMe = me && p.user_id === me.id;
+      const av = p.avatar_url ? `<img src="${escapeHtml(p.avatar_url)}" alt="">` : escapeHtml((p.name||'?')[0].toUpperCase());
+      const fmt = r => r ? `<b>★ ${r.avg.toFixed(1)}</b> <span style="color:var(--ink-mute)">(${r.cnt})</span>` : '<span style="color:var(--ink-mute)">sin votos</span>';
+      return `<button class="rank-row ${isMe?'me':''}" data-uid="${p.user_id}" type="button">
+        <div class="rank-av" style="background:${colorFor(p.name||'?')}">${av}</div>
+        <div class="rank-info">
+          <div class="rank-name">${escapeHtml(p.name)}${isMe?'<span class="youtag">vos</span>':''}</div>
+          <div class="rank-scores"><span>Atractivo/a: ${fmt(a)}</span><span>Buena onda: ${fmt(b)}</span></div>
+        </div>
+      </button>`;
+    }).join('');
+    list.querySelectorAll('.rank-row').forEach(row => row.addEventListener('click', () => openDetail(row.dataset.uid)));
+  }
+
+  async function openDetail(uid) {
+    const p = allProfiles.find(x => x.user_id === uid);
+    if (!p) return;
+    $('detailName').textContent = p.name + (me && uid === me.id ? ' (vos)' : '');
+    const dav = $('detailAv');
+    dav.style.background = colorFor(p.name||'?');
+    dav.innerHTML = p.avatar_url ? `<img src="${escapeHtml(p.avatar_url)}" alt="">` : escapeHtml((p.name||'?')[0].toUpperCase());
+    $('detailBody').innerHTML = '<div class="cat-none">Cargando…</div>';
+    $('detailModal').classList.add('open');
+    const { data, error } = await sb.rpc('rating_list', { p_user: uid });
+    if (error) { $('detailBody').innerHTML = '<div class="cat-none">No se pudieron cargar.</div>'; return; }
+    const byCat = { atractivo: [], buena_onda: [] };
+    (data || []).forEach(r => { if (byCat[r.category]) byCat[r.category].push(r.stars); });
+    $('detailBody').innerHTML = CATS.map(c => {
+      const arr = byCat[c.id] || [];
+      if (!arr.length) return `<div class="cat-block"><h4>${c.label}</h4><div class="cat-none">Todavía sin calificaciones.</div></div>`;
+      const avg = arr.reduce((s,n)=>s+n,0) / arr.length;
+      const dist = [5,4,3,2,1].map(star => {
+        const cnt = arr.filter(s => s === star).length;
+        const pct = Math.round(cnt / arr.length * 100);
+        return `<div class="dist-row"><span class="lbl">${star}★</span><div class="dist-bar"><span style="width:${pct}%"></span></div><span class="cnt">${cnt}</span></div>`;
+      }).join('');
+      return `<div class="cat-block"><h4>${c.label}</h4>
+        <div class="cat-avg"><span class="big">${avg.toFixed(1)}</span><span class="n">promedio · ${arr.length} ${arr.length===1?'voto':'votos'}</span></div>
+        ${dist}</div>`;
+    }).join('');
+  }
+  $('detailClose').addEventListener('click', () => $('detailModal').classList.remove('open'));
+  $('detailModal').addEventListener('click', e => { if (e.target === $('detailModal')) $('detailModal').classList.remove('open'); });
+
+  // ---------- TABS ----------
+  function wireTabs() {
+    $('tabRate').addEventListener('click', () => {
+      $('tabRate').classList.add('on'); $('tabRanks').classList.remove('on');
+      if (myProfile) $('rateView').hidden = false; else $('lockedView').hidden = false;
+      $('ranksView').hidden = true;
+    });
+    $('tabRanks').addEventListener('click', async () => {
+      $('tabRanks').classList.add('on'); $('tabRate').classList.remove('on');
+      $('rateView').hidden = true; $('lockedView').hidden = true; $('ranksView').hidden = false;
+      $('dbNotice').textContent = 'Actualizando…';
+      await loadData();
+      renderRanks();
+      $('dbNotice').textContent = 'Promedios de todo el salón';
+    });
+  }
+
+  init();
+</script>
+</body>
+</html>

@@ -77,6 +77,17 @@ begin
     update public.song_likes set user_id = v_new where user_id = v_old;
   exception when undefined_table then null; end;
 
+  -- calificaciones (como calificador y como calificado)
+  begin
+    delete from public.ratings r where r.rater_user_id = v_old
+      and exists (select 1 from public.ratings x where x.rater_user_id = v_new and x.rated_user_id = r.rated_user_id and x.category = r.category);
+    update public.ratings set rater_user_id = v_new where rater_user_id = v_old;
+    delete from public.ratings r where r.rated_user_id = v_old
+      and exists (select 1 from public.ratings x where x.rated_user_id = v_new and x.rater_user_id = r.rater_user_id and x.category = r.category);
+    update public.ratings set rated_user_id = v_new where rated_user_id = v_old;
+    delete from public.ratings where rater_user_id = rated_user_id;
+  exception when undefined_table then null; end;
+
   -- protestas
   begin
     update public.protests set author_user_id = v_new where author_user_id = v_old;
