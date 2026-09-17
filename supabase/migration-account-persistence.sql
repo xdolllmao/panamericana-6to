@@ -116,11 +116,6 @@ begin
     update public.follows set followed_id = v_new where followed_id = v_old;
   exception when undefined_table then null; end;
 
-  -- noticias
-  begin
-    update public.news set author_user_id = v_new where author_user_id = v_old;
-  exception when undefined_table then null; end;
-
   -- notificaciones (como destinatario y como actor)
   begin
     update public.notifications set user_id = v_new where user_id = v_old;

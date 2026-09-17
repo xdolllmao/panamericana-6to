@@ -195,29 +195,6 @@
   .story-tap:active { background: rgba(255,255,255,.03); }
   .story-delete { position: absolute; bottom: 14px; right: 14px; z-index: 4; background: rgba(0,0,0,.5); color: #fff; padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 700; }
 
-  /* ===== Noticias ===== */
-  .news-board { margin-bottom: 18px; border: 1px solid var(--line); border-radius: var(--radius, 16px); background: linear-gradient(180deg, color-mix(in oklab, var(--school) 8%, var(--paper)), var(--paper)); box-shadow: var(--shadow-sm); overflow: hidden; }
-  .news-head { padding: 14px 16px; border-bottom: 1px solid var(--line); }
-  .news-title { font-family: var(--f-display); font-weight: 800; font-size: 18px; letter-spacing: -.01em; }
-  .news-sub { font-size: 12px; color: var(--ink-mute); margin-top: 2px; }
-  #newsComposerHost, #newsList { padding: 0 16px; }
-  #newsComposerHost:not(:empty) { padding-top: 14px; }
-  .news-composer { display: flex; flex-direction: column; gap: 8px; }
-  .news-composer textarea { width: 100%; box-sizing: border-box; padding: 11px 13px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--paper); color: var(--ink); font: inherit; font-size: 15px; resize: vertical; min-height: 60px; outline: none; }
-  .news-composer textarea:focus { border-color: var(--school); }
-  .news-composer .row { display: flex; justify-content: flex-end; gap: 10px; align-items: center; }
-  .news-list { display: flex; flex-direction: column; }
-  .news-item { padding: 14px 0; border-top: 1px solid var(--line); }
-  #newsList .news-item:first-child { border-top: 0; }
-  .news-item-head { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; }
-  .news-badge { font-family: var(--f-mono); font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #fff; background: var(--school); padding: 3px 8px; border-radius: 999px; }
-  .news-author { font-weight: 800; font-size: 14px; }
-  .news-time { font-family: var(--f-mono); font-size: 11px; color: var(--ink-mute); margin-left: auto; }
-  .news-body { font-size: 15px; line-height: 1.5; color: var(--ink); white-space: pre-wrap; word-break: break-word; }
-  .news-del { margin-top: 6px; font-family: var(--f-mono); font-size: 11px; color: var(--ink-mute); border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; background: transparent; cursor: pointer; }
-  .news-del:hover { color: var(--coral); border-color: var(--coral); }
-  .news-empty { padding: 16px 0; color: var(--ink-mute); font-size: 14px; }
-
   .feed-tabs { display: flex; gap: 4px; padding: 4px; background: var(--paper); border: 1px solid var(--line); border-radius: 999px; box-shadow: var(--shadow-sm); margin-bottom: 16px; overflow-x: auto; }
   .feed-tab { padding: 8px 14px; border-radius: 999px; font-weight: 700; font-size: 13px; color: var(--ink-soft); white-space: nowrap; }
   .feed-tab.is-active { background: var(--ink); color: var(--paper); }
@@ -323,16 +300,6 @@
 
 <main class="wrap">
   <div id="storiesBar" class="stories-bar" hidden></div>
-
-  <section class="news-board" id="newsBoard" hidden>
-    <div class="news-head">
-      <div class="news-title">📰 Noticias del salón</div>
-      <div class="news-sub">Anuncios oficiales. Solo Gerardo y Magaña publican.</div>
-    </div>
-    <div id="newsComposerHost"></div>
-    <div id="newsList"></div>
-  </section>
-
   <div id="composerHost"></div>
 
   <div class="feed-tabs" role="tablist">
@@ -563,9 +530,7 @@
     await loadProfiles();
     myProfile = me ? profilesById.get(me.id) : null;
     renderComposer();
-    renderNewsComposer();
     await loadFeed();
-    await loadNews();
     await loadStories();
     subscribe();
     // Auto-open story viewer si viene con ?story=<uid>
@@ -1575,83 +1540,7 @@
       .on('postgres_changes', { event: '*', schema: 'public', table: 'stories' }, () => loadStories())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'story_views' }, () => loadStories())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'story_likes' }, () => loadStories())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'news' }, () => loadNews())
       .subscribe();
-  }
-
-  // ===================== NOTICIAS =====================
-  const NEWS_EDITORS = ['Gerardo', 'Magaña']; // solo estos nombres publican
-  const isNewsEditor = () => !!(myProfile && NEWS_EDITORS.includes(myProfile.name));
-  let news = [];
-
-  function renderNewsComposer() {
-    const host = document.getElementById('newsComposerHost');
-    if (!host) return;
-    if (!isNewsEditor()) { host.innerHTML = ''; return; }
-    host.innerHTML = `
-      <div class="news-composer">
-        <textarea id="newsInput" maxlength="1000" placeholder="Escribí una noticia para el salón…"></textarea>
-        <div class="row"><button class="btn btn-primary" id="newsPost" type="button">Publicar noticia</button></div>
-      </div>`;
-    document.getElementById('newsPost').addEventListener('click', postNews);
-  }
-
-  async function loadNews() {
-    const board = document.getElementById('newsBoard');
-    const { data, error } = await sb.from('news')
-      .select('id, author_user_id, body, created_at')
-      .order('created_at', { ascending: false }).limit(50);
-    if (error) { if (board) board.hidden = true; return; } // tabla aún sin crear → ocultar
-    news = data || [];
-    if (board) board.hidden = false;
-    renderNewsList();
-  }
-
-  function renderNewsList() {
-    const list = document.getElementById('newsList');
-    if (!list) return;
-    if (!news.length) {
-      list.innerHTML = `<div class="news-empty">Todavía no hay noticias.</div>`;
-      return;
-    }
-    list.className = 'news-list';
-    list.innerHTML = news.map(n => {
-      const author = profilesById.get(n.author_user_id);
-      const name = author ? author.name : 'Redacción';
-      const mine = me && n.author_user_id === me.id;
-      const del = mine ? `<button class="news-del" type="button" data-ndel="${n.id}">Borrar</button>` : '';
-      return `<article class="news-item">
-        <div class="news-item-head">
-          <span class="news-badge">Noticia</span>
-          <span class="news-author">${escapeHtml(name)}</span>
-          <span class="news-time">${timeAgo(n.created_at)}</span>
-        </div>
-        <div class="news-body">${escapeHtml(n.body)}</div>
-        ${del}
-      </article>`;
-    }).join('');
-    list.querySelectorAll('button[data-ndel]').forEach(b => b.addEventListener('click', () => deleteNews(b.dataset.ndel)));
-  }
-
-  async function postNews() {
-    if (!isNewsEditor() || !me) { alert('Solo Gerardo y Magaña pueden publicar noticias.'); return; }
-    const input = document.getElementById('newsInput');
-    const body = input.value.trim();
-    if (!body) { alert('Escribí la noticia.'); return; }
-    const btn = document.getElementById('newsPost');
-    btn.disabled = true;
-    const { error } = await sb.from('news').insert({ author_user_id: me.id, body: body.slice(0, 1000) });
-    btn.disabled = false;
-    if (error) { alert('No se pudo publicar: ' + error.message); return; }
-    input.value = '';
-  }
-
-  async function deleteNews(id) {
-    if (!confirm('¿Borrar esta noticia?')) return;
-    const { error } = await sb.from('news').delete().eq('id', id);
-    if (error) { alert('No se pudo borrar: ' + error.message); return; }
-    news = news.filter(n => n.id !== id);
-    renderNewsList();
   }
 
   // Refresh stories cada 60s para que expiren visualmente
