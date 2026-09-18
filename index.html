@@ -676,10 +676,10 @@
   .emp-modal-owners { margin: 0; font-family: var(--f-mono); font-size: 12px; color: var(--ink-mute); letter-spacing: .06em; }
   /* Anuncios de Clínicas Jaime en los bordes (solo en pantallas anchas, en el margen) */
   .jaime-ad { position: fixed; top: 0; bottom: 0; width: 120px; z-index: 20; pointer-events: none;
-    background-image: url('/clinicas-jaime.webp'); background-size: 100% auto; background-repeat: repeat-y; background-position: top center;
+    background-size: 100% auto; background-repeat: repeat-y; background-position: top center;
     opacity: .9; box-shadow: 0 0 0 1px var(--line) inset; display: none; }
-  .jaime-ad.left { left: 0; }
-  .jaime-ad.right { right: 0; }
+  .jaime-ad.left { left: 0; background-image: url('/clinicas-jaime.webp'); }
+  .jaime-ad.right { right: 0; background-image: url('/bancos-gema.jpg'); }
   @media (min-width: 1400px) { .jaime-ad { display: block; } }
   @media (min-width: 1650px) { .jaime-ad { width: 150px; } }
   .empresa .badge {
