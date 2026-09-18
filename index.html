@@ -41,7 +41,7 @@
     --shadow-lg:   0 4px 12px rgba(12,24,70,.08), 0 22px 44px rgba(12,24,70,.10);
     --radius:      14px;
     --radius-lg:   22px;
-    --adw:         150px; /* ancho de los anuncios de los bordes */
+    --barh:        76px; /* altura de la barra de anuncios de abajo */
 
     --f-display: 'Bricolage Grotesque', system-ui, -apple-system, sans-serif;
     --f-body:    'Manrope', system-ui, -apple-system, sans-serif;
@@ -97,8 +97,8 @@
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    /* Reserva los bordes para los anuncios (así nunca tapan el contenido) */
-    padding-left: var(--adw); padding-right: var(--adw);
+    /* Reserva el borde inferior para la barra de anuncios (no tapa el contenido) */
+    padding-bottom: var(--barh);
     box-sizing: border-box;
     font-family: var(--f-body);
     color: var(--ink);
@@ -126,7 +126,7 @@
   @media (max-width: 780px) {
     .mobile-tabs {
       display: flex;
-      position: fixed; left: var(--adw); right: var(--adw); bottom: 0;
+      position: fixed; left: 0; right: 0; bottom: var(--barh);
       padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
       background: color-mix(in oklab, var(--paper) 94%, transparent);
       backdrop-filter: saturate(140%) blur(16px);
@@ -145,7 +145,7 @@
     }
     .mtab svg { width: 22px; height: 22px; }
     .mtab.is-active { color: var(--school); }
-    body { padding-bottom: 68px; }
+    body { padding-bottom: calc(68px + var(--barh)); }
   }
 
   /* ================= NAV ================= */
@@ -679,14 +679,14 @@
   .emp-modal-desc { margin: 0 0 10px; font-size: 15px; line-height: 1.55; color: var(--ink); }
   .emp-modal-owners { margin: 0; font-family: var(--f-mono); font-size: 12px; color: var(--ink-mute); letter-spacing: .06em; }
   /* Anuncios de Clínicas Jaime en los bordes (solo en pantallas anchas, en el margen) */
-  .jaime-ad { position: fixed; top: 0; bottom: 0; width: var(--adw); z-index: 20; pointer-events: none;
-    background-size: 100% auto; background-repeat: repeat-y; background-position: top center;
-    opacity: .92; box-shadow: 0 0 0 1px var(--line) inset; display: block; }
-  .jaime-ad.left { left: 0; background-image: url('/clinicas-jaime.webp'); }
-  .jaime-ad.right { right: 0; background-image: url('/bancos-gema.jpg'); }
-  @media (max-width: 1200px) { :root { --adw: 90px; } }
-  @media (max-width: 780px)  { :root { --adw: 54px; } }
-  @media (max-width: 480px)  { :root { --adw: 40px; } }
+  .jaime-bar { position: fixed; left: 0; right: 0; bottom: 0; height: var(--barh); z-index: 15;
+    display: flex; overflow: hidden; background: var(--paper); border-top: 1px solid var(--line-strong);
+    pointer-events: none; }
+  .jaime-bar .tile { flex: 0 0 auto; width: 128px; height: 100%; background-size: cover;
+    background-position: center 14%; box-shadow: 0 0 0 1px var(--line) inset; }
+  .jaime-bar .tile.j { background-image: url('/clinicas-jaime.webp'); }
+  .jaime-bar .tile.g { background-image: url('/bancos-gema.jpg'); }
+  @media (max-width: 480px) { .jaime-bar .tile { width: 96px; } }
   .empresa .badge {
     align-self: flex-start;
     font-family: var(--f-mono); font-size: 11px;
@@ -2226,9 +2226,27 @@
 </head>
 <body>
 
-<!-- Anuncios de Clínicas Jaime en los bordes (solo pantallas anchas) -->
-<div class="jaime-ad left" aria-hidden="true"></div>
-<div class="jaime-ad right" aria-hidden="true"></div>
+<!-- Barra de anuncios abajo: Clínicas Jaime y Bancos Gema alternados -->
+<div class="jaime-bar" id="jaimeBar" aria-hidden="true"></div>
+<script>
+  (function () {
+    const bar = document.getElementById('jaimeBar');
+    if (!bar) return;
+    function fill() {
+      const tileW = window.innerWidth <= 480 ? 96 : 128;
+      const n = Math.ceil(window.innerWidth / tileW) + 2;
+      if (bar.childElementCount === n) return;
+      bar.innerHTML = '';
+      for (let i = 0; i < n; i++) {
+        const t = document.createElement('div');
+        t.className = 'tile ' + (i % 2 === 0 ? 'j' : 'g');
+        bar.appendChild(t);
+      }
+    }
+    fill();
+    let tmr; window.addEventListener('resize', () => { clearTimeout(tmr); tmr = setTimeout(fill, 200); });
+  })();
+</script>
 
 <!-- =================== NAV =================== -->
 <nav class="nav">
