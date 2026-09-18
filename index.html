@@ -41,7 +41,7 @@
     --shadow-lg:   0 4px 12px rgba(12,24,70,.08), 0 22px 44px rgba(12,24,70,.10);
     --radius:      14px;
     --radius-lg:   22px;
-    --barh:        76px; /* altura de la barra de anuncios de abajo */
+    --barh:        150px; /* altura de la barra de anuncios de abajo */
 
     --f-display: 'Bricolage Grotesque', system-ui, -apple-system, sans-serif;
     --f-body:    'Manrope', system-ui, -apple-system, sans-serif;
@@ -682,11 +682,12 @@
   .jaime-bar { position: fixed; left: 0; right: 0; bottom: 0; height: var(--barh); z-index: 15;
     display: flex; overflow: hidden; background: var(--paper); border-top: 1px solid var(--line-strong);
     pointer-events: none; }
-  .jaime-bar .tile { flex: 0 0 auto; width: 128px; height: 100%; background-size: cover;
-    background-position: center 14%; box-shadow: 0 0 0 1px var(--line) inset; }
-  .jaime-bar .tile.j { background-image: url('/clinicas-jaime.webp'); }
-  .jaime-bar .tile.g { background-image: url('/bancos-gema.jpg'); }
-  @media (max-width: 480px) { .jaime-bar .tile { width: 96px; } }
+  .jaime-bar .tile { flex: 0 0 auto; height: 100%; background-size: cover;
+    background-position: center; box-shadow: 0 0 0 1px var(--line) inset; }
+  /* ancho = alto × proporción real → el póster se ve completo, sin recorte */
+  .jaime-bar .tile.j { width: calc(var(--barh) * 0.6667); background-image: url('/clinicas-jaime.webp'); }
+  .jaime-bar .tile.g { width: calc(var(--barh) * 0.8056); background-image: url('/bancos-gema.jpg'); }
+  @media (max-width: 480px) { :root { --barh: 116px; } }
   .empresa .badge {
     align-self: flex-start;
     font-family: var(--f-mono); font-size: 11px;
@@ -2233,8 +2234,9 @@
     const bar = document.getElementById('jaimeBar');
     if (!bar) return;
     function fill() {
-      const tileW = window.innerWidth <= 480 ? 96 : 128;
-      const n = Math.ceil(window.innerWidth / tileW) + 2;
+      const barh = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--barh')) || 150;
+      const minTile = barh * 0.6667; // el tile más angosto (Clínicas Jaime)
+      const n = Math.ceil(window.innerWidth / minTile) + 2;
       if (bar.childElementCount === n) return;
       bar.innerHTML = '';
       for (let i = 0; i < n; i++) {
