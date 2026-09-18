@@ -41,6 +41,7 @@
     --shadow-lg:   0 4px 12px rgba(12,24,70,.08), 0 22px 44px rgba(12,24,70,.10);
     --radius:      14px;
     --radius-lg:   22px;
+    --adw:         150px; /* ancho de los anuncios de los bordes */
 
     --f-display: 'Bricolage Grotesque', system-ui, -apple-system, sans-serif;
     --f-body:    'Manrope', system-ui, -apple-system, sans-serif;
@@ -96,6 +97,9 @@
   * { box-sizing: border-box; }
   body {
     margin: 0;
+    /* Reserva los bordes para los anuncios (así nunca tapan el contenido) */
+    padding-left: var(--adw); padding-right: var(--adw);
+    box-sizing: border-box;
     font-family: var(--f-body);
     color: var(--ink);
     background: var(--ground);
@@ -122,7 +126,7 @@
   @media (max-width: 780px) {
     .mobile-tabs {
       display: flex;
-      position: fixed; left: 0; right: 0; bottom: 0;
+      position: fixed; left: var(--adw); right: var(--adw); bottom: 0;
       padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
       background: color-mix(in oklab, var(--paper) 94%, transparent);
       backdrop-filter: saturate(140%) blur(16px);
@@ -675,13 +679,14 @@
   .emp-modal-desc { margin: 0 0 10px; font-size: 15px; line-height: 1.55; color: var(--ink); }
   .emp-modal-owners { margin: 0; font-family: var(--f-mono); font-size: 12px; color: var(--ink-mute); letter-spacing: .06em; }
   /* Anuncios de Clínicas Jaime en los bordes (solo en pantallas anchas, en el margen) */
-  .jaime-ad { position: fixed; top: 0; bottom: 0; width: 120px; z-index: 20; pointer-events: none;
+  .jaime-ad { position: fixed; top: 0; bottom: 0; width: var(--adw); z-index: 20; pointer-events: none;
     background-size: 100% auto; background-repeat: repeat-y; background-position: top center;
-    opacity: .9; box-shadow: 0 0 0 1px var(--line) inset; display: none; }
+    opacity: .92; box-shadow: 0 0 0 1px var(--line) inset; display: block; }
   .jaime-ad.left { left: 0; background-image: url('/clinicas-jaime.webp'); }
   .jaime-ad.right { right: 0; background-image: url('/bancos-gema.jpg'); }
-  @media (min-width: 1400px) { .jaime-ad { display: block; } }
-  @media (min-width: 1650px) { .jaime-ad { width: 150px; } }
+  @media (max-width: 1200px) { :root { --adw: 90px; } }
+  @media (max-width: 780px)  { :root { --adw: 54px; } }
+  @media (max-width: 480px)  { :root { --adw: 40px; } }
   .empresa .badge {
     align-self: flex-start;
     font-family: var(--f-mono); font-size: 11px;
