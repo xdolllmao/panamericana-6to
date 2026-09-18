@@ -668,6 +668,20 @@
     position: relative; overflow: hidden;
   }
   .empresa:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+  .empresa { cursor: pointer; }
+  .emp-eye { font-family: var(--f-mono); font-size: 10px; font-weight: 600; color: var(--school); background: var(--school-tint); padding: 2px 7px; border-radius: 999px; vertical-align: middle; letter-spacing: .04em; white-space: nowrap; }
+  .emp-modal-img { border-radius: 12px; overflow: hidden; margin-bottom: 14px; border: 1px solid var(--line); background: var(--paper-soft); }
+  .emp-modal-img img { display: block; width: 100%; height: auto; }
+  .emp-modal-desc { margin: 0 0 10px; font-size: 15px; line-height: 1.55; color: var(--ink); }
+  .emp-modal-owners { margin: 0; font-family: var(--f-mono); font-size: 12px; color: var(--ink-mute); letter-spacing: .06em; }
+  /* Anuncios de Clínicas Jaime en los bordes (solo en pantallas anchas, en el margen) */
+  .jaime-ad { position: fixed; top: 0; bottom: 0; width: 120px; z-index: 20; pointer-events: none;
+    background-image: url('/clinicas-jaime.webp'); background-size: 100% auto; background-repeat: repeat-y; background-position: top center;
+    opacity: .9; box-shadow: 0 0 0 1px var(--line) inset; display: none; }
+  .jaime-ad.left { left: 0; }
+  .jaime-ad.right { right: 0; }
+  @media (min-width: 1400px) { .jaime-ad { display: block; } }
+  @media (min-width: 1650px) { .jaime-ad { width: 150px; } }
   .empresa .badge {
     align-self: flex-start;
     font-family: var(--f-mono); font-size: 11px;
@@ -2207,6 +2221,9 @@
 </head>
 <body>
 
+<!-- Anuncios de Clínicas Jaime en los bordes (solo pantallas anchas) -->
+<div class="jaime-ad left" aria-hidden="true"></div>
+<div class="jaime-ad right" aria-hidden="true"></div>
 
 <!-- =================== NAV =================== -->
 <nav class="nav">
@@ -2776,6 +2793,26 @@
   </div>
 </div>
 
+<!-- =================== MODAL · empresa =================== -->
+<div class="modal-backdrop" id="empresaModal" role="dialog" aria-modal="true" aria-labelledby="empModalTitle" hidden>
+  <div class="modal emp-modal">
+    <div class="modal-head">
+      <div>
+        <div class="section-tag" id="empModalBadge" style="color: var(--school)">Empresa</div>
+        <h3 id="empModalTitle">—</h3>
+      </div>
+      <button class="modal-close" id="empModalClose" aria-label="Cerrar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div id="empModalImgWrap" class="emp-modal-img" hidden><img id="empModalImg" src="" alt="Diseño de la empresa"></div>
+      <p id="empModalDesc" class="emp-modal-desc"></p>
+      <p id="empModalOwners" class="emp-modal-owners"></p>
+    </div>
+  </div>
+</div>
+
 <!-- =================== MODAL · reglas de la Liga =================== -->
 <div class="modal-backdrop" id="rulesModal" role="dialog" aria-modal="true" aria-labelledby="rulesTitle" hidden>
   <div class="modal rules-modal">
@@ -3060,6 +3097,7 @@
     { badge: 'Deportes',  title: 'Liga Lipton',       desc: 'Organiza los partidos entre Equipo 1 y Equipo 2 los miércoles. Patrocinador oficial del torneo interno.', owners: ['Gerardo', 'Magaña'] },
     { badge: 'Chismes',   title: 'El Bulevar de la Constitución', desc: 'El mayor proveedor de chismes del grado.', owners: ['Andrea', 'Sofía', 'Gerardo', 'Javier'] },
     { badge: 'Bancos',    title: 'Bancos Gema',       desc: 'Prestan dinero.', owners: ['Gerardo', 'Magaña'] },
+    { badge: 'Lápices',   title: 'Clínicas Jaime',    desc: 'Arreglan lápices y lapiceros, y tienen un diseño extraordinario de lápiz único.', owners: ['Gerardo', 'Magaña', 'Jaime'], img: '/clinicas-jaime.webp' },
   ];
 
   const PARTIDOS = [
@@ -3177,10 +3215,10 @@
 
   // ---------- render empresas ----------
   const empresasGrid = document.getElementById('empresasGrid');
-  empresasGrid.innerHTML = EMPRESAS.map(e => `
-    <article class="empresa">
+  empresasGrid.innerHTML = EMPRESAS.map((e, i) => `
+    <article class="empresa" data-emp="${i}" role="button" tabindex="0">
       <span class="badge">${e.badge}</span>
-      <h3>${e.title}</h3>
+      <h3>${e.title}${e.img ? ' <span class="emp-eye">👁 ver diseño</span>' : ''}</h3>
       <p>${e.desc}</p>
       <div class="empresa-foot">
         <span>Dueños</span>
@@ -3193,6 +3231,27 @@
       </div>
     </article>
   `).join('');
+  function openEmpresa(i) {
+    const e = EMPRESAS[i]; if (!e) return;
+    const m = document.getElementById('empresaModal');
+    document.getElementById('empModalBadge').textContent = e.badge;
+    document.getElementById('empModalTitle').textContent = e.title;
+    document.getElementById('empModalDesc').textContent = e.desc;
+    document.getElementById('empModalOwners').textContent = 'Dueños: ' + e.owners.join(' & ');
+    const imgWrap = document.getElementById('empModalImgWrap');
+    if (e.img) { imgWrap.hidden = false; document.getElementById('empModalImg').src = e.img; }
+    else { imgWrap.hidden = true; }
+    m.hidden = false; m.classList.add('open');
+  }
+  function closeEmpresa() { const m = document.getElementById('empresaModal'); m.classList.remove('open'); m.hidden = true; }
+  empresasGrid.querySelectorAll('.empresa').forEach(card => {
+    const i = parseInt(card.dataset.emp, 10);
+    card.addEventListener('click', () => openEmpresa(i));
+    card.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openEmpresa(i); } });
+  });
+  document.getElementById('empModalClose').addEventListener('click', closeEmpresa);
+  document.getElementById('empresaModal').addEventListener('click', (ev) => { if (ev.target === document.getElementById('empresaModal')) closeEmpresa(); });
+  document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && !document.getElementById('empresaModal').hidden) closeEmpresa(); });
 
   // ---------- render partidos (paginado, más recientes primero) ----------
   const partidosGrid = document.getElementById('partidosGrid');
