@@ -41,7 +41,6 @@
     --shadow-lg:   0 4px 12px rgba(12,24,70,.08), 0 22px 44px rgba(12,24,70,.10);
     --radius:      14px;
     --radius-lg:   22px;
-    --barh:        150px; /* altura de la barra de anuncios de abajo */
 
     --f-display: 'Bricolage Grotesque', system-ui, -apple-system, sans-serif;
     --f-body:    'Manrope', system-ui, -apple-system, sans-serif;
@@ -97,9 +96,6 @@
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    /* Reserva el borde inferior para la barra de anuncios (no tapa el contenido) */
-    padding-bottom: var(--barh);
-    box-sizing: border-box;
     font-family: var(--f-body);
     color: var(--ink);
     background: var(--ground);
@@ -126,7 +122,7 @@
   @media (max-width: 780px) {
     .mobile-tabs {
       display: flex;
-      position: fixed; left: 0; right: 0; bottom: var(--barh);
+      position: fixed; left: 0; right: 0; bottom: 0;
       padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
       background: color-mix(in oklab, var(--paper) 94%, transparent);
       backdrop-filter: saturate(140%) blur(16px);
@@ -145,7 +141,7 @@
     }
     .mtab svg { width: 22px; height: 22px; }
     .mtab.is-active { color: var(--school); }
-    body { padding-bottom: calc(68px + var(--barh)); }
+    body { padding-bottom: 68px; }
   }
 
   /* ================= NAV ================= */
@@ -679,15 +675,6 @@
   .emp-modal-desc { margin: 0 0 10px; font-size: 15px; line-height: 1.55; color: var(--ink); }
   .emp-modal-owners { margin: 0; font-family: var(--f-mono); font-size: 12px; color: var(--ink-mute); letter-spacing: .06em; }
   /* Anuncios de Clínicas Jaime en los bordes (solo en pantallas anchas, en el margen) */
-  .jaime-bar { position: fixed; left: 0; right: 0; bottom: 0; height: var(--barh); z-index: 15;
-    display: flex; overflow: hidden; background: var(--paper); border-top: 1px solid var(--line-strong);
-    pointer-events: none; }
-  .jaime-bar .tile { flex: 0 0 auto; height: 100%; background-size: cover;
-    background-position: center; box-shadow: 0 0 0 1px var(--line) inset; }
-  /* ancho = alto × proporción real → el póster se ve completo, sin recorte */
-  .jaime-bar .tile.j { width: calc(var(--barh) * 0.6667); background-image: url('/clinicas-jaime.webp'); }
-  .jaime-bar .tile.g { width: calc(var(--barh) * 0.8056); background-image: url('/bancos-gema.jpg'); }
-  @media (max-width: 480px) { :root { --barh: 116px; } }
   .empresa .badge {
     align-self: flex-start;
     font-family: var(--f-mono); font-size: 11px;
@@ -2227,28 +2214,6 @@
 </head>
 <body>
 
-<!-- Barra de anuncios abajo: Clínicas Jaime y Bancos Gema alternados -->
-<div class="jaime-bar" id="jaimeBar" aria-hidden="true"></div>
-<script>
-  (function () {
-    const bar = document.getElementById('jaimeBar');
-    if (!bar) return;
-    function fill() {
-      const barh = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--barh')) || 150;
-      const minTile = barh * 0.6667; // el tile más angosto (Clínicas Jaime)
-      const n = Math.ceil(window.innerWidth / minTile) + 2;
-      if (bar.childElementCount === n) return;
-      bar.innerHTML = '';
-      for (let i = 0; i < n; i++) {
-        const t = document.createElement('div');
-        t.className = 'tile ' + (i % 2 === 0 ? 'j' : 'g');
-        bar.appendChild(t);
-      }
-    }
-    fill();
-    let tmr; window.addEventListener('resize', () => { clearTimeout(tmr); tmr = setTimeout(fill, 200); });
-  })();
-</script>
 
 <!-- =================== NAV =================== -->
 <nav class="nav">
