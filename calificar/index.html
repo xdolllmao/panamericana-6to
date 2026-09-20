@@ -58,6 +58,14 @@
   .anon-banner { max-width: 720px; margin: 10px auto 0; padding: 10px 16px; }
   .anon-banner .inner { display: flex; align-items: center; gap: 10px; background: color-mix(in oklab, var(--school) 12%, var(--paper)); border: 1px solid color-mix(in oklab, var(--school) 30%, var(--line)); color: var(--school); border-radius: 12px; padding: 10px 14px; font-size: 13px; font-weight: 600; }
   .anon-banner svg { width: 18px; height: 18px; flex: none; }
+  .participate { max-width: 720px; margin: 8px auto 0; padding: 0 16px; }
+  .participate .inner { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: space-between; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+  .participate .ptext strong { display: block; font-family: var(--f-display); font-size: 15px; }
+  .participate .ptext span { font-size: 12px; color: var(--ink-mute); }
+  .participate .pbtns { display: flex; gap: 8px; }
+  .participate .pbtn { padding: 8px 14px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--paper-soft); color: var(--ink-soft); font-weight: 700; font-size: 13px; cursor: pointer; }
+  .participate .pbtn.on { border-color: var(--school); background: color-mix(in oklab, var(--school) 14%, var(--paper)); color: var(--school); }
+  #pbNo.on { border-color: var(--coral); background: color-mix(in oklab, var(--coral) 14%, var(--paper)); color: var(--coral); }
 
   .locked { max-width: 620px; margin: 40px auto; padding: 30px 22px; text-align: center; color: var(--ink-soft); background: var(--paper); border: 1px dashed var(--line-strong); border-radius: var(--radius); }
   .locked a { color: var(--school); font-weight: 700; text-decoration: underline; }
@@ -140,6 +148,19 @@
   </div>
 </div>
 
+<div class="participate" id="participateBox" hidden>
+  <div class="inner">
+    <div class="ptext">
+      <strong>¿Querés participar?</strong>
+      <span id="participateSub">Si elegís "No", no vas a aparecer en el feed de calificar ni en las calificaciones.</span>
+    </div>
+    <div class="pbtns">
+      <button type="button" class="pbtn" id="pbYes" data-v="yes">Sí, participar</button>
+      <button type="button" class="pbtn" id="pbNo" data-v="no">No participar</button>
+    </div>
+  </div>
+</div>
+
 <div id="lockedView" class="locked" hidden>
   Para calificar necesitás tu nombre. <a href="/">Elegilo en la home</a> y volvé.
 </div>
@@ -180,6 +201,7 @@
   const CATS = [{ id:'atractivo', label:'Atractivo/a' }, { id:'buena_onda', label:'Buena onda' }];
 
   let me = null, myProfile = null;
+  let myOptOut = false;              // true = no participo (no aparezco)
   let profiles = [];                 // otros con perfil (para calificar)
   let allProfiles = [];              // incluyéndome (para ranking)
   let myRatings = new Map();         // `${uid}|${cat}` -> stars
@@ -196,9 +218,11 @@
       else { const { data } = await sb.auth.signInAnonymously(); me = data.user; }
     } catch (e) { $('dbNotice').className='db-notice offline'; $('dbNotice').textContent='Sin conexión'; return; }
     if (me) {
-      const { data: prof } = await sb.from('profiles').select('user_id, name, section, avatar_url').eq('user_id', me.id).maybeSingle();
+      const { data: prof } = await sb.from('profiles').select('user_id, name, section, avatar_url, rate_opt_out').eq('user_id', me.id).maybeSingle();
       myProfile = prof || null;
+      myOptOut = !!(prof && prof.rate_opt_out);
     }
+    if (myProfile) renderParticipate();
     if (!myProfile) {
       $('rateView').hidden = true;
       $('lockedView').hidden = false;
@@ -216,17 +240,41 @@
 
   async function loadData() {
     const [{ data: profs }, { data: mine }, { data: avgs }] = await Promise.all([
-      sb.from('profiles').select('user_id, name, section, avatar_url').order('name'),
+      sb.from('profiles').select('user_id, name, section, avatar_url, rate_opt_out').order('name'),
       myProfile ? sb.from('ratings').select('rated_user_id, category, stars') : Promise.resolve({ data: [] }),
       sb.rpc('rating_averages'),
     ]);
-    allProfiles = profs || [];
+    // Los que eligieron NO participar no aparecen ni en el ranking ni en el feed.
+    allProfiles = (profs || []).filter(p => !p.rate_opt_out);
     profiles = allProfiles.filter(p => !me || p.user_id !== me.id);
     myRatings = new Map();
     (mine || []).forEach(r => myRatings.set(`${r.rated_user_id}|${r.category}`, r.stars));
     avgMap = new Map();
     (avgs || []).forEach(a => avgMap.set(`${a.rated_user_id}|${a.category}`, { avg: Number(a.avg_stars), cnt: Number(a.cnt) }));
   }
+
+  // ---------- Participar (opt-out) ----------
+  function renderParticipate() {
+    const box = $('participateBox'); if (!box) return;
+    box.hidden = false;
+    $('pbYes').classList.toggle('on', !myOptOut);
+    $('pbNo').classList.toggle('on', myOptOut);
+    $('participateSub').textContent = myOptOut
+      ? 'Elegiste NO participar: no aparecés en el feed de calificar ni en las calificaciones. Podés reactivarlo cuando quieras.'
+      : 'Si elegís "No", no vas a aparecer en el feed de calificar ni en las calificaciones.';
+  }
+  async function setOptOut(val) {
+    if (!myProfile || !me || myOptOut === val) return;
+    const prev = myOptOut;
+    myOptOut = val; renderParticipate();
+    const { error } = await sb.from('profiles').update({ rate_opt_out: val }).eq('user_id', me.id);
+    if (error) { myOptOut = prev; renderParticipate(); alert('No se pudo guardar: ' + error.message); return; }
+    await loadData();
+    buildFeed();
+    if (!$('ranksView').hidden) renderRanks();
+  }
+  $('pbYes').addEventListener('click', () => setOptOut(false));
+  $('pbNo').addEventListener('click', () => setOptOut(true));
 
   // ---------- FEED ----------
   function buildFeed() {
