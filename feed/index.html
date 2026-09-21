@@ -195,6 +195,12 @@
   .story-tap:active { background: rgba(255,255,255,.03); }
   .story-delete { position: absolute; bottom: 14px; right: 14px; z-index: 4; background: rgba(0,0,0,.5); color: #fff; padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 700; }
 
+  .feed-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .feed-toolbar .feed-tabs { flex: 1; margin-bottom: 0; }
+  .mute-btn { flex: none; width: 42px; height: 42px; border-radius: 999px; display: grid; place-items: center; background: var(--paper); border: 1px solid var(--line); box-shadow: var(--shadow-sm); font-size: 18px; cursor: pointer; }
+  .mute-btn.muted { background: color-mix(in oklab, var(--coral) 14%, var(--paper)); border-color: var(--coral); }
+  .post-audio { display: flex; align-items: center; gap: 10px; padding: 12px 16px; }
+  .post-audio-ico { flex: none; width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; font-size: 18px; background: color-mix(in oklab, var(--school) 14%, var(--paper)); }
   .feed-tabs { display: flex; gap: 4px; padding: 4px; background: var(--paper); border: 1px solid var(--line); border-radius: 999px; box-shadow: var(--shadow-sm); margin-bottom: 16px; overflow-x: auto; }
   .feed-tab { padding: 8px 14px; border-radius: 999px; font-weight: 700; font-size: 13px; color: var(--ink-soft); white-space: nowrap; }
   .feed-tab.is-active { background: var(--ink); color: var(--paper); }
@@ -302,11 +308,15 @@
   <div id="storiesBar" class="stories-bar" hidden></div>
   <div id="composerHost"></div>
 
-  <div class="feed-tabs" role="tablist">
-    <button class="feed-tab is-active" data-filter="all">✨ Todo</button>
-    <button class="feed-tab" data-filter="opinion">💬 Opiniones</button>
-    <button class="feed-tab" data-filter="photo">📷 Fotos</button>
-    <button class="feed-tab" data-filter="reel">🎬 Reels</button>
+  <div class="feed-toolbar">
+    <div class="feed-tabs" role="tablist">
+      <button class="feed-tab is-active" data-filter="all">✨ Todo</button>
+      <button class="feed-tab" data-filter="opinion">💬 Opiniones</button>
+      <button class="feed-tab" data-filter="photo">📷 Fotos</button>
+      <button class="feed-tab" data-filter="reel">🎬 Reels</button>
+      <button class="feed-tab" data-filter="audio">🎵 Audios</button>
+    </div>
+    <button class="mute-btn" id="muteBtn" type="button" title="Silenciar audios del feed"></button>
   </div>
 
   <div id="feedList"><div class="loading">Cargando feed…</div></div>
@@ -343,6 +353,7 @@
         <button class="ct is-active" data-type="opinion">💬 Opinión</button>
         <button class="ct" data-type="photo">📷 Foto</button>
         <button class="ct" data-type="reel">🎬 Reel</button>
+        <button class="ct" data-type="audio">🎵 Audio</button>
       </div>
       <div class="form-row">
         <label>Descripción</label>
@@ -516,6 +527,8 @@
   let me = null, myProfile = null;
   let profilesById = new Map();
   let posts = [];
+  let feedMuted = false;
+  try { feedMuted = localStorage.getItem('sixth-feed-muted') === '1'; } catch(e){}
   let likesByPost = new Map();  // post_id -> Set(user_ids)
   let commentsByPost = new Map(); // post_id -> [comments]
   let currentFilter = 'all';
@@ -624,7 +637,31 @@
     if (!filtered.length) { list.innerHTML = '<div class="feed-empty">— sin publicaciones acá aún —</div>'; return; }
     list.innerHTML = filtered.map(p => renderPost(p)).join('');
     wirePostActions();
+    applyMute();
   }
+
+  // ---- silenciar audios/videos del feed ----
+  function applyMute() {
+    document.querySelectorAll('#feedList audio, #feedList video').forEach(m => { m.muted = feedMuted; });
+  }
+  function renderMuteBtn() {
+    const b = document.getElementById('muteBtn');
+    if (!b) return;
+    b.classList.toggle('muted', feedMuted);
+    b.textContent = feedMuted ? '🔇' : '🔊';
+    b.title = feedMuted ? 'Audios silenciados · tocá para activar' : 'Silenciar audios del feed';
+  }
+  (function () {
+    const b = document.getElementById('muteBtn');
+    if (!b) return;
+    renderMuteBtn();
+    b.addEventListener('click', () => {
+      feedMuted = !feedMuted;
+      try { localStorage.setItem('sixth-feed-muted', feedMuted ? '1' : '0'); } catch(e){}
+      renderMuteBtn();
+      applyMute();
+    });
+  })();
 
   function renderPost(post) {
     const author = profilesById.get(post.author_user_id);
@@ -645,7 +682,10 @@
       body = `<div class="post-media"><img src="${escapeHtml(post.media_url)}" alt="foto"></div>`;
       if (post.description) body += `<div class="post-body"><p class="desc">${escapeHtml(post.description)}</p></div>`;
     } else if (post.type === 'reel' && post.media_url) {
-      body = `<div class="post-media"><video src="${escapeHtml(post.media_url)}" controls playsinline preload="metadata"${post.media_type ? ' type="'+escapeHtml(post.media_type)+'"' : ''}></video></div>`;
+      body = `<div class="post-media"><video src="${escapeHtml(post.media_url)}" controls playsinline preload="metadata"${feedMuted ? ' muted' : ''}${post.media_type ? ' type="'+escapeHtml(post.media_type)+'"' : ''}></video></div>`;
+      if (post.description) body += `<div class="post-body"><p class="desc">${escapeHtml(post.description)}</p></div>`;
+    } else if (post.type === 'audio' && post.media_url) {
+      body = `<div class="post-audio"><span class="post-audio-ico">🎵</span><audio src="${escapeHtml(post.media_url)}" controls preload="metadata"${feedMuted ? ' muted' : ''} style="flex:1;min-width:0"></audio></div>`;
       if (post.description) body += `<div class="post-body"><p class="desc">${escapeHtml(post.description)}</p></div>`;
     }
 
@@ -868,17 +908,22 @@
     const input = document.getElementById('cmpFile');
     if (cmpType === 'opinion') { wrap.hidden = true; return; }
     wrap.hidden = false;
-    input.accept = cmpType === 'reel' ? 'video/*' : 'image/*';
+    input.accept = cmpType === 'reel' ? 'video/*' : cmpType === 'audio' ? 'audio/*' : 'image/*';
     if (!cmpMedia) {
-      content.innerHTML = `<button type="button" class="picker-btn" id="pickBtn">${cmpType === 'reel' ? '🎬 Elegir video' : '📷 Elegir foto'}</button>`;
+      const lbl = cmpType === 'reel' ? '🎬 Elegir video' : cmpType === 'audio' ? '🎵 Elegir audio' : '📷 Elegir foto';
+      content.innerHTML = `<button type="button" class="picker-btn" id="pickBtn">${lbl}</button>`;
       document.getElementById('pickBtn').addEventListener('click', () => input.click());
     } else {
       if (cmpPreviewUrl) URL.revokeObjectURL(cmpPreviewUrl);
       cmpPreviewUrl = URL.createObjectURL(cmpMedia.blob);
       const info = `<div style="font-size:12px;opacity:.7;margin-top:6px">Listo (${cmpMedia.sizeKB.toFixed(0)} KB)</div>`;
-      content.innerHTML = cmpType === 'reel'
-        ? `<video src="${cmpPreviewUrl}" controls muted playsinline></video>${info}<button type="button" class="picker-btn" id="clrBtn" style="margin-top:8px">Cambiar</button>`
-        : `<img src="${cmpPreviewUrl}">${info}<button type="button" class="picker-btn" id="clrBtn" style="margin-top:8px">Cambiar</button>`;
+      if (cmpType === 'reel') {
+        content.innerHTML = `<video src="${cmpPreviewUrl}" controls muted playsinline></video>${info}<button type="button" class="picker-btn" id="clrBtn" style="margin-top:8px">Cambiar</button>`;
+      } else if (cmpType === 'audio') {
+        content.innerHTML = `<audio src="${cmpPreviewUrl}" controls style="width:100%"></audio>${info}<button type="button" class="picker-btn" id="clrBtn" style="margin-top:8px">Cambiar</button>`;
+      } else {
+        content.innerHTML = `<img src="${cmpPreviewUrl}">${info}<button type="button" class="picker-btn" id="clrBtn" style="margin-top:8px">Cambiar</button>`;
+      }
       document.getElementById('clrBtn').addEventListener('click', () => { clearCmpMedia(); updateCmpMedia(); });
     }
   }
