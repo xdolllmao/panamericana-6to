@@ -201,6 +201,9 @@
   .mute-btn.muted { background: color-mix(in oklab, var(--coral) 14%, var(--paper)); border-color: var(--coral); }
   .post-audio { display: flex; align-items: center; gap: 10px; padding: 12px 16px; }
   .post-audio-ico { flex: none; width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; font-size: 18px; background: color-mix(in oklab, var(--school) 14%, var(--paper)); }
+  .post-audio.attached { border-top: 1px solid var(--line); }
+  .post-audio .pa-cover { flex: none; width: 38px; height: 38px; border-radius: 10px; object-fit: cover; }
+  .post-audio .pa-title { font-size: 12px; font-weight: 700; color: var(--ink-soft); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .feed-tabs { display: flex; gap: 4px; padding: 4px; background: var(--paper); border: 1px solid var(--line); border-radius: 999px; box-shadow: var(--shadow-sm); margin-bottom: 16px; overflow-x: auto; }
   .feed-tab { padding: 8px 14px; border-radius: 999px; font-weight: 700; font-size: 13px; color: var(--ink-soft); white-space: nowrap; }
   .feed-tab.is-active { background: var(--ink); color: var(--paper); }
@@ -362,6 +365,24 @@
       <div id="cmpMediaWrap" class="media-preview" hidden>
         <input type="file" id="cmpFile" hidden>
         <div id="cmpMediaContent"></div>
+      </div>
+      <div class="form-row" id="cmpMusicRow" hidden>
+        <label>🎵 Música / audio (opcional)</label>
+        <div class="music-pick" id="cmpMusicPick">
+          <button type="button" class="music-btn" id="cmpSongBtn">🔎 Buscar canción</button>
+          <button type="button" class="music-btn" id="cmpAudioFileBtn">🎵 Subir audio</button>
+          <input type="file" id="cmpAudioFile" accept="audio/*" hidden>
+        </div>
+        <div class="song-search" id="cmpSongSearch" hidden>
+          <input type="text" id="cmpSongQuery" placeholder="Nombre de la canción o artista…">
+          <div class="song-results" id="cmpSongResults"></div>
+        </div>
+        <div class="audio-chosen" id="cmpAudioChosen" hidden></div>
+        <div id="cmpAudioOpts" class="audio-opts" hidden>
+          <div class="ao-row"><label>Empieza en el segundo</label><input type="number" id="cmpAudioStart" min="0" step="1" value="0"></div>
+          <div class="ao-row"><label>Duración (segundos, máx 30)</label><input type="number" id="cmpAudioDur" min="1" max="30" step="1" value="15"></div>
+          <div class="ao-hint" id="cmpAudioHint"></div>
+        </div>
       </div>
     </div>
     <div class="modal-foot">
@@ -570,7 +591,7 @@
   }
 
   async function loadFeed() {
-    const { data: postsData } = await sb.from('posts').select('id, author_user_id, type, description, media_url, media_type, created_at').order('created_at', { ascending: false }).limit(80);
+    const { data: postsData } = await sb.from('posts').select('*').order('created_at', { ascending: false }).limit(80);
     posts = postsData || [];
     // Load likes + comments for these posts
     const ids = posts.map(p => p.id);
@@ -675,6 +696,7 @@
     const comments = commentsByPost.get(post.id) || [];
     const showComments = expandedComments.has(post.id);
 
+    const hasAttachAudio = post.audio_url && post.type !== 'audio';
     let body = '';
     if (post.type === 'opinion') {
       body = `<div class="opinion-body"><div class="op">${escapeHtml(post.description || '')}</div></div>`;
@@ -682,11 +704,20 @@
       body = `<div class="post-media"><img src="${escapeHtml(post.media_url)}" alt="foto"></div>`;
       if (post.description) body += `<div class="post-body"><p class="desc">${escapeHtml(post.description)}</p></div>`;
     } else if (post.type === 'reel' && post.media_url) {
-      body = `<div class="post-media"><video src="${escapeHtml(post.media_url)}" controls playsinline preload="metadata"${feedMuted ? ' muted' : ''}${post.media_type ? ' type="'+escapeHtml(post.media_type)+'"' : ''}></video></div>`;
+      // Si tiene música adjunta, el video va silenciado (suena la canción)
+      const vidMuted = feedMuted || hasAttachAudio;
+      body = `<div class="post-media"><video src="${escapeHtml(post.media_url)}" controls playsinline preload="metadata"${vidMuted ? ' muted' : ''}${post.media_type ? ' type="'+escapeHtml(post.media_type)+'"' : ''}></video></div>`;
       if (post.description) body += `<div class="post-body"><p class="desc">${escapeHtml(post.description)}</p></div>`;
     } else if (post.type === 'audio' && post.media_url) {
       body = `<div class="post-audio"><span class="post-audio-ico">🎵</span><audio src="${escapeHtml(post.media_url)}" controls preload="metadata"${feedMuted ? ' muted' : ''} style="flex:1;min-width:0"></audio></div>`;
       if (post.description) body += `<div class="post-body"><p class="desc">${escapeHtml(post.description)}</p></div>`;
+    }
+    // Música/audio adjunto a una foto, reel u opinión
+    if (hasAttachAudio) {
+      const cover = post.audio_cover
+        ? `<img class="pa-cover" src="${escapeHtml(post.audio_cover)}" alt="">`
+        : `<span class="post-audio-ico">🎵</span>`;
+      body += `<div class="post-audio attached">${cover}<div style="flex:1;min-width:0"><div class="pa-title">${escapeHtml(post.audio_title || 'Audio')}</div><audio src="${escapeHtml(post.audio_url)}" controls preload="none"${feedMuted ? ' muted' : ''} style="width:100%"></audio></div></div>`;
     }
 
     return `
@@ -882,7 +913,7 @@
   }
   function openComposer(type) {
     if (!myProfile) { alert('Reclamá tu nombre primero'); return; }
-    cmpType = type || 'opinion'; clearCmpMedia();
+    cmpType = type || 'opinion'; clearCmpMedia(); clearCmpAudio();
     document.getElementById('cmpDesc').value = document.getElementById('quickInput')?.value || '';
     document.querySelectorAll('.ct').forEach(t => t.classList.toggle('is-active', t.dataset.type === cmpType));
     updateCmpMedia();
@@ -892,7 +923,7 @@
   function closeComposer() {
     document.getElementById('composerModal').classList.remove('open');
     document.getElementById('composerModal').hidden = true;
-    clearCmpMedia();
+    clearCmpMedia(); clearCmpAudio();
   }
   document.getElementById('cmpClose').addEventListener('click', closeComposer);
   document.getElementById('cmpCancel').addEventListener('click', closeComposer);
@@ -906,6 +937,9 @@
     const wrap = document.getElementById('cmpMediaWrap');
     const content = document.getElementById('cmpMediaContent');
     const input = document.getElementById('cmpFile');
+    // La música se puede adjuntar a opinión, foto y reel (no al post que YA es audio)
+    const musicRow = document.getElementById('cmpMusicRow');
+    if (musicRow) musicRow.hidden = (cmpType === 'audio');
     if (cmpType === 'opinion') { wrap.hidden = true; return; }
     wrap.hidden = false;
     input.accept = cmpType === 'reel' ? 'video/*' : cmpType === 'audio' ? 'audio/*' : 'image/*';
@@ -940,22 +974,147 @@
       updateCmpMedia();
     }
   });
+  // ===== Música/audio adjunto a la publicación (igual que en historias) =====
+  let cmpAudio = null; // { source:'song'|'file', url?, title, cover, blob?, ext?, type?, duration }
+  const cmpMusicPick = document.getElementById('cmpMusicPick');
+  const cmpSongBtn = document.getElementById('cmpSongBtn');
+  const cmpAudioFileBtn = document.getElementById('cmpAudioFileBtn');
+  const cmpAudioFile = document.getElementById('cmpAudioFile');
+  const cmpSongSearch = document.getElementById('cmpSongSearch');
+  const cmpSongQuery = document.getElementById('cmpSongQuery');
+  const cmpSongResults = document.getElementById('cmpSongResults');
+  const cmpAudioChosen = document.getElementById('cmpAudioChosen');
+  const cmpAudioOpts = document.getElementById('cmpAudioOpts');
+  const cmpAudioStart = document.getElementById('cmpAudioStart');
+  const cmpAudioDur = document.getElementById('cmpAudioDur');
+  const cmpAudioHint = document.getElementById('cmpAudioHint');
+
+  function clearCmpAudio() {
+    cmpAudio = null;
+    if (cmpAudioFile) cmpAudioFile.value = '';
+    if (cmpSongSearch) cmpSongSearch.hidden = true;
+    if (cmpSongResults) cmpSongResults.innerHTML = '';
+    if (cmpSongQuery) cmpSongQuery.value = '';
+    updateCmpAudioUI();
+  }
+  function updateCmpAudioUI() {
+    if (!cmpMusicPick) return;
+    const has = !!cmpAudio;
+    cmpMusicPick.hidden = has;
+    cmpAudioChosen.hidden = !has;
+    cmpAudioOpts.hidden = !has;
+    if (!has) return;
+    const total = Math.max(1, Math.floor(cmpAudio.duration || 30));
+    const art = cmpAudio.cover ? `<img src="${escapeHtml(cmpAudio.cover)}" alt="">` : `<span class="ac-note">🎵</span>`;
+    const sub = cmpAudio.source === 'song' ? 'Canción' : 'Audio propio';
+    cmpAudioChosen.innerHTML = `${art}<div class="ac-txt"><div class="ac-name">${escapeHtml(cmpAudio.title || 'Audio')}</div><div class="ac-sub">${sub}</div></div><span class="ac-remove" id="cmpAudioRemove">Quitar</span>`;
+    document.getElementById('cmpAudioRemove').addEventListener('click', clearCmpAudio);
+    cmpAudioStart.max = String(Math.max(0, total - 1));
+    if ((parseInt(cmpAudioStart.value, 10) || 0) > total - 1) cmpAudioStart.value = '0';
+    cmpAudioDur.value = String(Math.min(30, total, parseInt(cmpAudioDur.value, 10) || 30));
+    cmpAudioHint.textContent = `Dura ${total}s en total. Podés recortar hasta 30s.`;
+  }
+  function clampCmpAudioOpts() {
+    if (!cmpAudio) return;
+    const total = Math.max(1, Math.floor(cmpAudio.duration || 30));
+    let start = Math.max(0, Math.min(parseInt(cmpAudioStart.value, 10) || 0, Math.max(0, total - 1)));
+    let dur = Math.max(1, Math.min(parseInt(cmpAudioDur.value, 10) || 1, 30));
+    if (start + dur > total) dur = Math.max(1, total - start);
+    cmpAudioStart.value = String(start);
+    cmpAudioDur.value = String(dur);
+  }
+  if (cmpAudioStart) cmpAudioStart.addEventListener('change', clampCmpAudioOpts);
+  if (cmpAudioDur) cmpAudioDur.addEventListener('change', clampCmpAudioOpts);
+  if (cmpAudioFileBtn) cmpAudioFileBtn.addEventListener('click', () => cmpAudioFile.click());
+  if (cmpAudioFile) cmpAudioFile.addEventListener('change', async (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    try {
+      const m = await preparePostMedia(f, 'audio');
+      cmpAudio = { source: 'file', blob: m.blob, ext: m.ext, type: m.type, title: f.name.replace(/\.[^.]+$/, ''), cover: null, duration: m.duration || 30 };
+      cmpSongSearch.hidden = true;
+      updateCmpAudioUI();
+    } catch (err) { alert(err.message || 'No pudimos leer ese audio.'); }
+  });
+  if (cmpSongBtn) cmpSongBtn.addEventListener('click', () => {
+    cmpSongSearch.hidden = !cmpSongSearch.hidden;
+    if (!cmpSongSearch.hidden) cmpSongQuery.focus();
+  });
+  let cmpSongTimer = null;
+  if (cmpSongQuery) cmpSongQuery.addEventListener('input', () => {
+    clearTimeout(cmpSongTimer);
+    const q = cmpSongQuery.value.trim();
+    if (q.length < 2) { cmpSongResults.innerHTML = ''; return; }
+    cmpSongTimer = setTimeout(() => cmpSearchSongs(q), 350);
+  });
+  async function cmpSearchSongs(q) {
+    cmpSongResults.innerHTML = `<div class="sr-no" style="padding:8px">Buscando…</div>`;
+    let tracks = [];
+    try {
+      const r = await fetch('/api/spotify?q=' + encodeURIComponent(q));
+      const data = await r.json();
+      tracks = data.tracks || [];
+    } catch (e) { cmpSongResults.innerHTML = `<div class="sr-no" style="padding:8px">No se pudo buscar. Probá de nuevo.</div>`; return; }
+    if (!tracks.length) { cmpSongResults.innerHTML = `<div class="sr-no" style="padding:8px">Sin resultados.</div>`; return; }
+    cmpSongResults.innerHTML = tracks.map((t, i) => {
+      const playable = !!t.preview;
+      const cover = t.cover ? `<img src="${escapeHtml(t.cover)}" alt="">` : `<span class="ac-note">🎵</span>`;
+      return `<div class="song-row" data-i="${i}" ${playable ? '' : 'style="opacity:.45;cursor:not-allowed"'}>
+        ${cover}
+        <div class="sr-txt"><div class="sr-name">${escapeHtml(t.name)}</div><div class="sr-art">${escapeHtml(t.artists || '')}</div></div>
+        ${playable ? '' : '<span class="sr-no">sin preview</span>'}
+      </div>`;
+    }).join('');
+    cmpSongResults.querySelectorAll('.song-row').forEach(row => row.addEventListener('click', async () => {
+      const t = tracks[parseInt(row.dataset.i, 10)];
+      if (!t || !t.preview) return;
+      const dur = await getAudioDurationFromUrl(t.preview);
+      cmpAudio = { source: 'song', url: t.preview, title: `${t.name} — ${t.artists}`, cover: t.cover || null, duration: dur || 30 };
+      cmpSongSearch.hidden = true;
+      updateCmpAudioUI();
+    }));
+  }
+
   document.getElementById('cmpSubmit').addEventListener('click', async () => {
     const desc = document.getElementById('cmpDesc').value.trim();
-    if (cmpType === 'opinion' && !desc) { alert('Escribí algo'); return; }
-    if (cmpType !== 'opinion' && !cmpMedia) { alert('Elegí un archivo'); return; }
+    if (cmpType === 'opinion' && !desc && !cmpAudio) { alert('Escribí algo o agregá un audio'); return; }
+    if (cmpType !== 'opinion' && cmpType !== 'audio' && !cmpMedia && !cmpAudio) { alert('Elegí un archivo o agregá música'); return; }
+    if (cmpType === 'audio' && !cmpMedia) { alert('Elegí un archivo'); return; }
+    if (cmpAudio) clampCmpAudioOpts();
     const btn = document.getElementById('cmpSubmit'); btn.disabled = true; btn.textContent = 'Subiendo…';
+    const reset = () => { btn.disabled = false; btn.textContent = 'Publicar'; };
     let media_url = null, media_type = null;
     if (cmpMedia) {
       const path = `${me.id}/${cmpType}-${Date.now()}-${Math.random().toString(36).slice(2,6)}.${cmpMedia.ext}`;
       const { error: upErr } = await sb.storage.from('posts').upload(path, cmpMedia.blob, { contentType: cmpMedia.type, cacheControl: '3600', upsert: false });
-      if (upErr) { alert('Error: ' + upErr.message); btn.disabled = false; btn.textContent = 'Publicar'; return; }
+      if (upErr) { alert('Error: ' + upErr.message); reset(); return; }
       media_url = sb.storage.from('posts').getPublicUrl(path).data.publicUrl;
       media_type = cmpMedia.type;
     }
-    const { error } = await sb.from('posts').insert({ author_user_id: me.id, type: cmpType, description: desc || null, media_url, media_type });
-    btn.disabled = false; btn.textContent = 'Publicar';
-    if (error) { alert(error.message); return; }
+    // Música/audio adjunto (canción o audio propio)
+    let audio_url = null, audio_title = null, audio_cover = null;
+    if (cmpAudio) {
+      const start = parseInt(cmpAudioStart.value, 10) || 0;
+      const dur = Math.min(30, Math.max(1, parseInt(cmpAudioDur.value, 10) || 15));
+      let baseUrl = cmpAudio.url;
+      if (cmpAudio.source === 'file') {
+        const apath = `${me.id}/audio-${Date.now()}-${Math.random().toString(36).slice(2,6)}.${cmpAudio.ext}`;
+        const { error: aErr } = await sb.storage.from('posts').upload(apath, cmpAudio.blob, { contentType: cmpAudio.type, cacheControl: '3600', upsert: false });
+        if (aErr) { alert('Error subiendo el audio: ' + aErr.message); reset(); return; }
+        baseUrl = sb.storage.from('posts').getPublicUrl(apath).data.publicUrl;
+      }
+      audio_url = baseUrl + `#t=${start},${start + dur}`;
+      audio_title = cmpAudio.title || null;
+      audio_cover = cmpAudio.cover || null;
+    }
+    const row = { author_user_id: me.id, type: cmpType, description: desc || null, media_url, media_type };
+    if (audio_url) { row.audio_url = audio_url; row.audio_title = audio_title; row.audio_cover = audio_cover; }
+    const { error } = await sb.from('posts').insert(row);
+    reset();
+    if (error) {
+      if (/audio_url|audio_title|audio_cover|column|schema/i.test(error.message || '')) alert('Falta correr el SQL de audio en posts.');
+      else alert(error.message);
+      return;
+    }
     closeComposer();
     if (document.getElementById('quickInput')) document.getElementById('quickInput').value = '';
   });
