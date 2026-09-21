@@ -2383,7 +2383,7 @@
       <button class="perio-btn" id="perioPrev" aria-label="Página anterior" title="Anterior">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
       </button>
-      <div class="perio-indicator"><b id="perioNow">1</b> / <span id="perioTotal">8</span></div>
+      <div class="perio-indicator"><b id="perioNow">1</b> / <span id="perioTotal">3</span></div>
       <button class="perio-btn" id="perioNext" aria-label="Página siguiente" title="Siguiente">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
       </button>
@@ -5378,8 +5378,8 @@
 
   // =================== PERIÓDICO · libro embebido ===================
   (function() {
-    const PAGE_V = '4'; // subir al reemplazar las imágenes (evita caché viejo)
-    const PAGES = [1,2,3,4,5,6,7,8].map(n => `/periodico/pages/${n}.png?v=${PAGE_V}`);
+    const PAGE_V = '5'; // subir al reemplazar las imágenes (evita caché viejo)
+    const PAGES = [1,2,3].map(n => `/periodico/pages/${n}.png?v=${PAGE_V}`);
     const book = document.getElementById('perioBook');
     const prevBtn = document.getElementById('perioPrev');
     const nextBtn = document.getElementById('perioNext');
