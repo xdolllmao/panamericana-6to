@@ -53,3 +53,10 @@ returns void language sql security definer set search_path = public as $$
     and f.seen_at is null;
 $$;
 grant execute on function public.mark_flowers_seen() to authenticated, anon;
+
+-- Total público de flores enviadas (para el contador).
+create or replace function public.flowers_total()
+returns bigint language sql security definer set search_path = public as $$
+  select count(*) from public.flowers;
+$$;
+grant execute on function public.flowers_total() to authenticated, anon;

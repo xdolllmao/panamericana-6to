@@ -2109,6 +2109,17 @@
   .rate-banner .music-banner-cta { color: #B45309; }
 
   /* ===== Flores amarillas (especial 1 semana) ===== */
+  .flores-counter {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin: 0 auto 12px; padding: 8px 16px; border-radius: 999px;
+    background: linear-gradient(135deg, #FFF3C4, #FFE27A); border: 1px solid #F2C94C;
+    color: #4A3B00; font-weight: 700; font-size: 14px;
+    box-shadow: 0 6px 18px rgba(224,168,0,.22);
+  }
+  .flores-counter b { font-family: var(--f-display); font-size: 18px; color: #7A5B00; }
+  .flores-counter .fc-emoji { font-size: 16px; }
+  #flores { text-align: center; }
+  #flores .flores-card { text-align: left; }
   .flores-card {
     display: flex; align-items: center; gap: 24px; overflow: hidden;
     background: linear-gradient(135deg, #FFF7D6 0%, #FFE9A8 45%, #FFD65C 100%);
@@ -2369,6 +2380,7 @@
 
 <!-- =================== FLORES AMARILLAS (especial · 1 semana) =================== -->
 <section id="flores" class="wrap block" hidden>
+  <div class="flores-counter reveal"><span class="fc-emoji">🌼</span> <b id="floresTotal">0</b> flores enviadas</div>
   <div class="flores-card reveal">
     <div class="flores-art"><img src="/flores-amarillas.png" alt="Ramo de flores amarillas"></div>
     <div class="flores-body">
@@ -5191,6 +5203,15 @@
     }
     window.__loadFlowers = loadFlowers;
 
+    async function loadFloresTotal() {
+      try {
+        const { data } = await sb.rpc('flowers_total');
+        const el = $f('floresTotal');
+        if (el && data != null) el.textContent = data;
+      } catch(e){}
+    }
+    loadFloresTotal();
+
     // enviar
     $f('floresSendBtn').addEventListener('click', () => {
       if (!account) { alert('Reclamá tu nombre para enviar flores.'); openModal(); return; }
@@ -5215,6 +5236,7 @@
       btn.disabled = false;
       if (error) { alert('No se pudo enviar: ' + error.message); return; }
       closeBd($f('floresSendModal'));
+      loadFloresTotal();
       alert('🌼 ¡Flores enviadas!');
     });
 
