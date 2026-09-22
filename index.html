@@ -2108,6 +2108,54 @@
   .rate-banner:hover { box-shadow: 0 18px 40px rgba(245,179,1,.36); }
   .rate-banner .music-banner-cta { color: #B45309; }
 
+  /* ===== Flores amarillas (especial 1 semana) ===== */
+  .flores-card {
+    display: flex; align-items: center; gap: 24px; overflow: hidden;
+    background: linear-gradient(135deg, #FFF7D6 0%, #FFE9A8 45%, #FFD65C 100%);
+    border: 1px solid #F2C94C; border-radius: var(--radius-lg);
+    padding: 22px 26px; box-shadow: 0 18px 44px rgba(224,168,0,.28);
+    position: relative; color: #3A2E00;
+  }
+  .flores-art { flex: none; width: 190px; align-self: stretch; display: grid; place-items: center; }
+  .flores-art img { width: 100%; height: auto; filter: drop-shadow(0 10px 20px rgba(120,90,0,.35)); animation: floresFloat 4s ease-in-out infinite; }
+  @keyframes floresFloat { 0%,100%{ transform: translateY(0) rotate(-1deg);} 50%{ transform: translateY(-8px) rotate(1deg);} }
+  @media (prefers-reduced-motion: reduce){ .flores-art img { animation: none; } }
+  .flores-body { flex: 1; min-width: 0; }
+  .flores-body .section-tag { font-weight: 800; }
+  .flores-body h2 { font-family: var(--f-display); font-weight: 800; font-size: clamp(24px,3.4vw,34px); margin: 4px 0 6px; line-height: 1.02; color: #4A3B00; letter-spacing: -.02em; }
+  .flores-body p { margin: 0 0 14px; font-size: 14.5px; color: #5C4A00; max-width: 60ch; }
+  .flores-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+  .flores-btns .flores-send { background: #1B1200; color: #FFE27A; }
+  .flores-btns .flores-send:hover { background: #000; }
+  .flores-btns .btn-secondary { background: rgba(255,255,255,.7); border-color: #E7B93A; color: #4A3B00; }
+  .flores-count { background: var(--coral); color:#fff; border-radius: 999px; padding: 1px 8px; font-family: var(--f-mono); font-size: 11px; font-weight: 700; margin-left: 6px; }
+  @media (max-width: 620px) { .flores-card { flex-direction: column; text-align: center; } .flores-art { width: 150px; } .flores-btns { justify-content: center; } .flores-body p { margin-left:auto; margin-right:auto; } }
+
+  /* modal enviar/inbox flores */
+  .flores-modal .modal-body { display: flex; flex-direction: column; gap: 12px; }
+  .flores-preview { text-align: center; }
+  .flores-preview img { width: 130px; height: auto; filter: drop-shadow(0 8px 16px rgba(120,90,0,.3)); }
+  .flores-field label { display:block; font-family: var(--f-mono); font-size: 11px; letter-spacing:.08em; text-transform:uppercase; color: var(--ink-mute); font-weight:700; margin-bottom:6px; }
+  .flores-field select, .flores-field textarea { width:100%; box-sizing:border-box; padding:11px 13px; border:1.5px solid var(--line); border-radius:12px; background: var(--paper); color: var(--ink); font: inherit; font-size:15px; outline:none; }
+  .flores-field textarea { resize: vertical; min-height: 70px; }
+  .flores-field select:focus, .flores-field textarea:focus { border-color: var(--school); }
+  .flores-count-chars { font-family: var(--f-mono); font-size: 11px; color: var(--ink-mute); text-align: right; }
+  .flores-anon { display:flex; align-items:center; gap:8px; font-size:14px; color: var(--ink-soft); font-weight:600; cursor:pointer; }
+  .flores-anon input { width:16px; height:16px; accent-color: var(--school); }
+  /* popup recibido */
+  .flores-pop { text-align: center; }
+  .flores-pop img { width: 200px; max-width: 60%; height: auto; filter: drop-shadow(0 12px 24px rgba(120,90,0,.35)); margin: 0 auto 6px; display:block; }
+  .flores-pop h3 { font-family: var(--f-display); font-weight: 800; font-size: 24px; margin: 4px 0; color: var(--ink); }
+  .flores-note-card { background: linear-gradient(135deg,#FFF7D6,#FFE9A8); border:1px solid #F2C94C; border-radius: 14px; padding: 14px 16px; color:#3A2E00; margin: 10px 0; font-size:15px; line-height:1.5; white-space:pre-wrap; word-break:break-word; }
+  .flores-from { font-family: var(--f-mono); font-size: 12px; color: var(--ink-mute); letter-spacing:.04em; }
+  .flores-from b { color: var(--ink); }
+  .flores-list { display:flex; flex-direction:column; gap:10px; }
+  .flores-item { display:flex; gap:12px; align-items:flex-start; background: var(--paper-soft); border:1px solid var(--line); border-radius:14px; padding:12px 14px; }
+  .flores-item .fi-ico { flex:none; width:42px; height:42px; border-radius:10px; display:grid; place-items:center; font-size:20px; background: color-mix(in oklab, var(--lemon) 40%, var(--paper)); }
+  .flores-item .fi-note { font-size:14px; color: var(--ink); white-space:pre-wrap; word-break:break-word; }
+  .flores-item .fi-meta { font-family: var(--f-mono); font-size:11px; color: var(--ink-mute); margin-top:4px; }
+  .flores-empty { text-align:center; padding: 24px; color: var(--ink-mute); }
+
   /* Reveal */
   .reveal { opacity: 0; transform: translateY(12px); transition: opacity .6s ease, transform .6s ease; }
   .reveal.in { opacity: 1; transform: none; }
@@ -2318,6 +2366,22 @@
     <span>Periódico todos los lunes</span>
   </div>
 </div>
+
+<!-- =================== FLORES AMARILLAS (especial · 1 semana) =================== -->
+<section id="flores" class="wrap block" hidden>
+  <div class="flores-card reveal">
+    <div class="flores-art"><img src="/flores-amarillas.png" alt="Ramo de flores amarillas"></div>
+    <div class="flores-body">
+      <div class="section-tag">🌼 Solo esta semana</div>
+      <h2>Mandá flores amarillas</h2>
+      <p>Alegrale el día a alguien del salón: mandale un ramo amarillo con una notita, con tu nombre o anónimo.</p>
+      <div class="flores-btns">
+        <button class="btn btn-primary flores-send" id="floresSendBtn" type="button">🌼 Enviar flores</button>
+        <button class="btn btn-secondary" id="floresInboxBtn" type="button">Ver las que me enviaron<span class="flores-count" id="floresCount" hidden>0</span></button>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- =================== ESTUDIANTES =================== -->
 <section id="estudiantes" class="wrap block">
@@ -2780,6 +2844,55 @@
       <div id="protestaCommentsList" class="ship-comments-list"></div>
     </div>
     <div class="modal-foot ship-comments-foot" id="protestaCommentsFoot"></div>
+  </div>
+</div>
+
+<!-- =================== MODAL · enviar flores =================== -->
+<div class="modal-backdrop" id="floresSendModal" role="dialog" aria-modal="true" hidden>
+  <div class="modal flores-modal">
+    <div class="modal-head">
+      <div><div class="section-tag" style="color:#B45309">🌼 Flores amarillas</div><h3>Enviar flores</h3></div>
+      <button class="modal-close" id="floresSendClose" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="flores-preview"><img src="/flores-amarillas.png" alt=""></div>
+      <div class="flores-field">
+        <label>¿A quién?</label>
+        <select id="floresTo"></select>
+      </div>
+      <div class="flores-field">
+        <label>Notita (opcional)</label>
+        <textarea id="floresNote" maxlength="300" placeholder="Escribile algo lindo…"></textarea>
+        <div class="flores-count-chars"><span id="floresNoteCount">0</span>/300</div>
+      </div>
+      <label class="flores-anon"><input type="checkbox" id="floresAnon"> Enviar anónimo (sin mi nombre)</label>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" id="floresSendCancel">Cancelar</button>
+      <button class="btn btn-primary flores-send" id="floresSendConfirm">🌼 Enviar</button>
+    </div>
+  </div>
+</div>
+
+<!-- =================== MODAL · flores recibidas (bandeja) =================== -->
+<div class="modal-backdrop" id="floresInboxModal" role="dialog" aria-modal="true" hidden>
+  <div class="modal flores-modal">
+    <div class="modal-head">
+      <div><div class="section-tag" style="color:#B45309">🌼 Para mí</div><h3>Flores que me enviaron</h3></div>
+      <button class="modal-close" id="floresInboxClose" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="modal-body"><div class="flores-list" id="floresList"></div></div>
+  </div>
+</div>
+
+<!-- =================== POPUP · te llegaron flores =================== -->
+<div class="modal-backdrop" id="floresPopup" role="dialog" aria-modal="true" hidden>
+  <div class="modal flores-modal">
+    <div class="modal-body flores-pop" id="floresPopBody"></div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" id="floresPopAll">Ver todas</button>
+      <button class="btn btn-primary flores-send" id="floresPopClose">¡Gracias!</button>
+    </div>
   </div>
 </div>
 
@@ -4873,6 +4986,7 @@
     await refreshNotifBadge();
     await refreshVotes();
     await refreshStories();
+    if (window.__loadFlowers) { try { await window.__loadFlowers(true); } catch(e){} }
     updateAccountChip();
     renderComposer();
     renderShipComposer();
@@ -5037,6 +5151,108 @@
   renderComposer();
   renderShipComposer();
   renderProtestaComposer();
+
+  // ===== FLORES AMARILLAS (especial · dura una semana) =====
+  (function(){
+    const FLORES_END = new Date('2026-09-28T23:59:59'); // termina en una semana
+    const section = document.getElementById('flores');
+    if (!section) return;
+    if (Date.now() > FLORES_END.getTime()) return; // ya terminó → queda oculta
+    section.hidden = false;
+    const $f = id => document.getElementById(id);
+    let flores = [];
+    const openBd = el => { el.hidden=false; el.classList.add('open'); };
+    const closeBd = el => { el.classList.remove('open'); el.hidden=true; };
+
+    function fillRecipients() {
+      const sel = $f('floresTo'); if (!sel || sel.dataset.filled) return;
+      const bySec = { A: [], B: [] };
+      STUDENTS.forEach(s => bySec[s.s].push(s));
+      const opt = list => list.map(s => `<option value="${escapeHtml(s.n)}|${s.s}">${escapeHtml(s.n)}</option>`).join('');
+      sel.innerHTML = `<optgroup label="Sección A">${opt(bySec.A)}</optgroup><optgroup label="Sección B">${opt(bySec.B)}</optgroup>`;
+      sel.dataset.filled = '1';
+    }
+    function updateCount() {
+      const c = $f('floresCount'); if (!c) return;
+      if (flores.length) { c.hidden = false; c.textContent = flores.length; } else c.hidden = true;
+    }
+    async function loadFlowers(popup) {
+      if (!currentUser || !account) { flores = []; updateCount(); return; }
+      const { data, error } = await sb.rpc('my_flowers');
+      if (error) return; // aún sin correr el SQL
+      flores = data || [];
+      updateCount();
+      const unseen = flores.filter(f => !f.seen_at);
+      if (popup && unseen.length) {
+        showPopup(unseen);
+        try { await sb.rpc('mark_flowers_seen'); } catch(e){}
+        flores = flores.map(f => ({ ...f, seen_at: f.seen_at || new Date().toISOString() }));
+      }
+    }
+    window.__loadFlowers = loadFlowers;
+
+    // enviar
+    $f('floresSendBtn').addEventListener('click', () => {
+      if (!account) { alert('Reclamá tu nombre para enviar flores.'); openModal(); return; }
+      fillRecipients();
+      $f('floresNote').value=''; $f('floresNoteCount').textContent='0'; $f('floresAnon').checked=false;
+      openBd($f('floresSendModal'));
+    });
+    $f('floresNote').addEventListener('input', () => { $f('floresNoteCount').textContent = $f('floresNote').value.length; });
+    $f('floresSendClose').addEventListener('click', () => closeBd($f('floresSendModal')));
+    $f('floresSendCancel').addEventListener('click', () => closeBd($f('floresSendModal')));
+    $f('floresSendConfirm').addEventListener('click', async () => {
+      if (!account || !currentUser) { openModal(); return; }
+      const v = $f('floresTo').value; if (!v) return;
+      const [rn, rs] = v.split('|');
+      const note = $f('floresNote').value.trim();
+      const anon = $f('floresAnon').checked;
+      const btn = $f('floresSendConfirm'); btn.disabled = true;
+      const { error } = await sb.from('flowers').insert({
+        sender_user_id: currentUser.id, recipient_name: rn, recipient_section: rs,
+        note: note || null, anonymous: anon, sender_name: anon ? null : (account.name || null),
+      });
+      btn.disabled = false;
+      if (error) { alert('No se pudo enviar: ' + error.message); return; }
+      closeBd($f('floresSendModal'));
+      alert('🌼 ¡Flores enviadas!');
+    });
+
+    // bandeja de flores
+    function renderInbox() {
+      const list = $f('floresList');
+      if (!flores.length) { list.innerHTML = '<div class="flores-empty">Todavía no te enviaron flores 🌱</div>'; return; }
+      list.innerHTML = flores.map(f => `<div class="flores-item">
+        <div class="fi-ico">🌼</div>
+        <div style="flex:1;min-width:0">
+          ${f.note ? `<div class="fi-note">${escapeHtml(f.note)}</div>` : '<div class="fi-note" style="color:var(--ink-mute)">(sin notita)</div>'}
+          <div class="fi-meta">De ${f.anonymous ? 'Anónimo' : escapeHtml(f.sender || 'Alguien')} · ${timeAgo(f.created_at)}</div>
+        </div>
+      </div>`).join('');
+    }
+    $f('floresInboxBtn').addEventListener('click', async () => {
+      if (!account) { alert('Reclamá tu nombre para ver tus flores.'); openModal(); return; }
+      await loadFlowers(false);
+      renderInbox();
+      openBd($f('floresInboxModal'));
+    });
+    $f('floresInboxClose').addEventListener('click', () => closeBd($f('floresInboxModal')));
+
+    // popup te llegaron flores
+    function showPopup(unseen) {
+      const n = unseen.length, f = unseen[0];
+      $f('floresPopBody').innerHTML = `
+        <img src="/flores-amarillas.png" alt="">
+        <h3>${n > 1 ? `¡Te llegaron ${n} flores! 🌼` : '¡Te enviaron flores! 🌼'}</h3>
+        ${f.note ? `<div class="flores-note-card">${escapeHtml(f.note)}</div>` : ''}
+        <div class="flores-from">De ${f.anonymous ? '<b>Anónimo</b>' : ('<b>'+escapeHtml(f.sender||'Alguien')+'</b>')}${n>1?` y ${n-1} más`:''}</div>`;
+      openBd($f('floresPopup'));
+    }
+    $f('floresPopClose').addEventListener('click', () => closeBd($f('floresPopup')));
+    $f('floresPopAll').addEventListener('click', () => { closeBd($f('floresPopup')); renderInbox(); openBd($f('floresInboxModal')); });
+    [$f('floresSendModal'),$f('floresInboxModal'),$f('floresPopup')].forEach(m => m.addEventListener('click', e => { if (e.target === m) closeBd(m); }));
+  })();
+
   initSupabase();
 
   // ---------- calendario escolar ----------
