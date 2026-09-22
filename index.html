@@ -2108,6 +2108,15 @@
   .rate-banner:hover { box-shadow: 0 18px 40px rgba(245,179,1,.36); }
   .rate-banner .music-banner-cta { color: #B45309; }
 
+  /* ===== Anuncio intersticial ===== */
+  .ad-interstitial { position: fixed; inset: 0; z-index: 300; background: rgba(6,10,30,.93); backdrop-filter: blur(6px); display: grid; place-items: center; padding: 20px; }
+  .ad-interstitial[hidden] { display: none; }
+  .ad-inner { position: relative; display: flex; flex-direction: column; align-items: center; gap: 14px; max-width: 540px; width: 100%; }
+  .ad-inner img { max-width: 100%; max-height: 76vh; width: auto; border-radius: 16px; box-shadow: 0 30px 80px rgba(0,0,0,.6); }
+  .ad-label { position: absolute; top: 8px; left: 10px; z-index: 2; font-family: var(--f-mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.75); background: rgba(0,0,0,.5); padding: 3px 9px; border-radius: 999px; }
+  .ad-skip { min-width: 160px; padding: 13px 22px; border-radius: 999px; font-weight: 800; font-size: 15px; background: #fff; color: #0C1846; box-shadow: 0 10px 30px rgba(0,0,0,.4); cursor: pointer; transition: background .15s; }
+  .ad-skip:disabled { background: rgba(255,255,255,.18); color: rgba(255,255,255,.75); cursor: not-allowed; }
+
   /* ===== Flores amarillas (especial 1 semana) ===== */
   .flores-counter {
     display: inline-flex; align-items: center; gap: 8px;
@@ -2856,6 +2865,15 @@
       <div id="protestaCommentsList" class="ship-comments-list"></div>
     </div>
     <div class="modal-foot ship-comments-foot" id="protestaCommentsFoot"></div>
+  </div>
+</div>
+
+<!-- =================== ANUNCIO INTERSTICIAL (cada 4 min) =================== -->
+<div class="ad-interstitial" id="adInterstitial" hidden>
+  <div class="ad-inner">
+    <span class="ad-label">Publicidad</span>
+    <img id="adImg" src="" alt="Anuncio">
+    <button class="ad-skip" id="adSkip" type="button" disabled>Saltar en 10</button>
   </div>
 </div>
 
@@ -5273,6 +5291,34 @@
     $f('floresPopClose').addEventListener('click', () => closeBd($f('floresPopup')));
     $f('floresPopAll').addEventListener('click', () => { closeBd($f('floresPopup')); renderInbox(); openBd($f('floresInboxModal')); });
     [$f('floresSendModal'),$f('floresInboxModal'),$f('floresPopup')].forEach(m => m.addEventListener('click', e => { if (e.target === m) closeBd(m); }));
+  })();
+
+  // ===== Anuncio intersticial: cada 4 min, aleatorio, saltable a los 10s =====
+  (function(){
+    const ADS = ['/clinicas-jaime.webp', '/bancos-gema.jpg'];
+    const overlay = document.getElementById('adInterstitial');
+    const img = document.getElementById('adImg');
+    const skip = document.getElementById('adSkip');
+    if (!overlay || !img || !skip) return;
+    let cd = null;
+    function showAd() {
+      if (!overlay.hidden) return;          // ya hay un anuncio abierto
+      if (document.hidden) return;          // no molestar si la pestaña no está al frente
+      img.src = ADS[Math.floor(Math.random() * ADS.length)];
+      overlay.hidden = false;
+      let n = 10;
+      skip.disabled = true; skip.textContent = 'Saltar en ' + n;
+      clearInterval(cd);
+      cd = setInterval(() => {
+        n--;
+        if (n <= 0) { clearInterval(cd); skip.disabled = false; skip.textContent = 'Saltar anuncio  ✕'; }
+        else { skip.textContent = 'Saltar en ' + n; }
+      }, 1000);
+    }
+    function hideAd() { overlay.hidden = true; clearInterval(cd); }
+    skip.addEventListener('click', () => { if (!skip.disabled) hideAd(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !overlay.hidden && !skip.disabled) hideAd(); });
+    setInterval(showAd, 4 * 60 * 1000);     // cada 4 minutos
   })();
 
   initSupabase();
