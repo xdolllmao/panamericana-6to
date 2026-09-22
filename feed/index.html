@@ -295,7 +295,7 @@
 <nav class="nav">
   <div class="nav-inner">
     <a href="/" class="brand">
-      <img class="brand-mark" src="/logo-6to.jpg" alt="Logo Clase de 6to">
+      <img class="brand-mark" src="/logo-6to.webp" alt="Logo Clase de 6to">
       <span>Clase de <em>6to</em></span>
     </a>
     <div class="nav-links">
@@ -827,7 +827,7 @@
         i.onerror = () => reject(new Error('decode'));
         i.src = srcUrl;
       });
-      const maxDim = 1600;
+      const maxDim = 1280;
       let { width, height } = img;
       if (!width || !height) throw new Error('empty');
       if (Math.max(width, height) > maxDim) {
@@ -839,7 +839,10 @@
       canvas.width = width; canvas.height = height;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, width, height);
-      const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.85));
+      // webp pesa mucho menos que jpeg; si el navegador no lo soporta, cae a jpeg
+      let blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/webp', 0.8));
+      if (blob && blob.type === 'image/webp') return { blob, ext: 'webp', type: 'image/webp', sizeKB: blob.size / 1024 };
+      blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.82));
       if (!blob) throw new Error('toBlob');
       return { blob, ext: 'jpg', type: 'image/jpeg', sizeKB: blob.size / 1024 };
     } finally {

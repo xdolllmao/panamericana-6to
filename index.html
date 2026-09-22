@@ -9,7 +9,7 @@
 <meta property="og:title" content="Sextogram">
 <meta property="og:description" content="El espacio libre del salón. Hecho por nosotros, para nosotros.">
 <meta property="og:type" content="website">
-<link rel="icon" href="/logo-sextogram.png">
+<link rel="icon" href="/logo-sextogram.webp">
 <title>Sextogram</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2287,7 +2287,7 @@
 <nav class="nav">
   <div class="nav-inner">
     <a href="#top" class="brand">
-      <img class="brand-mark" src="/logo-sextogram.png" alt="Logo Sextogram">
+      <img class="brand-mark" src="/logo-sextogram.webp" alt="Logo Sextogram">
       <span class="brand-name">Sexto<em>gram</em></span>
     </a>
     <div class="nav-links">
@@ -2362,7 +2362,7 @@
     </div>
 
     <div class="crest-wrap reveal">
-      <img class="crest" src="/logo-sextogram.png" alt="Logo Sextogram">
+      <img class="crest" src="/logo-sextogram.webp" alt="Logo Sextogram">
       <div class="sticker s1">no le digan a la miss</div>
       <div class="sticker s2">Secciones A + B</div>
       <div class="sticker s3">📌 sin filtro</div>
@@ -2391,7 +2391,7 @@
 <section id="flores" class="wrap block" hidden>
   <div class="flores-counter reveal"><span class="fc-emoji">🌼</span> <b id="floresTotal">0</b> flores enviadas</div>
   <div class="flores-card reveal">
-    <div class="flores-art"><img src="/flores-amarillas.png" alt="Ramo de flores amarillas"></div>
+    <div class="flores-art"><img src="/flores-amarillas.webp" alt="Ramo de flores amarillas"></div>
     <div class="flores-body">
       <div class="section-tag">🌼 Solo esta semana</div>
       <h2>Mandá flores amarillas</h2>
@@ -2524,7 +2524,7 @@
   </div>
 
   <div class="liga-header reveal">
-    <img class="lipton-logo" src="/liga-lipton.png" alt="Escudo de La Liga Lipton" width="96" height="91" />
+    <img class="lipton-logo" src="/liga-lipton.webp" alt="Escudo de La Liga Lipton" width="96" height="91" />
     <div class="liga-brand">
       <div class="section-tag">🏆 Torneo activo · 2026</div>
       <h3>La Liga Lipton</h3>
@@ -2779,7 +2779,7 @@
     <div class="footer-grid">
       <div>
         <div class="brand" style="margin-bottom:14px">
-          <img class="brand-mark" src="/logo-sextogram.png" alt="Logo Sextogram">
+          <img class="brand-mark" src="/logo-sextogram.webp" alt="Logo Sextogram">
           <span class="brand-name">Sexto<em>gram</em></span>
         </div>
         <p>El espacio libre del salón. Página hecha por y para nosotros, no es oficial de la escuela.</p>
@@ -2885,7 +2885,7 @@
       <button class="modal-close" id="floresSendClose" aria-label="Cerrar">✕</button>
     </div>
     <div class="modal-body">
-      <div class="flores-preview"><img src="/flores-amarillas.png" alt=""></div>
+      <div class="flores-preview"><img src="/flores-amarillas.webp" alt=""></div>
       <div class="flores-field">
         <label>¿A quién?</label>
         <select id="floresTo"></select>
@@ -3230,7 +3230,7 @@
     { badge: 'Deportes',  title: 'Liga Lipton',       desc: 'Organiza los partidos entre Equipo 1 y Equipo 2 los miércoles. Patrocinador oficial del torneo interno.', owners: ['Gerardo', 'Magaña'] },
     { badge: 'Chismes',   title: 'El Bulevar de la Constitución', desc: 'El mayor proveedor de chismes del grado.', owners: ['Andrea', 'Sofía', 'Gerardo', 'Javier'] },
     { badge: 'Bancos',    title: 'Bancos Gema',       desc: 'Prestan dinero.', owners: ['Gerardo', 'Magaña'] },
-    { badge: 'Lápices',   title: 'Clínicas Jaime',    desc: 'Arreglan lápices y lapiceros, y tienen un diseño extraordinario de lápiz único.', owners: ['Gerardo', 'Magaña', 'Jaime'], img: '/clinicas-jaime-lapiz.png' },
+    { badge: 'Lápices',   title: 'Clínicas Jaime',    desc: 'Arreglan lápices y lapiceros, y tienen un diseño extraordinario de lápiz único.', owners: ['Gerardo', 'Magaña', 'Jaime'], img: '/clinicas-jaime-lapiz.webp' },
   ];
 
   const PARTIDOS = [
@@ -5282,7 +5282,7 @@
     function showPopup(unseen) {
       const n = unseen.length, f = unseen[0];
       $f('floresPopBody').innerHTML = `
-        <img src="/flores-amarillas.png" alt="">
+        <img src="/flores-amarillas.webp" alt="">
         <h3>${n > 1 ? `¡Te llegaron ${n} flores! 🌼` : '¡Te enviaron flores! 🌼'}</h3>
         ${f.note ? `<div class="flores-note-card">${escapeHtml(f.note)}</div>` : ''}
         <div class="flores-from">De ${f.anonymous ? '<b>Anónimo</b>' : ('<b>'+escapeHtml(f.sender||'Alguien')+'</b>')}${n>1?` y ${n-1} más`:''}</div>`;
@@ -5295,7 +5295,7 @@
 
   // ===== Anuncio intersticial: cada 4 min, aleatorio, saltable a los 10s =====
   (function(){
-    const ADS = ['/clinicas-jaime.webp', '/bancos-gema.jpg'];
+    const ADS = ['/clinicas-jaime.webp', '/bancos-gema.webp'];
     const overlay = document.getElementById('adInterstitial');
     const img = document.getElementById('adImg');
     const skip = document.getElementById('adSkip');
