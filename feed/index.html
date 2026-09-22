@@ -1085,7 +1085,7 @@
     let media_url = null, media_type = null;
     if (cmpMedia) {
       const path = `${me.id}/${cmpType}-${Date.now()}-${Math.random().toString(36).slice(2,6)}.${cmpMedia.ext}`;
-      const { error: upErr } = await sb.storage.from('posts').upload(path, cmpMedia.blob, { contentType: cmpMedia.type, cacheControl: '3600', upsert: false });
+      const { error: upErr } = await sb.storage.from('posts').upload(path, cmpMedia.blob, { contentType: cmpMedia.type, cacheControl: '2592000', upsert: false });
       if (upErr) { alert('Error: ' + upErr.message); reset(); return; }
       media_url = sb.storage.from('posts').getPublicUrl(path).data.publicUrl;
       media_type = cmpMedia.type;
@@ -1098,7 +1098,7 @@
       let baseUrl = cmpAudio.url;
       if (cmpAudio.source === 'file') {
         const apath = `${me.id}/audio-${Date.now()}-${Math.random().toString(36).slice(2,6)}.${cmpAudio.ext}`;
-        const { error: aErr } = await sb.storage.from('posts').upload(apath, cmpAudio.blob, { contentType: cmpAudio.type, cacheControl: '3600', upsert: false });
+        const { error: aErr } = await sb.storage.from('posts').upload(apath, cmpAudio.blob, { contentType: cmpAudio.type, cacheControl: '2592000', upsert: false });
         if (aErr) { alert('Error subiendo el audio: ' + aErr.message); reset(); return; }
         baseUrl = sb.storage.from('posts').getPublicUrl(apath).data.publicUrl;
       }
@@ -1700,7 +1700,7 @@
     let media_url = null, media_type = null;
     if (stMedia) {
       const path = `${me.id}/story-${Date.now()}-${Math.random().toString(36).slice(2,6)}.${stMedia.ext}`;
-      const { error: upErr } = await sb.storage.from('posts').upload(path, stMedia.blob, { contentType: stMedia.type, cacheControl: '3600', upsert: false });
+      const { error: upErr } = await sb.storage.from('posts').upload(path, stMedia.blob, { contentType: stMedia.type, cacheControl: '2592000', upsert: false });
       if (upErr) { alert('Error subiendo: ' + upErr.message); reset(); return; }
       media_url = sb.storage.from('posts').getPublicUrl(path).data.publicUrl;
       media_type = stMedia.type;
@@ -1713,7 +1713,7 @@
       let baseUrl = stAudio.url;
       if (stAudio.source === 'file') {
         const apath = `${me.id}/audio-${Date.now()}-${Math.random().toString(36).slice(2,6)}.${stAudio.ext}`;
-        const { error: aErr } = await sb.storage.from('posts').upload(apath, stAudio.blob, { contentType: stAudio.type, cacheControl: '3600', upsert: false });
+        const { error: aErr } = await sb.storage.from('posts').upload(apath, stAudio.blob, { contentType: stAudio.type, cacheControl: '2592000', upsert: false });
         if (aErr) { alert('Error subiendo el audio: ' + aErr.message); reset(); return; }
         baseUrl = sb.storage.from('posts').getPublicUrl(apath).data.publicUrl;
       }

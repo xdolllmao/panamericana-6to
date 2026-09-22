@@ -1990,7 +1990,7 @@
         const ext = pendingPhoto.ext || 'jpg';
         const path = `${currentUser.id}/${Date.now()}-${Math.random().toString(36).slice(2,6)}.${ext}`;
         const { error: upErr } = await sb.storage.from('photos').upload(path, pendingPhoto.blob, {
-          contentType: pendingPhoto.type || 'image/jpeg', cacheControl: '3600', upsert: false
+          contentType: pendingPhoto.type || 'image/jpeg', cacheControl: '2592000', upsert: false
         });
         if (upErr) { alert('Error subiendo foto: ' + upErr.message); sendBtn.disabled = false; return; }
         photoUrl = sb.storage.from('photos').getPublicUrl(path).data.publicUrl;

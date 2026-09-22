@@ -558,7 +558,7 @@
     if (file.size > 5 * 1024 * 1024) { alert('Foto muy grande (máx 5 MB)'); return; }
     const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().slice(0, 5);
     const path = `${me.id}/avatar-${Date.now()}.${ext}`;
-    const { error: upErr } = await sb.storage.from('avatars').upload(path, file, { contentType: file.type, upsert: false });
+    const { error: upErr } = await sb.storage.from('avatars').upload(path, file, { contentType: file.type, cacheControl: '2592000', upsert: false });
     if (upErr) { alert('No se pudo subir: ' + upErr.message); return; }
     const url = sb.storage.from('avatars').getPublicUrl(path).data.publicUrl;
     const { error } = await sb.from('profiles').update({ avatar_url: url }).eq('user_id', me.id);
@@ -622,7 +622,7 @@
     if (composerFile) {
       const ext = (composerFile.name.split('.').pop() || 'bin').toLowerCase().slice(0, 5);
       const path = `${me.id}/${composerType}-${Date.now()}-${Math.random().toString(36).slice(2,6)}.${ext}`;
-      const { error: upErr } = await sb.storage.from('posts').upload(path, composerFile, { contentType: composerFile.type, upsert: false });
+      const { error: upErr } = await sb.storage.from('posts').upload(path, composerFile, { contentType: composerFile.type, cacheControl: '2592000', upsert: false });
       if (upErr) { alert('Error subiendo: ' + upErr.message); btn.disabled = false; btn.textContent = 'Publicar'; return; }
       media_url = sb.storage.from('posts').getPublicUrl(path).data.publicUrl;
       media_type = composerFile.type;
