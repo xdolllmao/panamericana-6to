@@ -5302,10 +5302,19 @@
     const skip = document.getElementById('adSkip');
     if (!overlay || !img || !skip) return;
     let cd = null;
+    // "Bolsa" barajada: garantiza que los anuncios salgan alternados y parejo (sin rachas).
+    let bag = [];
+    function nextAd() {
+      if (!bag.length) {
+        bag = ADS.slice();
+        for (let i = bag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [bag[i], bag[j]] = [bag[j], bag[i]]; }
+      }
+      return bag.pop();
+    }
     function showAd() {
       if (!overlay.hidden) return;          // ya hay un anuncio abierto
       if (document.hidden) return;          // no molestar si la pestaña no está al frente
-      img.src = ADS[Math.floor(Math.random() * ADS.length)];
+      img.src = nextAd();
       overlay.hidden = false;
       let n = 10;
       skip.disabled = true; skip.textContent = 'Saltar en ' + n;
