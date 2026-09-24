@@ -2117,6 +2117,35 @@
   .ad-skip { min-width: 160px; padding: 13px 22px; border-radius: 999px; font-weight: 800; font-size: 15px; background: #fff; color: #0C1846; box-shadow: 0 10px 30px rgba(0,0,0,.4); cursor: pointer; transition: background .15s; }
   .ad-skip:disabled { background: rgba(255,255,255,.18); color: rgba(255,255,255,.75); cursor: not-allowed; }
 
+  /* ===== ¿Quién es el curis? ===== */
+  .curis-card {
+    display: flex; align-items: center; gap: 24px; overflow: hidden;
+    background: linear-gradient(135deg, #1B2340 0%, #2A3660 55%, #3B2A6B 100%);
+    border: 1px solid #3A4785; border-radius: var(--radius-lg);
+    padding: 22px 26px; box-shadow: var(--shadow-lg); color: #EAEFff;
+  }
+  .curis-art { flex: none; width: 180px; align-self: stretch; display: grid; place-items: center; }
+  .curis-art img { width: 100%; height: auto; border-radius: 14px; box-shadow: 0 14px 30px rgba(0,0,0,.4); }
+  .curis-body { flex: 1; min-width: 0; }
+  .curis-body h2 { font-family: var(--f-display); font-weight: 800; font-size: clamp(24px,3.4vw,34px); margin: 4px 0 6px; line-height: 1.02; letter-spacing: -.02em; color: #fff; }
+  .curis-body p { margin: 0 0 14px; font-size: 14.5px; color: #C7CEF0; max-width: 60ch; }
+  .curis-body p b { color: #fff; }
+  .curis-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+  .curis-btns .curis-vote { background: #fff; color: #1B2340; }
+  .curis-btns .btn-secondary { background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.25); color: #fff; }
+  @media (max-width: 620px) { .curis-card { flex-direction: column; text-align: center; } .curis-art { width: 150px; } .curis-btns { justify-content: center; } .curis-body p { margin-left:auto; margin-right:auto; } }
+  /* resultados curis */
+  .curis-rank { display: flex; flex-direction: column; gap: 8px; }
+  .curis-row { display: flex; align-items: center; gap: 10px; }
+  .curis-row .cr-av { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-family: var(--f-display); font-weight: 800; font-size: 13px; overflow: hidden; flex: none; }
+  .curis-row .cr-av img { width: 100%; height: 100%; object-fit: cover; }
+  .curis-row .cr-name { width: 90px; font-weight: 700; font-size: 13px; flex: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .curis-row .cr-bar { flex: 1; height: 12px; border-radius: 999px; background: var(--paper-soft); overflow: hidden; }
+  .curis-row .cr-bar span { display: block; height: 100%; background: linear-gradient(90deg, var(--school-2), var(--school)); }
+  .curis-row .cr-n { width: 42px; text-align: right; font-family: var(--f-mono); font-size: 12px; color: var(--ink-soft); }
+  .curis-row.mine .cr-name { color: var(--school); }
+  .curis-empty { text-align: center; padding: 20px; color: var(--ink-mute); }
+
   /* ===== Flores amarillas (especial 1 semana) ===== */
   .flores-counter {
     display: inline-flex; align-items: center; gap: 8px;
@@ -2399,6 +2428,22 @@
       <div class="flores-btns">
         <button class="btn btn-primary flores-send" id="floresSendBtn" type="button">🌼 Enviar flores</button>
         <button class="btn btn-secondary" id="floresInboxBtn" type="button">Ver las que me enviaron<span class="flores-count" id="floresCount" hidden>0</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== ¿QUIÉN ES EL CURIS? =================== -->
+<section id="curis" class="wrap block">
+  <div class="curis-card reveal">
+    <div class="curis-art"><img src="/curis.webp" alt="El curis"></div>
+    <div class="curis-body">
+      <div class="section-tag" style="color:#fff;opacity:.85">🕶️ votación anónima</div>
+      <h2>¿Quién es el curis?</h2>
+      <p>Todos sospechan de alguien. Votá anónimo quién creés que es <b>el curis</b>. Nadie sabe quién votó.</p>
+      <div class="curis-btns">
+        <button class="btn btn-primary curis-vote" id="curisVoteBtn" type="button">🕶️ Votar</button>
+        <button class="btn btn-secondary" id="curisResultsBtn" type="button">Ver resultados</button>
       </div>
     </div>
   </div>
@@ -2875,6 +2920,38 @@
     <span class="ad-label">Publicidad</span>
     <img id="adImg" src="" alt="Anuncio">
     <button class="ad-skip" id="adSkip" type="button" disabled>Saltar en 10</button>
+  </div>
+</div>
+
+<!-- =================== MODAL · votar curis =================== -->
+<div class="modal-backdrop" id="curisVoteModal" role="dialog" aria-modal="true" hidden>
+  <div class="modal flores-modal">
+    <div class="modal-head">
+      <div><div class="section-tag" style="color:var(--school)">🕶️ Votación anónima</div><h3>¿Quién es el curis?</h3></div>
+      <button class="modal-close" id="curisVoteClose" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="flores-field">
+        <label>Elegí a quién creés que es el curis</label>
+        <select id="curisTo"></select>
+      </div>
+      <p style="font-size:12px;color:var(--ink-mute);margin:0">Tu voto es anónimo. Podés cambiarlo cuando quieras.</p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" id="curisVoteCancel">Cancelar</button>
+      <button class="btn btn-primary" id="curisVoteConfirm">🕶️ Votar</button>
+    </div>
+  </div>
+</div>
+
+<!-- =================== MODAL · resultados curis =================== -->
+<div class="modal-backdrop" id="curisResultsModal" role="dialog" aria-modal="true" hidden>
+  <div class="modal flores-modal">
+    <div class="modal-head">
+      <div><div class="section-tag" style="color:var(--school)">🕶️ Resultados</div><h3>¿Quién es el curis?</h3></div>
+      <button class="modal-close" id="curisResultsClose" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="modal-body"><div class="curis-rank" id="curisRank"></div></div>
   </div>
 </div>
 
@@ -5330,6 +5407,68 @@
     skip.addEventListener('click', () => { if (!skip.disabled) hideAd(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !overlay.hidden && !skip.disabled) hideAd(); });
     setInterval(showAd, 4 * 60 * 1000);     // cada 4 minutos
+  })();
+
+  // ===== ¿Quién es el curis? (votación anónima, reusa la tabla votes) =====
+  (function(){
+    const $c = id => document.getElementById(id);
+    const sel = $c('curisTo'); if (!sel) return;
+    const openBd = el => { el.hidden=false; el.classList.add('open'); };
+    const closeBd = el => { el.classList.remove('open'); el.hidden=true; };
+    function fillCuris() {
+      if (sel.dataset.filled) return;
+      const bySec = { A:[], B:[] }; STUDENTS.forEach(s => bySec[s.s].push(s));
+      const opt = list => list.map(s => `<option value="${escapeHtml(s.n)}|${s.s}">${escapeHtml(s.n)}</option>`).join('');
+      sel.innerHTML = `<optgroup label="Sección A">${opt(bySec.A)}</optgroup><optgroup label="Sección B">${opt(bySec.B)}</optgroup>`;
+      sel.dataset.filled = '1';
+    }
+    function renderCurisRank() {
+      const counts = (voteCounts && voteCounts['curis']) ? voteCounts['curis'] : {};
+      const entries = Object.entries(counts).filter(([,n]) => n > 0).sort((a,b) => b[1]-a[1]);
+      const total = entries.reduce((s,[,n]) => s+n, 0);
+      const mine = myVotes && myVotes['curis'];
+      const box = $c('curisRank');
+      if (!entries.length) { box.innerHTML = '<div class="curis-empty">Todavía nadie votó. Sé el primero 🕶️</div>'; return; }
+      box.innerHTML = entries.map(([cand, n]) => {
+        const [nm, sec] = cand.split('|');
+        const prof = profilesByKey.get(keyOf(nm, sec || ''));
+        const av = prof && prof.avatar_url ? `<img src="${escapeHtml(prof.avatar_url)}" alt="">` : escapeHtml((nm || '?')[0]);
+        const pct = total ? Math.round(n/total*100) : 0;
+        return `<div class="curis-row ${cand === mine ? 'mine' : ''}">
+          <div class="cr-av" style="background:${colorFor(nm || '?')}">${av}</div>
+          <div class="cr-name">${escapeHtml(nm)}</div>
+          <div class="cr-bar"><span style="width:${pct}%"></span></div>
+          <div class="cr-n">${n}</div>
+        </div>`;
+      }).join('');
+    }
+    $c('curisVoteBtn').addEventListener('click', () => {
+      if (!account) { alert('Reclamá tu nombre para votar.'); openModal(); return; }
+      fillCuris();
+      if (myVotes && myVotes['curis']) sel.value = myVotes['curis'];
+      openBd($c('curisVoteModal'));
+    });
+    $c('curisVoteClose').addEventListener('click', () => closeBd($c('curisVoteModal')));
+    $c('curisVoteCancel').addEventListener('click', () => closeBd($c('curisVoteModal')));
+    $c('curisVoteConfirm').addEventListener('click', async () => {
+      if (!account || !currentUser) { openModal(); return; }
+      const v = sel.value; if (!v) return;
+      const btn = $c('curisVoteConfirm'); btn.disabled = true;
+      const { error } = await sb.from('votes').upsert({ user_id: currentUser.id, category: 'curis', candidate: v, updated_at: new Date().toISOString() }, { onConflict: 'user_id,category' });
+      btn.disabled = false;
+      if (error) { alert('No se pudo votar: ' + error.message); return; }
+      if (typeof refreshVotes === 'function') await refreshVotes();
+      closeBd($c('curisVoteModal'));
+      renderCurisRank();
+      openBd($c('curisResultsModal'));
+    });
+    $c('curisResultsBtn').addEventListener('click', async () => {
+      if (typeof refreshVotes === 'function') await refreshVotes();
+      renderCurisRank();
+      openBd($c('curisResultsModal'));
+    });
+    $c('curisResultsClose').addEventListener('click', () => closeBd($c('curisResultsModal')));
+    [$c('curisVoteModal'), $c('curisResultsModal')].forEach(m => m.addEventListener('click', e => { if (e.target === m) closeBd(m); }));
   })();
 
   initSupabase();
