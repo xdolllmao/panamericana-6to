@@ -2133,6 +2133,9 @@
   .curis-btns { display: flex; gap: 10px; flex-wrap: wrap; }
   .curis-btns .curis-vote { background: #fff; color: #1B2340; }
   .curis-btns .btn-secondary { background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.25); color: #fff; }
+  .curis-tiktok { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 999px; background: #000; color: #fff; font-weight: 800; font-size: 14px; box-shadow: 0 6px 18px rgba(0,0,0,.4); transition: transform .15s; }
+  .curis-tiktok:hover { transform: translateY(-2px); }
+  .curis-tiktok svg { width: 18px; height: 18px; }
   @media (max-width: 620px) { .curis-card { flex-direction: column; text-align: center; } .curis-art { width: 150px; } .curis-btns { justify-content: center; } .curis-body p { margin-left:auto; margin-right:auto; } }
   /* resultados curis */
   .curis-rank { display: flex; flex-direction: column; gap: 8px; }
@@ -2444,6 +2447,10 @@
       <div class="curis-btns">
         <button class="btn btn-primary curis-vote" id="curisVoteBtn" type="button">🕶️ Votar</button>
         <button class="btn btn-secondary" id="curisResultsBtn" type="button">Ver resultados</button>
+        <a class="curis-tiktok" href="https://www.tiktok.com/@curisdelaescuelapanameri" target="_blank" rel="noopener" title="Seguir en TikTok" aria-label="Cuenta de TikTok del curis">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.5 3c.3 2.1 1.6 3.8 3.7 4.1v2.6c-1.3.1-2.6-.3-3.7-1v6.1c0 3.4-2.6 5.9-5.9 5.9C7.4 20.7 5 18.2 5 15c0-3 2.3-5.4 5.3-5.6v2.7c-1.5.2-2.6 1.5-2.6 2.9 0 1.6 1.3 2.9 2.9 2.9s2.9-1.3 2.9-2.9V3h3z"/></svg>
+          <span>TikTok</span>
+        </a>
       </div>
     </div>
   </div>
