@@ -54,6 +54,8 @@
   [hidden] { display: none !important; }
   a { color: inherit; text-decoration: none; }
   button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  /* Borrado desactivado: nadie puede borrar publicaciones ni historias */
+  [data-act="delete"], .story-delete { display: none !important; }
   input, textarea { font: inherit; color: inherit; }
   :focus-visible { outline: 2px solid var(--school-2); outline-offset: 3px; border-radius: 6px; }
 
