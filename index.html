@@ -3378,28 +3378,30 @@
     { fecha: 'Jornada 28', tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 2, gb: 1, res: 'won',  note: '<b>Magaña</b> y <b>Javier</b> para Equipo 1; <b>Mateo</b> para Equipo 2. Gana Equipo 1.' },
     { fecha: 'Jornada 29', tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 3, gb: 3, res: 'tie',  note: 'Empate. <b>Magaña</b> ×2 y <b>Javier</b> para Equipo 1; <b>Mateo</b> ×2 y <b>Gerardo</b> para Equipo 2.' },
     { fecha: 'Jornada 30', tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 2, gb: 3, res: 'lost', note: '<b>Carlos</b> ×2 para Equipo 1; <b>Gerardo</b> ×2 y <b>Deleón</b> para Equipo 2. Gana Equipo 2.' },
+    { fecha: 'Jornada 31', tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 2, gb: 1, res: 'won',  note: '<b>Carlos</b> ×2 para Equipo 1; <b>Gerardo</b> para Equipo 2. Gana Equipo 1.' },
+    { fecha: 'Jornada 32', tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 5, gb: 3, res: 'won',  note: '<b>Magaña</b> ×2, <b>Lucas</b>, <b>Javier</b> y <b>Mateo</b> para Equipo 1; <b>Deleón</b>, <b>Gerardo</b> y autogol de <b>Javier</b> para Equipo 2. Gana Equipo 1.' },
   ];
 
   const STANDINGS = [
-    { name: 'Equipo 1', pj: 30, g: 12, e: 6, p: 12, gf: 60, gc: 59 },
-    { name: 'Equipo 2', pj: 30, g: 12, e: 6, p: 12, gf: 59, gc: 60 },
+    { name: 'Equipo 1', pj: 32, g: 14, e: 6, p: 12, gf: 67, gc: 63 },
+    { name: 'Equipo 2', pj: 32, g: 12, e: 6, p: 14, gf: 63, gc: 67 },
   ].map(t => ({ ...t, pts: t.g * 3 + t.e }))
    .sort((a,b) => b.pts - a.pts || (b.gf - b.gc) - (a.gf - a.gc));
 
   const GOLEADORES = [
-    { name: 'Gerardo',   goles: 21 },
-    { name: 'Deleón',    goles: 20 },
-    { name: 'Magaña',    goles: 16 },
-    { name: 'Mateo',     goles: 15 },
-    { name: 'Javier',    goles: 13 },
+    { name: 'Gerardo',   goles: 23 },
+    { name: 'Deleón',    goles: 21 },
+    { name: 'Magaña',    goles: 18 },
+    { name: 'Mateo',     goles: 16 },
+    { name: 'Javier',    goles: 14 },
     { name: 'Iglesias',  goles: 9 },
-    { name: 'Lucas',     goles: 6 },
+    { name: 'Lucas',     goles: 7 },
     { name: 'Eduardo',   goles: 4 },
     { name: 'Josué',     goles: 4 },
+    { name: 'Carlos',    goles: 4 },
     { name: 'Osegueda',  goles: 3 },
     { name: 'Suil',      goles: 3 },
     { name: 'Alejandro', goles: 2 },
-    { name: 'Carlos',    goles: 2 },
     { name: 'Roberto',   goles: 1 },
     { name: 'Fabricio',  goles: 1 },
   ].sort((a, b) => b.goles - a.goles);
