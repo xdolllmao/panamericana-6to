@@ -3380,20 +3380,21 @@
     { fecha: 'Jornada 30', tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 2, gb: 3, res: 'lost', note: '<b>Carlos</b> ×2 para Equipo 1; <b>Gerardo</b> ×2 y <b>Deleón</b> para Equipo 2. Gana Equipo 2.' },
     { fecha: 'Jornada 31', tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 2, gb: 1, res: 'won',  note: '<b>Carlos</b> ×2 para Equipo 1; <b>Gerardo</b> para Equipo 2. Gana Equipo 1.' },
     { fecha: 'Jornada 32', tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 5, gb: 3, res: 'won',  note: '<b>Magaña</b> ×2, <b>Lucas</b>, <b>Javier</b> y <b>Mateo</b> para Equipo 1; <b>Deleón</b>, <b>Gerardo</b> y autogol de <b>Javier</b> para Equipo 2. Gana Equipo 1.' },
+    { fecha: 'Jornada 33', tipo: 'Fútbol', a: 'Equipo 1', b: 'Equipo 2', ga: 2, gb: 1, res: 'won',  note: '<b>Magaña</b> y <b>Javier</b> para Equipo 1; <b>Gerardo</b> para Equipo 2. Gana Equipo 1.' },
   ];
 
   const STANDINGS = [
-    { name: 'Equipo 1', pj: 32, g: 14, e: 6, p: 12, gf: 67, gc: 63 },
-    { name: 'Equipo 2', pj: 32, g: 12, e: 6, p: 14, gf: 63, gc: 67 },
+    { name: 'Equipo 1', pj: 33, g: 15, e: 6, p: 12, gf: 69, gc: 64 },
+    { name: 'Equipo 2', pj: 33, g: 12, e: 6, p: 15, gf: 64, gc: 69 },
   ].map(t => ({ ...t, pts: t.g * 3 + t.e }))
    .sort((a,b) => b.pts - a.pts || (b.gf - b.gc) - (a.gf - a.gc));
 
   const GOLEADORES = [
-    { name: 'Gerardo',   goles: 23 },
+    { name: 'Gerardo',   goles: 24 },
     { name: 'Deleón',    goles: 21 },
-    { name: 'Magaña',    goles: 18 },
+    { name: 'Magaña',    goles: 19 },
     { name: 'Mateo',     goles: 16 },
-    { name: 'Javier',    goles: 14 },
+    { name: 'Javier',    goles: 15 },
     { name: 'Iglesias',  goles: 9 },
     { name: 'Lucas',     goles: 7 },
     { name: 'Eduardo',   goles: 4 },
