@@ -1657,8 +1657,13 @@
     margin: 0 0 10px;
     font-size: 15px; line-height: 1.5;
     color: var(--ink);
-    word-wrap: break-word;
-    white-space: pre-wrap;
+    overflow-wrap: anywhere;      /* corta palabras larguísimas sin espacios */
+    white-space: pre-line;        /* respeta saltos de línea pero colapsa espacios repetidos */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 14;       /* tope de altura: ningún chisme spam rompe el muro */
+    line-clamp: 14;
+    overflow: hidden;
   }
   .chisme-meta {
     display: flex; align-items: center; gap: 8px;
@@ -4075,8 +4080,9 @@
     wallEl.innerHTML = slice.map((p, i) => {
       const tilt = ((((start + i) * 41) % 7) - 3) * 0.5;
       const tint = (start + i) % 5;
+      const clean = (p.text || '').replace(/\n{3,}/g, '\n\n').replace(/[ \t]{2,}/g, ' ').trim();
       return `<article class="chisme tint-${tint}" style="--r:${tilt}deg">
-        <p>${escapeHtml(p.text)}</p>
+        <p>${escapeHtml(clean)}</p>
         <div class="chisme-meta"><span>Anónimo</span><span class="dot"></span><span>${timeAgo(p.created_at)}</span></div>
       </article>`;
     }).join('');
