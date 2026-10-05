@@ -2239,6 +2239,15 @@
     padding: 8px 0 12px;
     perspective: 2200px;
   }
+  .perio-notice {
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: var(--radius); box-shadow: var(--shadow-lg);
+    padding: 44px 30px; max-width: 520px; width: min(94vw, 520px);
+    text-align: center; margin: 10px auto;
+  }
+  .perio-notice-ico { font-size: 56px; line-height: 1; margin-bottom: 10px; }
+  .perio-notice h3 { font-family: var(--f-display); font-weight: 800; font-size: 25px; letter-spacing: -0.02em; margin: 6px 0 12px; color: var(--ink); }
+  .perio-notice p { color: var(--ink-soft); font-size: 15px; margin: 0 auto; max-width: 44ch; }
   .perio-book {
     position: relative;
     /* Paginas cropeadas 754x1070 (portrait). Width limitada para que
@@ -2541,23 +2550,17 @@
 <section id="periodico" class="wrap block">
   <div class="section-head reveal">
     <div>
-      <div class="section-tag">★ Edición #4 · Sep 2026</div>
+      <div class="section-tag">★ Sin edición esta semana</div>
       <h2>Periódico Panamericano.</h2>
     </div>
-    <p>El diario del salón. Pasa las páginas con los botones, con las flechas del teclado o deslizando.</p>
+    <p>El diario del salón. Chismes, deportes y todo lo que pasa en 6to.</p>
   </div>
 
   <div class="perio-stage reveal">
-    <div class="perio-book" id="perioBook" aria-label="Periódico Panamericano" tabindex="0"></div>
-
-    <div class="perio-controls">
-      <button class="perio-btn" id="perioPrev" aria-label="Página anterior" title="Anterior">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>
-      <div class="perio-indicator"><b id="perioNow">1</b> / <span id="perioTotal">3</span></div>
-      <button class="perio-btn" id="perioNext" aria-label="Página siguiente" title="Siguiente">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
-      </button>
+    <div class="perio-notice">
+      <div class="perio-notice-ico">📰</div>
+      <h3>Esta semana no hay periódico</h3>
+      <p>No pudimos sacar la edición de esta semana por unos problemas. Perdón por la espera 🙏 Volvemos la próxima semana.</p>
     </div>
   </div>
 </section>

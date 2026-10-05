@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1E3AAB" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#070D24" media="(prefers-color-scheme: dark)">
-<title>Resumen del Weekly · Clase de 6to</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%231E3AAB'/%3E%3Crect x='10' y='11' width='20' height='2' rx='1' fill='white'/%3E%3Crect x='10' y='19' width='20' height='2' rx='1' fill='white'/%3E%3Crect x='10' y='27' width='14' height='2' rx='1' fill='white'/%3E%3C/svg%3E">
+<title>Spirit Week · Clase de 6to</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%231E3AAB'/%3E%3Ctext x='20' y='29' font-family='system-ui,sans-serif' font-size='24' text-anchor='middle'%3E%E2%9C%A8%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -53,7 +53,6 @@
   [hidden] { display: none !important; }
   body { margin: 0; font-family: var(--f-body); color: var(--ink); background: var(--ground); line-height: 1.5; -webkit-font-smoothing: antialiased; }
   a { color: inherit; text-decoration: none; }
-  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
 
   .mobile-tabs { display: none; }
   @media (max-width: 780px) {
@@ -75,61 +74,32 @@
 
   .wrap { max-width: 980px; margin: 0 auto; padding: 24px 20px 60px; }
 
-  .page-head { margin-bottom: 24px; }
+  .page-head { margin-bottom: 20px; }
   .page-tag { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--school); font-weight: 700; }
   .page-tag em { font-style: normal; color: var(--coral); }
-  .page-head h1 { font-family: var(--f-display); font-weight: 800; font-size: clamp(32px, 5vw, 48px); line-height: 1; letter-spacing: -0.03em; margin: 10px 0 6px; }
+  .page-head h1 { font-family: var(--f-display); font-weight: 800; font-size: clamp(34px, 6vw, 56px); line-height: 1; letter-spacing: -0.03em; margin: 10px 0 6px;
+    background: linear-gradient(115deg, var(--school), var(--school-2) 45%, var(--coral)); -webkit-background-clip: text; background-clip: text; color: transparent; }
   .page-head p { color: var(--ink-soft); font-size: 15px; margin: 0; max-width: 60ch; }
 
-  .globals { background: linear-gradient(135deg, var(--school), var(--school-2)); color: #fff; padding: 16px 20px; border-radius: var(--radius-lg); margin-bottom: 22px; display: flex; align-items: center; gap: 14px; }
-  .globals .g-ico { font-size: 28px; flex-shrink: 0; }
-  .globals strong { display: block; font-family: var(--f-display); font-size: 18px; }
-  .globals span { font-size: 13px; opacity: .9; }
+  .banner { background: linear-gradient(135deg, var(--school), var(--school-2)); color: #fff; padding: 16px 20px; border-radius: var(--radius-lg); margin-bottom: 22px; display: flex; align-items: center; gap: 14px; box-shadow: var(--shadow-lg); }
+  .banner .b-ico { font-size: 30px; flex-shrink: 0; }
+  .banner strong { display: block; font-family: var(--f-display); font-size: 19px; }
+  .banner span { font-size: 13px; opacity: .92; }
 
-  .subj-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
-  .subj-card { text-align: left; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; cursor: pointer; transition: transform .18s, box-shadow .18s, border-color .18s; display: flex; flex-direction: column; gap: 6px; position: relative; overflow: hidden; }
-  .subj-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: var(--line-strong); }
-  .subj-card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--subj-color, var(--school)); }
-  .subj-ico { width: 44px; height: 44px; border-radius: 12px; background: color-mix(in oklab, var(--subj-color, var(--school)) 12%, var(--paper)); color: var(--subj-color, var(--school)); display: grid; place-items: center; font-size: 22px; }
-  .subj-name { font-family: var(--f-display); font-weight: 700; font-size: 17px; letter-spacing: -0.02em; line-height: 1.1; }
-  .subj-teacher { font-family: var(--f-mono); font-size: 10px; color: var(--ink-mute); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; }
-  .subj-tags { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
-  .subj-tag { font-family: var(--f-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; padding: 3px 8px; border-radius: 999px; }
-  .subj-tag.eval { background: color-mix(in oklab, var(--coral) 15%, var(--paper)); color: var(--coral); }
-  .subj-tag.exp { background: color-mix(in oklab, var(--mint) 20%, var(--paper)); color: color-mix(in oklab, var(--mint) 60%, var(--ink)); }
-  .subj-tag.hands { background: color-mix(in oklab, var(--lemon) 40%, var(--paper)); color: #7a5f00; }
+  .sw-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
+  .sw-card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 10px;
+    transition: transform .18s, box-shadow .18s, border-color .18s; }
+  .sw-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: var(--line-strong); }
+  .sw-card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--c, var(--school)); }
+  .sw-top { display: flex; align-items: center; gap: 12px; }
+  .sw-day { font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-mute); font-weight: 700; }
+  .sw-num { width: 46px; height: 46px; border-radius: 13px; background: color-mix(in oklab, var(--c, var(--school)) 14%, var(--paper)); color: var(--c, var(--school)); display: grid; place-items: center; font-family: var(--f-display); font-weight: 800; font-size: 22px; flex-shrink: 0; }
+  .sw-ico { margin-left: auto; font-size: 26px; }
+  .sw-theme { font-family: var(--f-display); font-weight: 800; font-size: 21px; letter-spacing: -0.02em; line-height: 1.05; }
+  .sw-snack { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--ink-soft); }
+  .sw-price { font-family: var(--f-mono); font-weight: 700; font-size: 12px; color: var(--c, var(--school)); background: color-mix(in oklab, var(--c, var(--school)) 12%, var(--paper)); padding: 3px 9px; border-radius: 999px; }
 
-  /* Modal */
-  .modal-backdrop { position: fixed; inset: 0; z-index: 100; background: rgba(12,24,70,.6); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; padding: 20px; }
-  .modal-backdrop.open { display: flex; }
-  .modal { background: var(--paper); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); max-width: 640px; width: 100%; max-height: 92vh; overflow: hidden; display: flex; flex-direction: column; animation: slide .22s ease; }
-  @keyframes slide { from { transform: translateY(12px); opacity: 0 } to { transform: none; opacity: 1 } }
-  .modal-head { display: flex; align-items: start; gap: 12px; padding: 22px 24px 12px; border-bottom: 1px solid var(--line); }
-  .modal-head .m-ico { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; font-size: 22px; flex-shrink: 0; background: color-mix(in oklab, var(--subj-color, var(--school)) 14%, var(--paper)); color: var(--subj-color, var(--school)); }
-  .modal-head .m-info { flex: 1; min-width: 0; }
-  .modal-head h3 { font-family: var(--f-display); font-weight: 800; font-size: 22px; margin: 0; letter-spacing: -0.02em; }
-  .modal-head p { color: var(--ink-mute); font-size: 12px; margin: 3px 0 0; font-family: var(--f-mono); letter-spacing: 0.08em; }
-  .modal-close { width: 32px; height: 32px; border-radius: 999px; background: var(--paper-soft); border: 1px solid var(--line); display: grid; place-items: center; color: var(--ink-soft); flex-shrink: 0; }
-  .modal-tabs { display: flex; padding: 12px 24px 0; gap: 4px; border-bottom: 1px solid var(--line); }
-  .modal-tab { padding: 8px 16px; border-radius: 10px 10px 0 0; font-weight: 700; font-size: 13px; color: var(--ink-soft); border-bottom: 3px solid transparent; margin-bottom: -1px; cursor: pointer; }
-  .modal-tab.is-active { color: var(--subj-color, var(--school)); border-bottom-color: var(--subj-color, var(--school)); }
-  .modal-body { padding: 18px 24px 22px; overflow-y: auto; flex: 1; }
-
-  .info-block { margin-bottom: 16px; }
-  .info-block:last-child { margin-bottom: 0; }
-  .info-label { display: flex; align-items: center; gap: 8px; font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-mute); font-weight: 700; margin-bottom: 6px; }
-  .info-label .il-ico { font-size: 14px; }
-  .info-item { padding: 10px 14px; margin-bottom: 6px; border-radius: 10px; background: var(--paper-soft); border-left: 3px solid var(--line-strong); font-size: 14px; line-height: 1.45; }
-  .info-item strong { display: block; font-weight: 700; color: var(--ink); font-size: 13.5px; margin-bottom: 2px; }
-  .info-item .date-chip { display: inline-block; font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; margin-right: 6px; font-weight: 700; }
-  .info-block.eval .info-item { border-left-color: var(--coral); background: color-mix(in oklab, var(--coral) 6%, var(--paper-soft)); }
-  .info-block.eval .date-chip { background: var(--coral); color: #fff; }
-  .info-block.exp .info-item { border-left-color: var(--mint); background: color-mix(in oklab, var(--mint) 8%, var(--paper-soft)); }
-  .info-block.exp .date-chip { background: var(--mint); color: #fff; }
-  .info-block.hands .info-item { border-left-color: var(--lemon); background: color-mix(in oklab, var(--lemon) 15%, var(--paper-soft)); }
-  .info-block.topic .info-item { border-left-color: var(--school-2); }
-  .info-block .empty { color: var(--ink-mute); font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.06em; padding: 6px 0; }
-  .info-item a { color: var(--school); text-decoration: underline; }
+  .foot-note { margin-top: 22px; font-size: 13px; color: var(--ink-mute); text-align: center; font-family: var(--f-mono); letter-spacing: 0.04em; }
 </style>
 </head>
 <body>
@@ -152,38 +122,68 @@
 
 <main class="wrap">
   <div class="page-head">
-    <div class="page-tag">Weekly Bulletin · <em>Boletín #7</em></div>
-    <h1>Resumen del weekly.</h1>
-    <p>Lo importante de cada materia esta semana: evaluaciones, experimentos y entregas. Nada de relleno. Tocá una materia para ver el detalle.</p>
+    <div class="page-tag">Spirit Week · <em>5–9 octubre</em></div>
+    <h1>Spirit Week. ✨</h1>
+    <p>Esta semana no hay weekly normal: es <b>Spirit Week</b>. Cada día tiene su temática y su antojito. ¡Vení disfrazado y apoyá!</p>
   </div>
 
-  <div class="globals">
-    <div class="g-ico">🎉</div>
+  <div class="banner">
+    <div class="b-ico">🎟️</div>
     <div>
-      <strong>Semana del Día del Niño</strong>
-      <span>Mié 30 sept: Jean Day (camiseta o blusa amarilla · $0.75) · Jue 1 oct: NO hay clase — celebración del Día del Niño con actividades y desayuno · Evaluaciones: Lun 28 Spelling Dictation 5 · Jue 2 oct hands-on de Math + integradora de Ciudadanía · Vie 2 oct Grammar Test 1 + integradora de Arte</span>
+      <strong>Cada día cuesta $0.75</strong>
+      <span>Participá en la temática del día. Los antojitos se venden aparte (precios en cada tarjeta).</span>
     </div>
   </div>
 
-  <div class="subj-grid" id="subjGrid"></div>
-</main>
-
-<div class="modal-backdrop" id="modal" hidden>
-  <div class="modal" id="modalCard">
-    <div class="modal-head">
-      <div class="m-ico" id="modalIco">📚</div>
-      <div class="m-info">
-        <h3 id="modalTitle">—</h3>
-        <p id="modalTeacher">—</p>
+  <div class="sw-grid">
+    <div class="sw-card" style="--c:#7C3AED">
+      <div class="sw-top">
+        <div class="sw-num">5</div>
+        <div><div class="sw-day">Lunes</div><div class="sw-theme">Pijama Day</div></div>
+        <div class="sw-ico">🛌</div>
       </div>
-      <button class="modal-close" id="modalClose" aria-label="Cerrar">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
-      </button>
+      <div class="sw-snack">🧁 Muffins &amp; cupcakes <span class="sw-price">$1</span></div>
     </div>
-    <div class="modal-tabs" id="modalTabs"></div>
-    <div class="modal-body" id="modalBody"></div>
+
+    <div class="sw-card" style="--c:#D97706">
+      <div class="sw-top">
+        <div class="sw-num">6</div>
+        <div><div class="sw-day">Martes</div><div class="sw-theme">Decades Day</div></div>
+        <div class="sw-ico">📻</div>
+      </div>
+      <div class="sw-snack">🍩 Donas <span class="sw-price">$1</span></div>
+    </div>
+
+    <div class="sw-card" style="--c:#22B573">
+      <div class="sw-top">
+        <div class="sw-num">7</div>
+        <div><div class="sw-day">Miércoles</div><div class="sw-theme">Sports Day</div></div>
+        <div class="sw-ico">⚽</div>
+      </div>
+      <div class="sw-snack">🍪 Galletas <span class="sw-price">$1</span></div>
+    </div>
+
+    <div class="sw-card" style="--c:#92400E">
+      <div class="sw-top">
+        <div class="sw-num">8</div>
+        <div><div class="sw-day">Jueves</div><div class="sw-theme">Cowboys Day</div></div>
+        <div class="sw-ico">🤠</div>
+      </div>
+      <div class="sw-snack">🍿 Palomitas <span class="sw-price">$1</span></div>
+    </div>
+
+    <div class="sw-card" style="--c:#DB2777">
+      <div class="sw-top">
+        <div class="sw-num">9</div>
+        <div><div class="sw-day">Viernes</div><div class="sw-theme">Mis-Match Day</div></div>
+        <div class="sw-ico">🧩</div>
+      </div>
+      <div class="sw-snack">🥨 Churros preparados <span class="sw-price">$1.25</span></div>
+    </div>
   </div>
-</div>
+
+  <p class="foot-note">El weekly de materias vuelve la próxima semana.</p>
+</main>
 
 <nav class="mobile-tabs" aria-label="Navegación">
   <a class="mtab" href="/">
@@ -205,232 +205,6 @@
 </nav>
 
 <script>
-  const SUBJECTS = [
-    {
-      id: 'math', name: 'Math', teacher: 'Ms. Norma Rebeca Vásquez', icon: '🧮', color: '#D91F26',
-      content: {
-        both: {
-          topic: [
-            { t: 'Lesson 1-8 · Measurement: The Metric System', p: 'Textbook pp. 38-41 · convertir unidades métricas de longitud, masa y capacidad' },
-            { t: 'Lesson 1-9 · Scientific Notation', p: 'Textbook pp. 43-45 · representar números grandes con potencias de 10' },
-          ],
-          hands: [{ date: 'Jue 2 oct', t: '✋ Hands-on (con nota): Metric measurement & Cosmic Scale challenge', p: 'Medir objetos reales del salón (longitud, masa y capacidad), convertir unidades y representar números grandes en notación científica' }],
-          eval:  [{ date: 'Jue 2 oct', t: 'Hands-on activity (graded)', p: 'La actividad práctica de medición y escala cósmica cuenta con nota' }],
-          notes: [{ t: 'Durante la semana', p: 'Se trabaja en el cuaderno resolviendo los ejercicios del textbook paso a paso' }],
-        }
-      }
-    },
-    {
-      id: 'lang', name: 'Language Arts', teacher: 'Ms. Verónica Castillo', icon: '🔤', color: '#3B5EF0',
-      content: {
-        both: {
-          topic: [
-            { t: 'Spelling · List 6', p: 'Palabras con /әn/, /әl/, /әr/ (error, panel, litter, pollen, gallon, mental, cancel, abandon, rival, soldier, recycle, salmon, morsel, assemble, rural, vehicle, citizen, monitor, physical, oxygen, proposal, criterion, accidental, emperor)' },
-            { t: 'Grammar · Kinds of sentences', p: 'Grammar Workbook pp. 19-21' },
-            { t: 'Reading & Oral Expression', p: 'Magazine articles · Vocab: slackening, frail, drenched, savagely, resilient' },
-          ],
-          eval: [
-            { date: 'Lun 28 sept', t: 'Spelling Dictation 5 · 6th Daily Activity', p: 'La miss dicta cada palabra 3 veces; escribirlas correctas y ordenadas en hoja aparte (son las de la List 5: brief, field, reign, review, fiery, receipt, relieve, conceited, neither, foreign, grief, veil, freight, belief, deceive, yield, beige, perceive, seize, leisure, unbelievable, achievement, neighborhood, surveillance)' },
-            { date: 'Vie 2 oct', t: 'Grammar Test 1 · Prueba Objetiva 1', p: 'Identifying Sentences, Simple Subjects and Verbs, Simple & Compound Sentences, Writing Sentences · Grammar Workbook pp. 1-21' },
-            { t: 'Speaking in English', p: 'Se evalúa toda la semana' },
-          ],
-          notes: [{ t: '⚠️ Traer siempre', p: 'Device en cada clase' }],
-        }
-      }
-    },
-    {
-      id: 'social', name: 'Social Studies', teacher: 'Ms. Claudia Vásquez', icon: '🌎', color: '#0891B2',
-      content: {
-        both: {
-          topic: [{ t: 'Chapter 10 · Expanding West and Overseas — Lesson 1: Railroads, Miners, and Ranchers', p: 'Reading pp. 352-357. Objetivos: cómo los ferrocarriles expandieron EE.UU. al oeste, la vida de mineros y ganaderos, por qué la gente migró al oeste y los retos de vivir allí. Vocab: transcontinental railroad, miner, rancher, cattle, homestead, westward expansion' }],
-          eval:  [{ date: 'Mié', t: 'Open Book Review', p: 'Repaso con libro abierto (Guided Notes de pp. 352-354)' }],
-          notes: [{ t: '🎶 Integradora 7 oct', p: 'Practicar el Star Spangled Banner: será la actividad integradora del 7 de octubre (link en Google Classroom)' }],
-        }
-      }
-    },
-    {
-      id: 'sci', name: 'Science / Discovery', teacher: 'Ms. Claudia Vásquez', icon: '🔬', color: '#22B573',
-      content: {
-        both: {
-          topic: [
-            { t: 'Chapter 2 · Exploring Space', p: 'Read pp. 40-41: Keeping Track of Time / After Apollo: Exploring The Moon. Vocab pg 45 (buscar en el glosario): rocket, thrust, velocity, orbital velocity, escape velocity, satellite, space shuttle, space station, space probe, rover, vacuum, microgravity, space spinoff, remote sensing, geostationary orbit' },
-            { t: 'Lesson 1 · Science of Rockets', p: 'Read pp. 46-51, se lee en voz alta y todos participan' },
-          ],
-          eval:  [{ date: 'Vie', t: 'Review Lesson 1 + participación diaria', p: 'La participación y el speaking se evalúan todos los días; el viernes se repasa la Lección 1' }],
-          hands: [{ t: 'Discovery', p: 'Ice Melting Experiment' }],
-        }
-      }
-    },
-    {
-      id: 'cyv', name: 'Ciudadanía y Valores', teacher: 'Ms. Dolores Hernández', icon: '🏛️', color: '#DB2777',
-      content: {
-        both: {
-          topic: [{ t: 'Unidad 2 · Semana 2: Transporte y logística para el desarrollo regional', p: 'Comprender qué es el territorio y reconocer la riqueza natural y cultural de Centroamérica. Valor: Identidad y Pertenencia. Pregunta detonadora, lluvia de ideas, mapa de CA, juego de imágenes y debate sobre el desarrollo regional desigual · lecturas y actividades libro pp. 62-69' }],
-          eval:  [{ date: 'Jue 2 oct', t: 'Evaluación', p: 'Evaluación de la unidad' }],
-          hands: [{ t: 'Proyecto Final · "Arquitectos de mi Comunidad"', p: 'En equipos, hacer un mapa del departamento o distrito que elijan y dar soluciones a uno de los tres problemas que el docente plantea sobre la población salvadoreña' }],
-        }
-      }
-    },
-    {
-      id: 'cyt', name: 'Ciencia y Tecnología', teacher: 'Ms. Dolores Hernández', icon: '⚗️', color: '#10B981',
-      content: {
-        both: {
-          topic: [{ t: 'Unidad 2 · Semana 6: Cambios de fase — Conducción, Convección y Radiación', p: 'Identificar y diferenciar los tres mecanismos de transferencia de calor con ejemplos cotidianos' }],
-          exp:   [{ t: '🧪 "Detectives del Calor"', p: 'Experimentar el calor con agua tibia y un objeto expuesto al sol. En parejas clasifican 3 situaciones en Conducción (planchar), Convección (agua hirviendo) o Radiación (fogata) y escriben una razón breve · uso de termómetro' }],
-        }
-      }
-    },
-    {
-      id: 'com', name: 'Comunicación', teacher: 'Ms. Iris Zaldaña', icon: '💬', color: '#7C3AED',
-      content: {
-        both: {
-          topic: [
-            { t: 'Lunes · Marcadores discursivos', p: 'Actividad: páginas 55 y 56, ejercicios del 1 al 4' },
-            { t: 'Martes · Ortografía', p: 'Uso de la coma en el vocativo y frases explicativas' },
-            { t: 'Miércoles · Caligrafía', p: 'Libreta de caligrafía' },
-            { t: 'Jueves', p: 'Celebración del Día del Niño' },
-            { t: 'Viernes · La novela', p: 'Lectura del fragmento (VII) de Andanzas y malAndanzas · páginas 60, 61 y 62' },
-          ],
-          notes: [{ t: 'Vocabulario', p: 'Marcadores discursivos, información, organización, argumentación, oposición, novela, narración, personajes, acontecimientos, espacio, tiempo, narrador, estructura, inicio, desarrollo, conflicto, desenlace, historia, cuento, fuentes' }],
-        }
-      }
-    },
-    {
-      id: 'arte', name: 'Arte', teacher: 'Ms. Clancy de Fuentes', icon: '🎨', color: '#F5DE3A',
-      content: {
-        both: {
-          topic: [{ t: 'Picasso antes del Cubismo · Periodo Azul y Periodo Rosa', p: 'Comprender la evolución de Picasso previa al cubismo: Periodo Azul (1901-1904: melancolía, pobreza, tonos fríos) y Periodo Rosa (1904-1906: el circo, la calidez, tonos cálidos). Obras clave: El viejo guitarrista ciego, La vida, La familia de saltimbanquis. Boceto a lápiz + paleta de color monocromática (fría o cálida)' }],
-          eval: [{ date: 'Vie 2 oct', t: 'Actividad integradora', p: 'Aplicar color y pintura sobre el papel definitivo (matices, sombras y luces enfocando la expresividad del color), y exponer qué periodo eligieron y qué emociones quisieron transmitir' }],
-        }
-      }
-    },
-    {
-      id: 'lec', name: 'Lectura y Escritura', teacher: 'Ms. Dolores Hernández', icon: '📖', color: '#EA580C',
-      content: {
-        both: {
-          topic: [{ t: 'La poesía · "Danza ritual en honor de Chiconcoat"', p: 'Comprender qué es la descripción y el uso de interjecciones · lectura guiada libro pp. 23-24' }],
-          notes: [{ t: 'Hoja de trabajo', p: 'Responder las interrogantes del poema reconociendo los 4 niveles y siguiendo las normas de escritura' }],
-        }
-      }
-    },
-    {
-      id: 'mus', name: 'Música', teacher: 'Mr. Pablo Díaz', icon: '🎵', color: '#F59E0B',
-      content: {
-        both: {
-          topic: [{ t: 'Solfeo rítmico + figuras musicales en el pentagrama + ukelele', p: 'Se practican ejercicios de solfeo y la identificación de figuras musicales; continúa la práctica del ukelele con la canción seleccionada por el grupo' }],
-          eval: [{ t: 'Prueba Objetiva (más adelante)', p: 'Se hará un dictado de figuras musicales que será parte de la nota de Prueba Objetiva' }],
-        }
-      }
-    },
-    {
-      id: 'val', name: 'Valores', teacher: 'Mr. José Rodas', icon: '❤️', color: '#DB2777',
-      content: {
-        both: {
-          topic: [{ t: 'El valor del Amor Propio', p: 'Aprender a valorarnos, respetarnos y cuidarnos tal como somos. No es ser egoístas: es reconocer que cada persona tiene un gran valor y merece ser tratada con dignidad, empezando por uno mismo' }],
-        }
-      }
-    },
-    {
-      id: 'tec', name: 'Technology', teacher: 'Mr. Francisco Sánchez', icon: '💻', color: '#0EA5A5',
-      content: {
-        both: {
-          topic: [{ t: '🎉 Celebración del Día del Niño', p: '¡Muchas felicidades en su día!' }],
-        }
-      }
-    },
-    {
-      id: 'efi', name: 'Educación Física', teacher: 'Mr. Ernesto Argumedo', icon: '🏀', color: '#6366F1',
-      content: {
-        both: {
-          topic: [{ t: 'Mini-baloncesto', p: 'Fundamento técnico de pivot y dribbling, juego en equipo. Calentamiento (pase y movimiento, estiramientos dinámicos), ejercicios tácticos (movimientos sin balón, 2v2 y 3v3) y partidos reducidos 3v3 o 4v4' }],
-        }
-      }
-    },
-  ];
-
-  function escapeHtml(s) { return String(s || ''); /* trust dev-authored content */ }
-  function countTags(content) {
-    const secs = Object.values(content);
-    let eval_ = 0, exp = 0, hands = 0;
-    secs.forEach(s => {
-      eval_ += (s.eval || []).length;
-      exp   += (s.exp || []).length;
-      hands += (s.hands || []).length;
-    });
-    return { eval: eval_, exp, hands };
-  }
-
-  const grid = document.getElementById('subjGrid');
-  grid.innerHTML = SUBJECTS.map(s => {
-    const c = countTags(s.content);
-    const tags = [];
-    if (c.eval)  tags.push(`<span class="subj-tag eval">${c.eval} eval</span>`);
-    if (c.exp)   tags.push(`<span class="subj-tag exp">${c.exp} exp</span>`);
-    if (c.hands) tags.push(`<span class="subj-tag hands">${c.hands} hands-on</span>`);
-    return `<button class="subj-card" data-id="${s.id}" style="--subj-color:${s.color}">
-      <div class="subj-ico">${s.icon}</div>
-      <div class="subj-name">${s.name}</div>
-      <div class="subj-teacher">${s.teacher}</div>
-      ${tags.length ? `<div class="subj-tags">${tags.join('')}</div>` : ''}
-    </button>`;
-  }).join('');
-
-  const modal = document.getElementById('modal');
-  const modalCard = document.getElementById('modalCard');
-  const modalIco = document.getElementById('modalIco');
-  const modalTitle = document.getElementById('modalTitle');
-  const modalTeacher = document.getElementById('modalTeacher');
-  const modalTabs = document.getElementById('modalTabs');
-  const modalBody = document.getElementById('modalBody');
-
-  function renderSection(s, key) {
-    let html = '';
-    const c = s.content[key];
-    if (!c) return '<div class="empty">Sin info para esta sección.</div>';
-    const block = (kind, label, ico, items) => {
-      if (!items || !items.length) return '';
-      return `<div class="info-block ${kind}">
-        <div class="info-label"><span class="il-ico">${ico}</span>${label}</div>
-        ${items.map(i => `<div class="info-item">${i.date ? `<span class="date-chip">${i.date}</span>` : ''}${i.t ? `<strong>${i.t}</strong>` : ''}${i.p || ''}</div>`).join('')}
-      </div>`;
-    };
-    html += block('topic', 'Tema', '📚', c.topic);
-    html += block('eval', 'Evaluaciones', '📝', c.eval);
-    html += block('exp', 'Experimentos', '🧪', c.exp);
-    html += block('hands', 'Hands-on / Actividades', '✋', c.hands);
-    html += block('notes', 'Notas', '💡', c.notes);
-    return html || '<div class="empty">Sin actividades importantes esta semana.</div>';
-  }
-
-  function openModal(id) {
-    const s = SUBJECTS.find(x => x.id === id);
-    if (!s) return;
-    modalCard.style.setProperty('--subj-color', s.color);
-    modalIco.textContent = s.icon;
-    modalTitle.textContent = s.name;
-    modalTeacher.textContent = s.teacher;
-    const hasBoth = !!s.content.both;
-    const keys = hasBoth ? ['both'] : ['A', 'B'];
-    const labels = { both: '6° A + B', A: '6° A', B: '6° B' };
-    modalTabs.innerHTML = keys.map((k, i) => `<button class="modal-tab ${i===0?'is-active':''}" data-k="${k}">${labels[k]}</button>`).join('');
-    let currentKey = keys[0];
-    const paint = () => { modalBody.innerHTML = renderSection(s, currentKey); };
-    paint();
-    modalTabs.querySelectorAll('.modal-tab').forEach(b => b.addEventListener('click', () => {
-      modalTabs.querySelectorAll('.modal-tab').forEach(x => x.classList.remove('is-active'));
-      b.classList.add('is-active');
-      currentKey = b.dataset.k;
-      paint();
-    }));
-    modal.hidden = false;
-    modal.classList.add('open');
-  }
-  function closeModal() { modal.classList.remove('open'); modal.hidden = true; }
-  document.getElementById('modalClose').addEventListener('click', closeModal);
-  modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hidden) closeModal(); });
-  grid.querySelectorAll('.subj-card').forEach(b => b.addEventListener('click', () => openModal(b.dataset.id)));
-
   // Theme sync from other pages
   try {
     const t = localStorage.getItem('sixth-theme');
