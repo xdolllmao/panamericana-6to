@@ -1682,6 +1682,37 @@
     border-radius: var(--radius);
   }
 
+  /* ============ ÚLTIMAS NOTICIAS ============ */
+  .news-list { display: flex; flex-direction: column; gap: 14px; margin-top: 18px; }
+  .news-item {
+    background: var(--paper); border: 1px solid var(--line);
+    border-left: 4px solid var(--coral);
+    border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow-sm);
+  }
+  .news-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .news-avatar {
+    width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+    display: grid; place-items: center; font-family: var(--f-display); font-weight: 800;
+    font-size: 15px; color: #fff; background: linear-gradient(135deg, var(--school), var(--coral));
+  }
+  .news-who { display: flex; flex-direction: column; line-height: 1.2; }
+  .news-author { font-family: var(--f-display); font-weight: 700; font-size: 15px; color: var(--ink); }
+  .news-time { font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-mute); }
+  .news-pill { margin-left: auto; font-family: var(--f-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--coral); background: color-mix(in oklab, var(--coral) 12%, var(--paper)); padding: 4px 9px; border-radius: 999px; }
+  .news-text { font-size: 15px; line-height: 1.55; color: var(--ink); white-space: pre-line; overflow-wrap: anywhere; margin: 0; }
+  .news-empty {
+    padding: 36px 20px; text-align: center; color: var(--ink-mute);
+    font-family: var(--f-mono); font-size: 13px; letter-spacing: 0.06em;
+    background: var(--paper); border: 1px dashed var(--line); border-radius: var(--radius); margin-top: 18px;
+  }
+  .news-locked {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 18px; border-radius: var(--radius);
+    background: var(--paper-soft); border: 1px dashed var(--line);
+    color: var(--ink-mute); font-size: 13px;
+  }
+  .news-locked svg { width: 18px; height: 18px; flex-shrink: 0; }
+
   /* Pager (paginación tipo Motora) */
   .pager {
     display: flex; align-items: center; justify-content: center; gap: 6px;
@@ -2350,6 +2381,7 @@
       <span class="brand-name">Sexto<em>gram</em></span>
     </a>
     <div class="nav-links">
+      <a class="nav-link" href="#noticias">Noticias</a>
       <a class="nav-link" href="#estudiantes">Estudiantes</a>
       <a class="nav-link" href="#horario">Horario</a>
       <a class="nav-link" href="#empresas">Empresas</a>
@@ -2445,6 +2477,19 @@
     <span>Periódico todos los lunes</span>
   </div>
 </div>
+
+<!-- =================== ÚLTIMAS NOTICIAS =================== -->
+<section id="noticias" class="wrap block">
+  <div class="section-head reveal">
+    <div>
+      <div class="section-tag">📢 · <em>lo oficial del salón</em></div>
+      <h2>Últimas noticias.</h2>
+    </div>
+    <p>Anuncios y novedades del salón. Acá solo publican <b>Magaña</b> y <b>Gerardo</b>.</p>
+  </div>
+  <div id="newsComposerHost" class="reveal"></div>
+  <div class="news-list reveal" id="newsList"></div>
+</section>
 
 <!-- =================== FLORES AMARILLAS (especial · 1 semana) =================== -->
 <section id="flores" class="wrap block" hidden>
@@ -4014,6 +4059,7 @@
         <button class="btn btn-primary" id="openLoginBtn" type="button" style="align-self:center; margin-top:8px">Elegir mi nombre</button>
       `;
       document.getElementById('openLoginBtn').addEventListener('click', openModal);
+      try { renderNewsComposer(); } catch (e) {}
       return;
     }
     composerEl.className = 'composer';
@@ -4054,6 +4100,7 @@
       counter.textContent = '0 / 400';
       counter.classList.remove('warn');
     });
+    try { renderNewsComposer(); } catch (e) {}
   }
 
   function timeAgo(ts) {
@@ -4126,6 +4173,85 @@
     if (error) return;
     posts = data || [];
     renderWall();
+  }
+
+  // ---------- ÚLTIMAS NOTICIAS (solo Magaña y Gerardo publican) ----------
+  const NEWS_AUTHORS = ['Magaña', 'Gerardo'];
+  const NEWS_MAX = 1000;
+  const newsListEl = document.getElementById('newsList');
+  const newsComposerHost = document.getElementById('newsComposerHost');
+  let news = [];
+  function canPostNews() {
+    return !!account && NEWS_AUTHORS.some(n => slug(n) === slug(account.name));
+  }
+  function renderNews() {
+    if (!newsListEl) return;
+    if (!news.length) {
+      newsListEl.innerHTML = '<div class="news-empty">Todavía no hay noticias. Pronto habrá novedades.</div>';
+      return;
+    }
+    newsListEl.innerHTML = news.map(n => {
+      const nm = n.author_name || 'Redacción';
+      return `<article class="news-item">
+        <div class="news-head">
+          <div class="news-avatar">${escapeHtml(nm[0] ? nm[0].toUpperCase() : '!')}</div>
+          <div class="news-who">
+            <span class="news-author">${escapeHtml(nm)}</span>
+            <span class="news-time">${timeAgo(n.created_at)}</span>
+          </div>
+          <span class="news-pill">Noticia</span>
+        </div>
+        <p class="news-text">${escapeHtml((n.text || '').trim())}</p>
+      </article>`;
+    }).join('');
+  }
+  function renderNewsComposer() {
+    if (!newsComposerHost) return;
+    if (!canPostNews()) { newsComposerHost.innerHTML = ''; return; }
+    newsComposerHost.className = 'composer reveal in';
+    newsComposerHost.innerHTML = `
+      <div class="composer-head">
+        <div class="who-mask" aria-hidden="true">📢</div>
+        <div class="composer-who">
+          <strong>Publicar una noticia</strong>
+          <span>Sesión: ${escapeHtml(account.name)} · ${escapeHtml(account.section)}</span>
+        </div>
+      </div>
+      <textarea id="newsText" maxlength="${NEWS_MAX}" placeholder="Escribí la noticia del salón… (la verán todos, con tu nombre)"></textarea>
+      <div class="composer-foot">
+        <span class="counter" id="newsCounter">0 / ${NEWS_MAX}</span>
+        <button class="btn btn-primary" id="postNews" type="button">
+          Publicar noticia
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </button>
+      </div>`;
+    const ta = document.getElementById('newsText');
+    const counter = document.getElementById('newsCounter');
+    ta.addEventListener('input', () => {
+      const n = ta.value.length;
+      counter.textContent = `${n} / ${NEWS_MAX}`;
+      counter.classList.toggle('warn', n > NEWS_MAX - 60);
+    });
+    document.getElementById('postNews').addEventListener('click', async () => {
+      const text = ta.value.trim();
+      if (!text) return;
+      ta.disabled = true;
+      const { error } = await sb.from('news').insert({
+        text: text.slice(0, NEWS_MAX),
+        author_name: account.name,
+        author_user_id: currentUser ? currentUser.id : undefined
+      });
+      ta.disabled = false;
+      if (error) { alert('No se pudo publicar la noticia: ' + error.message); return; }
+      ta.value = '';
+      counter.textContent = `0 / ${NEWS_MAX}`;
+      counter.classList.remove('warn');
+    });
+  }
+  async function refreshNews() {
+    const { data, error } = await sb.from('news').select('id, author_name, text, created_at').order('created_at', { ascending: false }).limit(100);
+    if (!error) news = data || [];
+    renderNews();
   }
 
   // ---------- SHIPS · muro anónimo con formato "Nombre + Nombre" ----------
@@ -5145,6 +5271,7 @@
     await refreshProfiles();
     refreshNamesWithPassword();
     await refreshChismes();
+    await refreshNews();
     await refreshShips();
     await refreshProtestas();
     await refreshNotifBadge();
@@ -5161,6 +5288,19 @@
       posts = [payload.new, ...posts].slice(0, 500);
       renderWall();
     }).subscribe();
+
+    sb.channel('news-live')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'news' }, (payload) => {
+        if (news.find(n => n.id === payload.new.id)) return;
+        news = [payload.new, ...news].slice(0, 100);
+        renderNews();
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'news' }, (payload) => {
+        const id = payload.old && payload.old.id;
+        if (!id) return;
+        news = news.filter(n => n.id !== id);
+        renderNews();
+      }).subscribe();
 
     sb.channel('ships-live')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ships' }, (payload) => {
